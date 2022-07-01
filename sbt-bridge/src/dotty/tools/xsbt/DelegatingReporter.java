@@ -16,61 +16,68 @@ import xsbti.Position;
 import xsbti.Severity;
 
 final public class DelegatingReporter extends AbstractReporter {
-  private xsbti.Reporter delegate;
+	private xsbti.Reporter delegate;
 
-  public DelegatingReporter(xsbti.Reporter delegate) {
-    super();
-    this.delegate = delegate;
-  }
+	public DelegatingReporter(xsbti.Reporter delegate) {
+		super();
+		this.delegate = delegate;
+	}
 
-  public void dropDelegate() {
-    delegate = null;
-  }
+	public void dropDelegate() {
+		delegate = null;
+	}
 
-  @Override
-  public void printSummary(Context ctx) {
-    delegate.printSummary();
-  }
+	@Override
+	public void printSummary(Context ctx) {
+		delegate.printSummary();
+	}
 
-  public void doReport(Diagnostic dia, Context ctx) {
-    Severity severity = severityOf(dia.level());
-    Position position = positionOf(dia.pos().nonInlined());
+	public void doReport(Diagnostic dia, Context ctx) {
+		Severity severity = severityOf(dia.level());
+		Position position = positionOf(dia.pos().nonInlined());
 
-    StringBuilder rendered = new StringBuilder();
-    rendered.append(messageAndPos(dia, ctx));
-    Message message = dia.msg();
-    boolean shouldExplain = Diagnostic.shouldExplain(dia, ctx);
-    if (shouldExplain && !message.explanation().isEmpty()) {
-      rendered.append(explanation(message, ctx));
-    }
+		StringBuilder rendered = new StringBuilder();
+		rendered.append(messageAndPos(dia, ctx));
+		Message message = dia.msg();
+		String diagnosticCode = String.valueOf(message.errorId().errorNumber());
+		boolean shouldExplain = Diagnostic.shouldExplain(dia, ctx);
+		if (shouldExplain && !message.explanation().isEmpty()) {
+			rendered.append(explanation(message, ctx));
+		}
 
-    delegate.log(new Problem(position, message.msg(), severity, rendered.toString()));
-  }
+		delegate.log(new Problem(position, message.msg(), severity, rendered.toString(), diagnosticCode));
+	}
 
-  private static Severity severityOf(int level) {
-    Severity severity;
-    switch (level) {
-      case dotty.tools.dotc.interfaces.Diagnostic.ERROR: severity = Severity.Error; break;
-      case dotty.tools.dotc.interfaces.Diagnostic.WARNING: severity = Severity.Warn; break;
-      case dotty.tools.dotc.interfaces.Diagnostic.INFO: severity = Severity.Info; break;
-      default:
-        throw new IllegalArgumentException(String.format("Bad diagnostic level: %s", level));
-    }
-    return severity;
-  }
+	private static Severity severityOf(int level) {
+		Severity severity;
+		switch (level) {
+		case dotty.tools.dotc.interfaces.Diagnostic.ERROR:
+			severity = Severity.Error;
+			break;
+		case dotty.tools.dotc.interfaces.Diagnostic.WARNING:
+			severity = Severity.Warn;
+			break;
+		case dotty.tools.dotc.interfaces.Diagnostic.INFO:
+			severity = Severity.Info;
+			break;
+		default:
+			throw new IllegalArgumentException(String.format("Bad diagnostic level: %s", level));
+		}
+		return severity;
+	}
 
-  private static Position positionOf(SourcePosition pos) {
-    if (pos.exists()){
-      return new PositionBridge(pos, pos.source());
-    } else {
-      return PositionBridge.noPosition;
-    }
-  }
+	private static Position positionOf(SourcePosition pos) {
+		if (pos.exists()) {
+			return new PositionBridge(pos, pos.source());
+		} else {
+			return PositionBridge.noPosition;
+		}
+	}
 
-  @SuppressWarnings("unchecked")
   // [warn] sbt-bridge/src/dotty/tools/xsbt/DelegatingReporter.java:18:1: dotty$tools$dotc$reporting$UniqueMessagePositions$$positions() in dotty.tools.dotc.reporting.AbstractReporter implements dotty$tools$dotc$reporting$UniqueMessagePositions$$positions() in dotty.tools.dotc.reporting.UniqueMessagePositions
   // [warn]   return type requires unchecked conversion from scala.collection.mutable.HashMap to scala.collection.mutable.HashMap<scala.Tuple2<dotty.tools.dotc.util.SourceFile,java.lang.Integer>,dotty.tools.dotc.reporting.Diagnostic>
-  public HashMap<Tuple2<SourceFile, Integer>, Diagnostic> dotty$tools$dotc$reporting$UniqueMessagePositions$$positions() {
-    return (HashMap<Tuple2<SourceFile, Integer>, Diagnostic>) super.dotty$tools$dotc$reporting$UniqueMessagePositions$$positions();
-  }
+	@SuppressWarnings("unchecked")
+	public HashMap<Tuple2<SourceFile, Integer>, Diagnostic> dotty$tools$dotc$reporting$UniqueMessagePositions$$positions() {
+		return (HashMap<Tuple2<SourceFile, Integer>, Diagnostic>) super.dotty$tools$dotc$reporting$UniqueMessagePositions$$positions();
+	}
 }
