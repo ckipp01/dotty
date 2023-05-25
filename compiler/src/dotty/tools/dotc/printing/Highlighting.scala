@@ -3,14 +3,15 @@ package dotc
 package printing
 
 import scala.collection.mutable
-import core.Contexts._
+import core.Contexts.*
 
-object Highlighting {
+object Highlighting:
 
-  abstract class Highlight(private val highlight: String) {
+  abstract class Highlight(private val highlight: String):
     def text: String
 
-    def show(using Context): String = if ctx.useColors then highlight + text + Console.RESET else text
+    def show(using Context): String =
+      if ctx.useColors then highlight + text + Console.RESET else text
 
     override def toString: String =
       highlight + text + Console.RESET
@@ -20,32 +21,28 @@ object Highlighting {
 
     def +(other: String)(using Context): HighlightBuffer =
       new HighlightBuffer(this) + other
-  }
 
-  abstract class Modifier(private val mod: String, text: String) extends Highlight(Console.RESET) {
+  abstract class Modifier(private val mod: String, text: String)
+      extends Highlight(Console.RESET):
     override def show(using Context): String =
-      if (ctx.settings.color.value == "never") ""
+      if ctx.settings.color.value == "never" then ""
       else mod + super.show
-  }
 
-  case class HighlightBuffer(hl: Highlight)(using Context) {
+  case class HighlightBuffer(hl: Highlight)(using Context):
     private val buffer = new mutable.ListBuffer[String]
 
     buffer += hl.show
 
-    def +(other: Highlight): HighlightBuffer = {
+    def +(other: Highlight): HighlightBuffer =
       buffer += other.show
       this
-    }
 
-    def +(other: String): HighlightBuffer = {
+    def +(other: String): HighlightBuffer =
       buffer += other
       this
-    }
 
     override def toString: String =
       buffer.mkString
-  }
 
   case class NoColor(text: String) extends Highlight(Console.RESET)
 
@@ -69,4 +66,4 @@ object Highlighting {
 
   case class Bold(text: String) extends Modifier(Console.BOLD, text)
   case class Underlined(text: String) extends Modifier(Console.UNDERLINED, text)
-}
+end Highlighting

@@ -1,14 +1,14 @@
 package dotty.tools.dotc.typer
 
 import dotty.tools.DottyTest
-import dotty.tools.dotc.core.Contexts._
+import dotty.tools.dotc.core.Contexts.*
 
 import org.junit.Test
-import org.junit.Assert.{ assertTrue, fail }
+import org.junit.Assert.{assertTrue, fail}
 
-class DivergenceCheckerTests extends DottyTest {
+class DivergenceCheckerTests extends DottyTest:
   @Test
-  def testCoveringSet: Unit = {
+  def testCoveringSet: Unit =
     val source = """
       |class A
       |class B extends A
@@ -25,7 +25,16 @@ class DivergenceCheckerTests extends DottyTest {
       "List[List[(A, B) { type Baz = Int }]] { type Foo = A }"
     )
 
-    val elements = List("A", "B", "Nothing", "Object", "String", "Tuple2[?, ?]", "Int", "List[?]")
+    val elements = List(
+      "A",
+      "B",
+      "Nothing",
+      "Object",
+      "String",
+      "Tuple2[?, ?]",
+      "Int",
+      "List[?]"
+    )
 
     checkTypes(source, List(types, elements)) {
       case (List(tpes, elements0), context) =>
@@ -44,14 +53,7 @@ class DivergenceCheckerTests extends DottyTest {
         ).map(_.map(_.dealias.typeSymbol))
 
         val expectedSizes = List(
-          0,
-          0,
-          1,
-          1,
-          1,
-          1,
-          3,
-          5
+          0, 0, 1, 1, 1, 1, 3, 5
         )
 
         tpes.lazyZip(expectedSizes).lazyZip(expectedCoveringSets).foreach {
@@ -65,5 +67,5 @@ class DivergenceCheckerTests extends DottyTest {
 
       case _ => fail
     }
-  }
-}
+  end testCoveringSet
+end DivergenceCheckerTests

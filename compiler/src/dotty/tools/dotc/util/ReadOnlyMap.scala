@@ -2,7 +2,7 @@ package dotty.tools
 package dotc.util
 
 /** A class for the reading part of mutable or immutable maps.
- */
+  */
 abstract class ReadOnlyMap[Key, Value]:
 
   def lookup(x: Key): Value | Null
@@ -17,17 +17,17 @@ abstract class ReadOnlyMap[Key, Value]:
 
   def get(key: Key): Option[Value] = lookup(key) match
     case null => None
-    case v => Some(v.uncheckedNN)
+    case v    => Some(v.uncheckedNN)
 
   def getOrElse(key: Key, value: => Value) = lookup(key) match
     case null => value
-    case v => v.uncheckedNN
+    case v    => v.uncheckedNN
 
   def contains(key: Key): Boolean = lookup(key) != null
 
   def apply(key: Key): Value = lookup(key) match
     case null => throw new NoSuchElementException(s"$key")
-    case v => v.uncheckedNN
+    case v    => v.uncheckedNN
 
   def toArray: Array[(Key, Value)] =
     val result = new Array[(Key, Value)](size)
@@ -38,4 +38,4 @@ abstract class ReadOnlyMap[Key, Value]:
     result
 
   def toSeq: Seq[(Key, Value)] = toArray.toSeq
-
+end ReadOnlyMap

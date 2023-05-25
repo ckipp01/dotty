@@ -7,11 +7,11 @@ import org.junit.Test
 import java.io.File
 import dotty.tools.io.AbstractFile
 import java.nio.file.{Files, Paths}
-import java.nio.file.StandardCopyOption._
+import java.nio.file.StandardCopyOption.*
 import java.nio.file.attribute.PosixFilePermissions
-import dotty.tools.io.{ PlainDirectory, Directory, ClassPath }
+import dotty.tools.io.{PlainDirectory, Directory, ClassPath}
 
-class ClasspathTest {
+class ClasspathTest:
 
   def pathsep = sys.props("path.separator")
 
@@ -32,12 +32,15 @@ class ClasspathTest {
             val dest = Paths.get(s"$outDir/${src.getName}")
             printf("copy: %s\n", Files.copy(src.toPath, dest))
 
-          val cp = Seq(s"$outDir/*", "not-a-real-directory/*").mkString(pathsep).replace('\\', '/')
+          val cp = Seq(s"$outDir/*", "not-a-real-directory/*")
+            .mkString(pathsep)
+            .replace('\\', '/')
 
           val libjars = libjarFiles.map { _.getName }.toSet
 
           // expand wildcard classpath entries, ignoring invalid entries
-          val entries = ClassPath.expandPath(cp).map { Paths.get(_).toFile.getName }
+          val entries =
+            ClassPath.expandPath(cp).map { Paths.get(_).toFile.getName }
 
           // require one-to-one matches
           assert(libjars == entries.toSet)
@@ -45,23 +48,20 @@ class ClasspathTest {
           printf("%d entries\n", entries.size)
           printf("%d libjars\n", libjars.size)
 
-          for entry <- libjars do
-            printf("libdir[%s]\n", entry)
+          for entry <- libjars do printf("libdir[%s]\n", entry)
 
-          for entry <- entries do
-            printf("expand[%s]\n", entry)
+          for entry <- entries do printf("expand[%s]\n", entry)
 
           // verify that expanded classpath has expected jar names
-          for jar <- libjars do
-            assert(entries.contains(jar))
+          for jar <- libjars do assert(entries.contains(jar))
 
         catch
-          case _:NullPointerException => // no test if unable to copy jars to outDir
-
-
-    finally
-      deleteFile(outDir.toFile)
-
+          case _: NullPointerException => // no test if unable to copy jars to outDir
+        end try
+      end if
+    finally deleteFile(outDir.toFile)
+    end try
+  end testWildcards
 
   private def deleteFile(target: File): Unit =
     if target.isDirectory then
@@ -69,4 +69,4 @@ class ClasspathTest {
       do deleteFile(member)
     target.delete()
   end deleteFile
-}
+end ClasspathTest

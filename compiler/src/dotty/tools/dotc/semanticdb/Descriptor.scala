@@ -2,106 +2,92 @@ package dotty.tools.dotc.semanticdb
 
 import scala.language.unsafeNulls
 
-import java.lang.System.{lineSeparator => EOL}
-import dotty.tools.dotc.semanticdb.{Descriptor => d}
+import java.lang.System.{lineSeparator as EOL}
+import dotty.tools.dotc.semanticdb.{Descriptor as d}
 
-class DescriptorParser(s: String) {
+class DescriptorParser(s: String):
   var i = s.length
-  def fail() = {
+  def fail() =
     val message = "invalid symbol format"
     val caret = " " * i + "^"
     sys.error(s"$message$EOL$s$EOL$caret")
-  }
 
   val BOF = '\u0000'
   val EOF = '\u001A'
   var currChar = EOF
-  def readChar(): Char = {
-    if (i <= 0) {
-      if (i == 0) {
+  def readChar(): Char =
+    if i <= 0 then
+      if i == 0 then
         i -= 1
         currChar = BOF
         currChar
-      } else {
-        fail()
-      }
-    } else {
+      else fail()
+    else {
       i -= 1
       currChar = s(i)
       currChar
     }
-  }
 
-  def parseValue(): String = {
-    if (currChar == '`') {
+  def parseValue(): String =
+    if currChar == '`' then
       val end = i
-      while (readChar() != '`') {}
+      while readChar() != '`' do {}
       readChar()
       s.substring(i + 2, end)
-    } else {
+    else {
       val end = i + 1
-      if (!Character.isJavaIdentifierPart(currChar)) fail()
-      while (Character.isJavaIdentifierPart(readChar()) && currChar != BOF) {}
+      if !Character.isJavaIdentifierPart(currChar) then fail()
+      while Character.isJavaIdentifierPart(readChar()) && currChar != BOF do {}
       s.substring(i + 1, end)
     }
-  }
 
-  def parseDisambiguator(): String = {
+  def parseDisambiguator(): String =
     val end = i + 1
-    if (currChar != ')') fail()
-    while (readChar() != '(') {}
+    if currChar != ')' then fail()
+    while readChar() != '(' do {}
     readChar()
     s.substring(i + 1, end)
-  }
 
-  def parseDescriptor(): Descriptor = {
-    if (currChar == '.') {
+  def parseDescriptor(): Descriptor =
+    if currChar == '.' then
       readChar()
-      if (currChar == ')') {
+      if currChar == ')' then
         val disambiguator = parseDisambiguator()
         val value = parseValue()
         d.Method(value, disambiguator)
-      } else {
-        d.Term(parseValue())
-      }
-    } else if (currChar == '#') {
+      else d.Term(parseValue())
+    else if currChar == '#' then
       readChar()
       d.Type(parseValue())
-    } else if (currChar == '/') {
+    else if currChar == '/' then
       readChar()
       d.Package(parseValue())
-    } else if (currChar == ')') {
+    else if currChar == ')' then
       readChar()
       val value = parseValue()
-      if (currChar != '(') fail()
+      if currChar != '(' then fail()
       else readChar()
       d.Parameter(value)
-    } else if (currChar == ']') {
+    else if currChar == ']' then
       readChar()
       val value = parseValue()
-      if (currChar != '[') fail()
+      if currChar != '[' then fail()
       else readChar()
       d.TypeParameter(value)
-    } else {
-      fail()
-    }
-  }
+    else fail()
 
-  def entryPoint(): (Descriptor, String) = {
+  def entryPoint(): (Descriptor, String) =
     readChar()
     val desc = parseDescriptor()
     (desc, s.substring(0, i + 1))
-  }
-}
+end DescriptorParser
 
-object DescriptorParser {
-  def apply(symbol: String): (Descriptor, String) = {
+object DescriptorParser:
+  def apply(symbol: String): (Descriptor, String) =
     val parser = new DescriptorParser(symbol)
     parser.entryPoint()
-  }
-}
 
-sealed trait Descriptor {
+sealed trait Descriptor:
   def isNone: Boolean = this == d.None
   def isTerm: Boolean = this.isInstanceOf[d.Term]
   def isMethod: Boolean = this.isInstanceOf[d.Method]
@@ -110,13 +96,13 @@ sealed trait Descriptor {
   def isParameter: Boolean = this.isInstanceOf[d.Parameter]
   def isTypeParameter: Boolean = this.isInstanceOf[d.TypeParameter]
   def value: String
-}
-object Descriptor {
-  case object None extends Descriptor { def value: String = "" }
+object Descriptor:
+  case object None extends Descriptor:
+    def value: String = ""
   final case class Term(value: String) extends Descriptor
-  final case class Method(value: String, disambiguator: String) extends Descriptor
+  final case class Method(value: String, disambiguator: String)
+      extends Descriptor
   final case class Type(value: String) extends Descriptor
   final case class Package(value: String) extends Descriptor
   final case class Parameter(value: String) extends Descriptor
   final case class TypeParameter(value: String) extends Descriptor
-}

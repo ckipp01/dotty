@@ -2,7 +2,7 @@ package dotty.tools.scaladoc.util
 
 object Escape:
   def escapeUrl(url: String) = url
-    .replace("#","%23")
+    .replace("#", "%23")
 
   def escapeFilename(filename: String) =
     val escaped = filename

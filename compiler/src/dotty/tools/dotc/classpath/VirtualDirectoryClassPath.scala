@@ -4,32 +4,41 @@ import scala.language.unsafeNulls
 
 import dotty.tools.io.{ClassPath, ClassRepresentation}
 import dotty.tools.io.{AbstractFile, VirtualDirectory}
-import FileUtils._
+import FileUtils.*
 import java.net.{URI, URL}
 
-case class VirtualDirectoryClassPath(dir: VirtualDirectory) extends ClassPath with DirectoryLookup[ClassFileEntryImpl] with NoSourcePaths {
+case class VirtualDirectoryClassPath(dir: VirtualDirectory)
+    extends ClassPath
+    with DirectoryLookup[ClassFileEntryImpl]
+    with NoSourcePaths:
   type F = AbstractFile
 
   // From AbstractFileClassLoader
-  private final def lookupPath(base: AbstractFile)(pathParts: Seq[String], directory: Boolean): AbstractFile = {
+  private final def lookupPath(
+      base: AbstractFile
+  )(pathParts: Seq[String], directory: Boolean): AbstractFile =
     var file: AbstractFile = base
     val dirParts = pathParts.init.iterator
-    while (dirParts.hasNext) {
+    while dirParts.hasNext do
       val dirPart = dirParts.next
       file = file.lookupName(dirPart, directory = true)
-      if (file == null)
-        return null
-    }
+      if file == null then return null
     file.lookupName(pathParts.last, directory = directory)
-  }
 
   protected def emptyFiles: Array[AbstractFile] = Array.empty
   protected def getSubDir(packageDirName: String): Option[AbstractFile] =
-    Option(lookupPath(dir)(packageDirName.split(java.io.File.separator).toIndexedSeq, directory = true))
-  protected def listChildren(dir: AbstractFile, filter: Option[AbstractFile => Boolean] = None): Array[F] = filter match {
+    Option(
+      lookupPath(dir)(
+        packageDirName.split(java.io.File.separator).toIndexedSeq,
+        directory = true
+      )
+    )
+  protected def listChildren(
+      dir: AbstractFile,
+      filter: Option[AbstractFile => Boolean] = None
+  ): Array[F] = filter match
     case Some(f) => dir.iterator.filter(f).toArray
-    case _ => dir.toArray
-  }
+    case _       => dir.toArray
   def getName(f: AbstractFile): String = f.name
   def toAbstractFile(f: AbstractFile): AbstractFile = f
   def isPackage(f: AbstractFile): Boolean = f.isPackage
@@ -38,15 +47,22 @@ case class VirtualDirectoryClassPath(dir: VirtualDirectory) extends ClassPath wi
   def asURLs: Seq[URL] = Seq(new URI(dir.name).toURL)
   def asClassPathStrings: Seq[String] = Seq(dir.path)
 
-  override def findClass(className: String): Option[ClassRepresentation] = findClassFile(className) map ClassFileEntryImpl.apply
+  override def findClass(className: String): Option[ClassRepresentation] =
+    findClassFile(className) map ClassFileEntryImpl.apply
 
-  def findClassFile(className: String): Option[AbstractFile] = {
+  def findClassFile(className: String): Option[AbstractFile] =
     val relativePath = FileUtils.dirPath(className) + ".class"
-    Option(lookupPath(dir)(relativePath.split(java.io.File.separator).toIndexedSeq, directory = false))
-  }
+    Option(
+      lookupPath(dir)(
+        relativePath.split(java.io.File.separator).toIndexedSeq,
+        directory = false
+      )
+    )
 
-  private[dotty] def classes(inPackage: PackageName): Seq[ClassFileEntry] = files(inPackage)
+  private[dotty] def classes(inPackage: PackageName): Seq[ClassFileEntry] =
+    files(inPackage)
 
-  protected def createFileEntry(file: AbstractFile): ClassFileEntryImpl = ClassFileEntryImpl(file)
+  protected def createFileEntry(file: AbstractFile): ClassFileEntryImpl =
+    ClassFileEntryImpl(file)
   protected def isMatchingFile(f: AbstractFile): Boolean = f.isClass
-}
+end VirtualDirectoryClassPath

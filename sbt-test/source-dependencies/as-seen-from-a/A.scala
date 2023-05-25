@@ -1,6 +1,4 @@
-abstract class A {
+abstract class A:
   type T
-  object X {
+  object X:
     def foo(x: T): T = x
-  }
-}

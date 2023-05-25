@@ -1,1 +1,2 @@
-class B { val y = new A("a") }
+class B:
+  val y = new A("a")

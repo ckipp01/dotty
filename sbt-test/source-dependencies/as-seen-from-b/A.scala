@@ -1,7 +1,5 @@
-abstract class A {
+abstract class A:
   type T <: S
   type S
-  object X {
+  object X:
     def foo: T = null.asInstanceOf[T]
-  }
-}

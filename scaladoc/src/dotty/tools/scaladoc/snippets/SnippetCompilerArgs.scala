@@ -11,7 +11,10 @@ enum SCFlags(val flagName: String):
   case NoCompile extends SCFlags("nocompile")
   case Fail extends SCFlags("fail")
 
-case class SnippetCompilerArgs(scFlags: PathBased[SCFlags], defaultFlag: SCFlags):
+case class SnippetCompilerArgs(
+    scFlags: PathBased[SCFlags],
+    defaultFlag: SCFlags
+):
   def get(member: Member): SnippetCompilerArg =
     member.sources
       .flatMap(s => scFlags.get(s.path).map(_.elem))
@@ -21,7 +24,6 @@ case class SnippetCompilerArgs(scFlags: PathBased[SCFlags], defaultFlag: SCFlags
     path
       .flatMap(p => scFlags.get(p).map(_.elem))
       .fold(SnippetCompilerArg(defaultFlag))(SnippetCompilerArg(_))
-
 
 object SnippetCompilerArgs:
   val usage =
@@ -42,23 +44,22 @@ object SnippetCompilerArgs:
     |
     """.stripMargin
 
-  def load(args: List[String], defaultFlag: SCFlags = SCFlags.NoCompile)(using CompilerContext): SnippetCompilerArgs = {
-    PathBased.parse[SCFlags](args)(using SCFlagsParser) match {
+  def load(args: List[String], defaultFlag: SCFlags = SCFlags.NoCompile)(using
+      CompilerContext
+  ): SnippetCompilerArgs =
+    PathBased.parse[SCFlags](args)(using SCFlagsParser) match
       case PathBased.ParsingResult(errors, res) =>
         if errors.nonEmpty then report.warning(s"""
             |Got following errors during snippet compiler args parsing:
             |$errors
             |
             |$usage
-            |""".stripMargin
-        )
+            |""".stripMargin)
         SnippetCompilerArgs(res, defaultFlag)
-    }
-  }
+end SnippetCompilerArgs
 
 object SCFlagsParser extends ArgParser[SCFlags]:
-  def parse(s: String): Either[String, SCFlags] = {
+  def parse(s: String): Either[String, SCFlags] =
     SCFlags.values
       .find(_.flagName == s)
       .fold(Left(s"$s: No such flag found."))(Right(_))
-  }

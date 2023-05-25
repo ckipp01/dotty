@@ -1,8 +1,10 @@
-lazy val a = project.in(file("a"))
+lazy val a = project
+  .in(file("a"))
   .settings(
     scalaVersion := sys.props("plugin.scalaVersion")
   )
-lazy val b = project.in(file("b"))
+lazy val b = project
+  .in(file("b"))
   .settings(Reporter.checkSettings)
   .settings(
     scalaVersion := sys.props("plugin.scalaVersion"),
@@ -11,7 +13,8 @@ lazy val b = project.in(file("b"))
     // 2. Remove a source file in `a`
     // 3. Compile `b` without forcing a recompilation of `a`
     Compile / unmanagedJars := {
-      val s = Seq(Attributed.blank((a / Compile / packageBin / artifactPath).value))
+      val s =
+        Seq(Attributed.blank((a / Compile / packageBin / artifactPath).value))
       println("s: " + s)
       s
     }

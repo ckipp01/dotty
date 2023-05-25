@@ -2,9 +2,8 @@ package dotty.tools
 package dotc
 package transform
 
-
 class LazyValsTest extends DottyTest {
-    /* FIXME: re-enable after adapting to new scheme
+  /* FIXME: re-enable after adapting to new scheme
     @Test
     def doNotRewriteObjects = {
       checkCompile("LazyVals", "object O"){ (tree, ctx) =>

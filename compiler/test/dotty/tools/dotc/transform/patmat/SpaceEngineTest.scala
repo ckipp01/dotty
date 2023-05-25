@@ -3,7 +3,8 @@ package dotc
 package transform
 package patmat
 
-import core.*, Annotations.*, Contexts.*, Decorators.*, Flags.*, Names.*, StdNames.*, Symbols.*, Types.*
+import core.*, Annotations.*, Contexts.*, Decorators.*, Flags.*, Names.*,
+  StdNames.*, Symbols.*, Types.*
 import ast.*, tpd.*
 
 import vulpix.TestConfiguration, TestConfiguration.basicClasspath
@@ -20,17 +21,18 @@ class SpaceEngineTest:
     // and this is a counter-example,
     // for which you need either to simplify(b) or simplify the minus result.
 
-    val tp      = defn.ConsType.appliedTo(defn.AnyType)
-    val unappTp = requiredMethod("scala.collection.immutable.::.unapply").termRef
-    val params  = List(Empty, Typ(tp))
+    val tp = defn.ConsType.appliedTo(defn.AnyType)
+    val unappTp =
+      requiredMethod("scala.collection.immutable.::.unapply").termRef
+    val params = List(Empty, Typ(tp))
 
     val a = Prod(tp, unappTp, params)
     val b = Empty
 
     val res1 = isSubspace(a, b)
 
-    val a2   = simplify(a)
-    val b2   = simplify(b)
+    val a2 = simplify(a)
+    val b2 = simplify(b)
     val rem1 = minus(a2, b2)
     val rem2 = simplify(rem1)
     val res2 = rem2 == Empty
@@ -60,5 +62,9 @@ class SpaceEngineTest:
           |rem1 = ${rem1.toString}
           |rem2 = ${rem2.toString}
           |
-          |""".stripMargin, res1, res2)
+          |""".stripMargin,
+      res1,
+      res2
+    )
   }
+end SpaceEngineTest

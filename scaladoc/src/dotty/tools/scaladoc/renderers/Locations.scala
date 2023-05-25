@@ -1,11 +1,11 @@
 package dotty.tools.scaladoc
 package renderers
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import java.net.URI
-import dotty.tools.scaladoc.site._
+import dotty.tools.scaladoc.site.*
 import java.nio.file.Paths
-import dotty.tools.scaladoc.util.Escape._
+import dotty.tools.scaladoc.util.Escape.*
 
 val UnresolvedLocationLink = "#"
 
@@ -14,7 +14,8 @@ trait Locations(using ctx: DocContext):
 
   // We generate this collection only if there may be a conflict with resources.
   // Potentially can be quite big.
-  lazy val apiPaths = effectiveMembers.keySet.filterNot(_.isStaticFile).map(absolutePath(_))
+  lazy val apiPaths =
+    effectiveMembers.keySet.filterNot(_.isStaticFile).map(absolutePath(_))
 
   var cache = new JHashMap[DRI, Seq[String]]()
 
@@ -28,8 +29,8 @@ trait Locations(using ctx: DocContext):
         val path = dri match
           case `apiPageDRI` =>
             if ctx.args.apiSubdirectory && ctx.staticSiteContext.nonEmpty
-              then List("api", "index")
-              else List("index")
+            then List("api", "index")
+            else List("index")
           case dri if dri.isStaticFile =>
             Paths.get(dri.location).iterator.asScala.map(_.toString).toList
           case dri =>
@@ -37,7 +38,7 @@ trait Locations(using ctx: DocContext):
             val fqn = loc.split(Array('.')).toList match
               case "<empty>" :: Nil  => "_empty_" :: Nil
               case "<empty>" :: tail => "_empty_" :: tail
-              case other => other
+              case other             => other
             if ctx.args.apiSubdirectory then "api" :: fqn else fqn
         ctx.checkPathCompat(path)
         cache.put(dri, path)
@@ -52,30 +53,34 @@ trait Locations(using ctx: DocContext):
   def pathToPage(from: DRI, to: DRI): String =
     if to.isStaticFile || effectiveMembers.contains(to) then
       val anchor = if to.anchor.isEmpty then "" else "#" + to.anchor
-      pathToRaw(rawLocation(from), rawLocation(to)) +".html" + anchor
-    else
-      to.externalLink.fold(unknownPage(to))(l => l)
+      pathToRaw(rawLocation(from), rawLocation(to)) + ".html" + anchor
+    else to.externalLink.fold(unknownPage(to))(l => l)
 
   def pathToRaw(from: Seq[String], to: Seq[String]): String =
-    import dotty.tools.scaladoc.util.Escape._
+    import dotty.tools.scaladoc.util.Escape.*
     val fromDir = from.dropRight(1)
-    val commonPaths = to.zip(fromDir).takeWhile{ case (a, b) => a == b }.size
+    val commonPaths = to.zip(fromDir).takeWhile { case (a, b) => a == b }.size
 
     val contextPath = fromDir.drop(commonPaths).map(_ => "..")
     val nodePath = to.drop(commonPaths) match
-        case Nil if contextPath.isEmpty && to.nonEmpty=> Seq("..", to.last)
-        case Nil => to.lastOption.fold(Seq("index"))(".." :: _ :: Nil)
-        case l => l
+      case Nil if contextPath.isEmpty && to.nonEmpty => Seq("..", to.last)
+      case Nil => to.lastOption.fold(Seq("index"))(".." :: _ :: Nil)
+      case l   => l
 
     escapeUrl((contextPath ++ nodePath).mkString("/"))
 
   def resolveRoot(from: Seq[String], to: String): String =
     pathToRaw(from, to.split("/").toList)
 
-  def resolveRoot(dri: DRI, path: String): String = resolveRoot(rawLocation(dri), path)
-  def absolutePath(dri: DRI, extension: String = "html"): String = rawLocation(dri).mkString("", "/", s".$extension")
+  def resolveRoot(dri: DRI, path: String): String =
+    resolveRoot(rawLocation(dri), path)
+  def absolutePath(dri: DRI, extension: String = "html"): String =
+    rawLocation(dri).mkString("", "/", s".$extension")
 
-  def escapedAbsolutePathWithAnchor(dri: DRI, extension: String = "html"): String =
+  def escapedAbsolutePathWithAnchor(
+      dri: DRI,
+      extension: String = "html"
+  ): String =
     s"${escapeUrl(absolutePath(dri, extension))}#${dri.anchor}"
 
   def relativeInternalOrAbsoluteExternalPath(dri: DRI): String =
@@ -84,8 +89,11 @@ trait Locations(using ctx: DocContext):
   def resolveLink(dri: DRI, url: String): String =
     if URI(url).isAbsolute then url else resolveRoot(dri, url)
 
-  def pathToRoot(dri: DRI): String = rawLocation(dri).drop(1).map(_ => "..") match
-    case Nil => ""
-    case seq => seq.mkString("", "/" , "/")
+  def pathToRoot(dri: DRI): String =
+    rawLocation(dri).drop(1).map(_ => "..") match
+      case Nil => ""
+      case seq => seq.mkString("", "/", "/")
 
-  def driExists(dri: DRI) = effectiveMembers.get(dri).isDefined || dri.isStaticFile
+  def driExists(dri: DRI) =
+    effectiveMembers.get(dri).isDefined || dri.isStaticFile
+end Locations

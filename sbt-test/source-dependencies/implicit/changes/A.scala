@@ -1,4 +1,2 @@
-class A
-{
-	def x(i: Int): String = i.toString
-}
+class A:
+  def x(i: Int): String = i.toString

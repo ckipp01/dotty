@@ -1,5 +1,5 @@
-object Main {
-  def main(args: Array[String]): Unit = {
+object Main:
+  def main(args: Array[String]): Unit =
     val z = new scala2Lib.Z
 
     def dummy[T]: T = null.asInstanceOf[T]
@@ -14,5 +14,3 @@ object Main {
     z.a_53(dummy)
     z.b_56(dummy)
     z.a_57(dummy)
-  }
-}

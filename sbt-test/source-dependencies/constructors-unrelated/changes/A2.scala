@@ -1,2 +1,3 @@
 class A(a: String)
-object A { val x = 3 }
+object A:
+  val x = 3

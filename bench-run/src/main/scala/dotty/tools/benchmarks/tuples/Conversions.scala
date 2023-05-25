@@ -1,9 +1,9 @@
 package dotty.tools.benchmarks.tuples
 
-import org.openjdk.jmh.annotations._
+import org.openjdk.jmh.annotations.*
 
 @State(Scope.Thread)
-class Conversions {
+class Conversions:
   @Param(Array("1"))
   var size: Int = _
   var tuple: Tuple = _
@@ -11,43 +11,35 @@ class Conversions {
   var iarray: IArray[Object] = _
 
   @Setup
-  def setup(): Unit = {
+  def setup(): Unit =
     tuple = Tuple()
 
-    for (i <- 1 to size)
-      tuple = "elem" *: tuple
+    for i <- 1 to size do tuple = "elem" *: tuple
 
     array = Array.fill(size)("elem")
     iarray = IArray.fill(size)("elem")
-  }
 
   @Benchmark
-  def tupleToArray(): Array[Object] = {
+  def tupleToArray(): Array[Object] =
     runtime.Tuples.toArray(tuple)
-  }
 
   @Benchmark
-  def tupleToIArray(): IArray[Object] = {
+  def tupleToIArray(): IArray[Object] =
     runtime.Tuples.toIArray(tuple)
-  }
 
   @Benchmark
-  def tupleFromArray(): Tuple = {
+  def tupleFromArray(): Tuple =
     runtime.Tuples.fromArray(array)
-  }
 
   @Benchmark
-  def tupleFromIArray(): Tuple = {
+  def tupleFromIArray(): Tuple =
     runtime.Tuples.fromIArray(iarray)
-  }
 
   @Benchmark
-  def productToArray(): Array[Object] = {
+  def productToArray(): Array[Object] =
     runtime.Tuples.productToArray(tuple.asInstanceOf[Product])
-  }
 
   @Benchmark
-  def cloneArray(): Array[Object] = {
+  def cloneArray(): Array[Object] =
     array.clone()
-  }
-}
+end Conversions

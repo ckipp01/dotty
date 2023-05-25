@@ -1,3 +1,3 @@
-object B {
-  def show(what: String): String = s"String interpolation is ${what.toUpperCase}!"
-}
+object B:
+  def show(what: String): String =
+    s"String interpolation is ${what.toUpperCase}!"

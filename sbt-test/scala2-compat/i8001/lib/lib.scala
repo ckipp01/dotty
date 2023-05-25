@@ -4,7 +4,7 @@ class Arr[A](val value: Array[A]) extends AnyVal
 
 class ArrRef[A <: AnyRef](val value: Array[A]) extends AnyVal
 
-class A {
+class A:
   def poly1(x: Poly[Int]): Poly[Int] =
     new Poly(x.value)
 
@@ -40,4 +40,4 @@ class A {
 
   def arrRef4(x: ArrRef[Array[String]]): ArrRef[Array[String]] =
     new ArrRef(x.value)
-}
+end A

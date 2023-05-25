@@ -8,8 +8,8 @@ import dotty.tools.backend.jvm.DottyBytecodeTest
 
 import scala.jdk.CollectionConverters.*
 
-class SpecializeTuplesTests extends DottyBytecodeTest {
-  @Test def noBoxing = {
+class SpecializeTuplesTests extends DottyBytecodeTest:
+  @Test def noBoxing =
     given source: String =
       """|class Test {
          |  def foo: (Int, Int) = (1, 1)
@@ -21,9 +21,8 @@ class SpecializeTuplesTests extends DottyBytecodeTest {
       assertNoBoxing("foo", methods)
       assertNoBoxing("bar", methods)
     }
-  }
 
-  @Test def boxing = {
+  @Test def boxing =
     // Pick a tuple type that isn't specialised.
     given source: String =
       """|class Test {
@@ -52,5 +51,5 @@ class SpecializeTuplesTests extends DottyBytecodeTest {
       assertBoxing("_8", methods)
       assertNoBoxing("_9", methods)
     }
-  }
-}
+  end boxing
+end SpecializeTuplesTests

@@ -1,3 +1,2 @@
-object C {
-	new A[Int] {}
-}
+object C:
+  new A[Int] {}

@@ -1,8 +1,8 @@
 package example
 
-object Main {
+object Main:
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
 
     runExample("Trait Params")(TraitParams.test)
 
@@ -28,12 +28,8 @@ object Main {
 
     runExample("Pattern Matching")(PatternMatching.test)
 
-  }
-
-  private def runExample(name: String)(f: => Unit) = {
+  private def runExample(name: String)(f: => Unit) =
     println(Console.MAGENTA + s"$name example:" + Console.RESET)
     f
     println()
-  }
-
-}
+end Main

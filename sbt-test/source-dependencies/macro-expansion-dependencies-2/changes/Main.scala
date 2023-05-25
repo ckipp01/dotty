@@ -1,3 +1,2 @@
-object Main extends App {
-   Macro.f()
-}
+object Main extends App:
+  Macro.f()

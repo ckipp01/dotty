@@ -6,18 +6,19 @@ import java.nio.file.Files
 import java.nio.file.Paths
 
 import org.jsoup.Jsoup
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
-
-case class LazyEntry(getKey: String, value: () => String) extends JMapEntry[String, Object]:
+case class LazyEntry(getKey: String, value: () => String)
+    extends JMapEntry[String, Object]:
   lazy val getValue: Object = value()
   def setValue(x$0: Object): Object = ???
 
 case class LoadedTemplate(
-  templateFile: TemplateFile,
-  children: List[LoadedTemplate],
-  file: File,
-  hidden: Boolean = false):
+    templateFile: TemplateFile,
+    children: List[LoadedTemplate],
+    file: File,
+    hidden: Boolean = false
+):
 
   private def brief(ctx: StaticSiteContext): String =
     try
@@ -29,26 +30,44 @@ case class LoadedTemplate(
         report.error(msg, templateFile.file, e)(using ctx.outerCtx)
         "..."
 
-  def lazyTemplateProperties(ctx: StaticSiteContext): JMap[String, Object] = new java.util.AbstractMap[String, Object]():
-    lazy val entrySet: JSet[JMapEntry[String, Object]] =
-      val site = templateFile.settings.getOrElse("page", Map.empty).asInstanceOf[Map[String, Object]]
-      site.asJava.entrySet() ++ JSet(
-        LazyEntry("url", () => "/" ++ ctx.pathFromRoot(LoadedTemplate.this).toString),
-        LazyEntry("title", () => templateFile.title.name),
-        LazyEntry("excerpt", () => brief(ctx))
-      )
+  def lazyTemplateProperties(ctx: StaticSiteContext): JMap[String, Object] =
+    new java.util.AbstractMap[String, Object]():
+      lazy val entrySet: JSet[JMapEntry[String, Object]] =
+        val site = templateFile.settings
+          .getOrElse("page", Map.empty)
+          .asInstanceOf[Map[String, Object]]
+        site.asJava.entrySet() ++ JSet(
+          LazyEntry(
+            "url",
+            () => "/" ++ ctx.pathFromRoot(LoadedTemplate.this).toString
+          ),
+          LazyEntry("title", () => templateFile.title.name),
+          LazyEntry("excerpt", () => brief(ctx))
+        )
 
   def resolveToHtml(ctx: StaticSiteContext): ResolvedPage =
-    val subpages = children.filterNot(_.hidden).map(_.lazyTemplateProperties(ctx))
-    def getMap(key: String) = templateFile.settings.getOrElse(key, Map.empty).asInstanceOf[Map[String, Object]]
+    val subpages =
+      children.filterNot(_.hidden).map(_.lazyTemplateProperties(ctx))
+    def getMap(key: String) = templateFile.settings
+      .getOrElse(key, Map.empty)
+      .asInstanceOf[Map[String, Object]]
 
-    val sourceLinks = if !templateFile.file.exists() then Nil else
-      val actualPath = templateFile.file.toPath
-      ctx.sourceLinks.pathTo(actualPath).map("viewSource" -> _ ) ++
-        ctx.sourceLinks.pathTo(actualPath, operation = "edit").map("editSource" -> _)
+    val sourceLinks =
+      if !templateFile.file.exists() then Nil
+      else
+        val actualPath = templateFile.file.toPath
+        ctx.sourceLinks.pathTo(actualPath).map("viewSource" -> _) ++
+          ctx.sourceLinks
+            .pathTo(actualPath, operation = "edit")
+            .map("editSource" -> _)
 
     val updatedSettings = templateFile.settings ++ ctx.projectWideProperties +
-      ("site" -> (getMap("site") + ("subpages" -> subpages))) + ("urls" -> sourceLinks.toMap) +
+      ("site" -> (getMap(
+        "site"
+      ) + ("subpages" -> subpages))) + ("urls" -> sourceLinks.toMap) +
       ("page" -> (getMap("page") + ("title" -> templateFile.title.name)))
 
-    templateFile.resolveInner(RenderingContext(updatedSettings, ctx.layouts))(using ctx)
+    templateFile.resolveInner(RenderingContext(updatedSettings, ctx.layouts))(
+      using ctx
+    )
+end LoadedTemplate

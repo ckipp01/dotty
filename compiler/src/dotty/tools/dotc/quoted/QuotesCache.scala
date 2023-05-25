@@ -1,16 +1,15 @@
 package dotty.tools.dotc.quoted
 
-import dotty.tools.dotc.core.Contexts._
+import dotty.tools.dotc.core.Contexts.*
 import dotty.tools.dotc.util.Property
 import dotty.tools.dotc.ast.tpd
 
-
-object QuotesCache {
-  import tpd._
+object QuotesCache:
+  import tpd.*
 
   /** A key to be used in a context property that caches the unpickled trees */
-  private val QuotesCacheKey = new Property.Key[collection.mutable.Map[String | List[String], Tree]]
-
+  private val QuotesCacheKey =
+    new Property.Key[collection.mutable.Map[String | List[String], Tree]]
 
   /** Get the cached tree of the quote */
   def getTree(pickled: String | List[String])(using Context): Option[Tree] =
@@ -23,4 +22,3 @@ object QuotesCache {
   /** Context with a cache for quote trees and tasty bytes */
   def init(ctx: FreshContext): ctx.type =
     ctx.setProperty(QuotesCacheKey, collection.mutable.Map.empty)
-}

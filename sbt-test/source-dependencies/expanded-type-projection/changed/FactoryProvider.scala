@@ -1,6 +1,5 @@
 package foo
 
-object FactoryProvider {
+object FactoryProvider:
   import Types.::
   type MyFactory = FactoryA :: Nil
-}

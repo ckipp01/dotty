@@ -1,3 +1,2 @@
-object D {
-	def x[T](a: A[T]) = a
-}
+object D:
+  def x[T](a: A[T]) = a

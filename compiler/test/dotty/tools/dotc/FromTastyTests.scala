@@ -6,41 +6,42 @@ import scala.language.unsafeNulls
 
 import org.junit.{AfterClass, Test}
 import reporting.TestReporter
-import vulpix._
+import vulpix.*
 
-import java.io.{File => JFile}
+import java.io.{File as JFile}
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 
-class FromTastyTests {
-  import TestConfiguration._
-  import FromTastyTests._
+class FromTastyTests:
+  import TestConfiguration.*
+  import FromTastyTests.*
 
-  @Test def posTestFromTasty: Unit = {
+  @Test def posTestFromTasty: Unit =
     // Can be reproduced with
     // > sbt
     // > scalac -Ythrough-tasty -Ycheck:all <source>
 
     implicit val testGroup: TestGroup = TestGroup("posTestFromTasty")
-    compileTastyInDir(s"tests${JFile.separator}pos", defaultOptions,
+    compileTastyInDir(
+      s"tests${JFile.separator}pos",
+      defaultOptions,
       fromTastyFilter = FileFilter.exclude(TestSources.posFromTastyBlacklisted)
     ).checkCompile()
-  }
 
-  @Test def runTestFromTasty: Unit = {
+  @Test def runTestFromTasty: Unit =
     // Can be reproduced with
     // > sbt
     // > scalac -Ythrough-tasty -Ycheck:all <source>
     // > scala Test
 
     implicit val testGroup: TestGroup = TestGroup("runTestFromTasty")
-    compileTastyInDir(s"tests${JFile.separator}run", defaultOptions,
+    compileTastyInDir(
+      s"tests${JFile.separator}run",
+      defaultOptions,
       fromTastyFilter = FileFilter.exclude(TestSources.runFromTastyBlacklisted)
     ).checkRuns()
-  }
-}
 
-object FromTastyTests extends ParallelTesting {
+object FromTastyTests extends ParallelTesting:
   // Test suite configuration --------------------------------------------------
 
   def maxDuration = 30.seconds
@@ -52,8 +53,6 @@ object FromTastyTests extends ParallelTesting {
   def failedTests = TestReporter.lastRunFailedTests
 
   implicit val summaryReport: SummaryReporting = new SummaryReport
-  @AfterClass def tearDown(): Unit = {
+  @AfterClass def tearDown(): Unit =
     super.cleanup()
     summaryReport.echoSummary()
-  }
-}

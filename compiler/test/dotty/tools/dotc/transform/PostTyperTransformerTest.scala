@@ -2,7 +2,7 @@ package dotty.tools
 package dotc
 package transform
 
-import core._
+import core.*
 import ast.Trees
 
 class PostTyperTransformerTest extends DottyTest {

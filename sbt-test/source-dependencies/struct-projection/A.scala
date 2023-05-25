@@ -1,3 +1,2 @@
-object A {
-  def m: ({type T <: Int})#T = ???
-}
+object A:
+  def m: ({ type T <: Int })#T = ???

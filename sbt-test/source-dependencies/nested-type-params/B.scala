@@ -1,1 +1,2 @@
-trait B { def b = 1.0 }
+trait B:
+  def b = 1.0

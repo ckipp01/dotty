@@ -1,9 +1,9 @@
 package scala.quoted
 package runtime.impl.printers
 
-import scala.quoted._
+import scala.quoted.*
 
-object Extractors {
+object Extractors:
 
   def showTree(using Quotes)(tree: quotes.reflect.Tree): String =
     new ExtractorsPrinter[quotes.type]().visitTree(tree).result()
@@ -17,60 +17,62 @@ object Extractors {
   def showSymbol(using Quotes)(symbol: quotes.reflect.Symbol): String =
     new ExtractorsPrinter[quotes.type]().visitSymbol(symbol).result()
 
-  def showFlags(using Quotes)(flags: quotes.reflect.Flags): String = {
-    import quotes.reflect._
+  def showFlags(using Quotes)(flags: quotes.reflect.Flags): String =
+    import quotes.reflect.*
     val flagList = List.newBuilder[String]
-    if (flags.is(Flags.Abstract)) flagList += "Flags.Abstract"
-    if (flags.is(Flags.Artifact)) flagList += "Flags.Artifact"
-    if (flags.is(Flags.Case)) flagList += "Flags.Case"
-    if (flags.is(Flags.CaseAccessor)) flagList += "Flags.CaseAccessor"
-    if (flags.is(Flags.Contravariant)) flagList += "Flags.Contravariant"
-    if (flags.is(Flags.Covariant)) flagList += "Flags.Covariant"
-    if (flags.is(Flags.Deferred)) flagList += "Flags.Deferred"
-    if (flags.is(Flags.Enum)) flagList += "Flags.Enum"
-    if (flags.is(Flags.Erased)) flagList += "Flags.Erased"
-    if (flags.is(Flags.Exported)) flagList += "Flags.Exported"
-    if (flags.is(Flags.ExtensionMethod)) flagList += "Flags.ExtensionMethod"
-    if (flags.is(Flags.FieldAccessor)) flagList += "Flags.FieldAccessor"
-    if (flags.is(Flags.Final)) flagList += "Flags.Final"
-    if (flags.is(Flags.Given)) flagList += "Flags.Given"
-    if (flags.is(Flags.HasDefault)) flagList += "Flags.HasDefault"
-    if (flags.is(Flags.Implicit)) flagList += "Flags.Implicit"
-    if (flags.is(Flags.Infix)) flagList += "Flags.Infix"
-    if (flags.is(Flags.Inline)) flagList += "Flags.Inline"
-    if (flags.is(Flags.JavaDefined)) flagList += "Flags.JavaDefined"
-    if (flags.is(Flags.JavaStatic)) flagList += "Flags.JavaStatic"
-    if (flags.is(Flags.Lazy)) flagList += "Flags.Lazy"
-    if (flags.is(Flags.Local)) flagList += "Flags.Local"
-    if (flags.is(Flags.Macro)) flagList += "Flags.Macro"
-    if (flags.is(Flags.Method)) flagList += "Flags.Method"
-    if (flags.is(Flags.Module)) flagList += "Flags.Module"
-    if (flags.is(Flags.Mutable)) flagList += "Flags.Mutable"
-    if (flags.is(Flags.NoInits)) flagList += "Flags.NoInits"
-    if (flags.is(Flags.Override)) flagList += "Flags.Override"
-    if (flags.is(Flags.Package)) flagList += "Flags.Package"
-    if (flags.is(Flags.Param)) flagList += "Flags.Param"
-    if (flags.is(Flags.ParamAccessor)) flagList += "Flags.ParamAccessor"
-    if (flags.is(Flags.Private)) flagList += "Flags.Private"
-    if (flags.is(Flags.PrivateLocal)) flagList += "Flags.PrivateLocal"
-    if (flags.is(Flags.Protected)) flagList += "Flags.Protected"
-    if (flags.is(Flags.Scala2x)) flagList += "Flags.Scala2x"
-    if (flags.is(Flags.Sealed)) flagList += "Flags.Sealed"
-    if (flags.is(Flags.StableRealizable)) flagList += "Flags.StableRealizable"
-    if (flags.is(Flags.Synthetic)) flagList += "Flags.Synthetic"
-    if (flags.is(Flags.Trait)) flagList += "Flags.Trait"
-    if (flags.is(Flags.Transparent)) flagList += "Flags.Transparent"
+    if flags.is(Flags.Abstract) then flagList += "Flags.Abstract"
+    if flags.is(Flags.Artifact) then flagList += "Flags.Artifact"
+    if flags.is(Flags.Case) then flagList += "Flags.Case"
+    if flags.is(Flags.CaseAccessor) then flagList += "Flags.CaseAccessor"
+    if flags.is(Flags.Contravariant) then flagList += "Flags.Contravariant"
+    if flags.is(Flags.Covariant) then flagList += "Flags.Covariant"
+    if flags.is(Flags.Deferred) then flagList += "Flags.Deferred"
+    if flags.is(Flags.Enum) then flagList += "Flags.Enum"
+    if flags.is(Flags.Erased) then flagList += "Flags.Erased"
+    if flags.is(Flags.Exported) then flagList += "Flags.Exported"
+    if flags.is(Flags.ExtensionMethod) then flagList += "Flags.ExtensionMethod"
+    if flags.is(Flags.FieldAccessor) then flagList += "Flags.FieldAccessor"
+    if flags.is(Flags.Final) then flagList += "Flags.Final"
+    if flags.is(Flags.Given) then flagList += "Flags.Given"
+    if flags.is(Flags.HasDefault) then flagList += "Flags.HasDefault"
+    if flags.is(Flags.Implicit) then flagList += "Flags.Implicit"
+    if flags.is(Flags.Infix) then flagList += "Flags.Infix"
+    if flags.is(Flags.Inline) then flagList += "Flags.Inline"
+    if flags.is(Flags.JavaDefined) then flagList += "Flags.JavaDefined"
+    if flags.is(Flags.JavaStatic) then flagList += "Flags.JavaStatic"
+    if flags.is(Flags.Lazy) then flagList += "Flags.Lazy"
+    if flags.is(Flags.Local) then flagList += "Flags.Local"
+    if flags.is(Flags.Macro) then flagList += "Flags.Macro"
+    if flags.is(Flags.Method) then flagList += "Flags.Method"
+    if flags.is(Flags.Module) then flagList += "Flags.Module"
+    if flags.is(Flags.Mutable) then flagList += "Flags.Mutable"
+    if flags.is(Flags.NoInits) then flagList += "Flags.NoInits"
+    if flags.is(Flags.Override) then flagList += "Flags.Override"
+    if flags.is(Flags.Package) then flagList += "Flags.Package"
+    if flags.is(Flags.Param) then flagList += "Flags.Param"
+    if flags.is(Flags.ParamAccessor) then flagList += "Flags.ParamAccessor"
+    if flags.is(Flags.Private) then flagList += "Flags.Private"
+    if flags.is(Flags.PrivateLocal) then flagList += "Flags.PrivateLocal"
+    if flags.is(Flags.Protected) then flagList += "Flags.Protected"
+    if flags.is(Flags.Scala2x) then flagList += "Flags.Scala2x"
+    if flags.is(Flags.Sealed) then flagList += "Flags.Sealed"
+    if flags.is(Flags.StableRealizable) then
+      flagList += "Flags.StableRealizable"
+    if flags.is(Flags.Synthetic) then flagList += "Flags.Synthetic"
+    if flags.is(Flags.Trait) then flagList += "Flags.Trait"
+    if flags.is(Flags.Transparent) then flagList += "Flags.Transparent"
     flagList.result().mkString(" | ")
-  }
+  end showFlags
 
-  private class ExtractorsPrinter[Q <: Quotes & Singleton](using val quotes: Q) { self =>
-    import quotes.reflect._
+  private class ExtractorsPrinter[Q <: Quotes & Singleton](using val quotes: Q):
+    self =>
+    import quotes.reflect.*
 
     private val sb: StringBuilder = new StringBuilder
 
     def result(): String = sb.result()
 
-    def visitTree(x: Tree): this.type = x match {
+    def visitTree(x: Tree): this.type = x match
       case tree: Ref =>
         tree match
           case Wildcard() =>
@@ -92,7 +94,7 @@ object Extractors {
       case New(tpt) =>
         this += "New(" += tpt += ")"
       case Typed(expr, tpt) =>
-        this += "Typed(" += expr += ", "  += tpt += ")"
+        this += "Typed(" += expr += ", " += tpt += ")"
       case NamedArg(name, arg) =>
         this += "NamedArg(\"" += name += "\", " += arg += ")"
       case Assign(lhs, rhs) =>
@@ -177,30 +179,29 @@ object Extractors {
         this += "Alternatives(" ++= patterns += ")"
       case TypedOrTest(tree, tpt) =>
         this += "TypedOrTest(" += tree += ", " += tpt += ")"
-    }
 
-    def visitConstant(x: Constant): this.type = x match {
-      case UnitConstant() => this += "UnitConstant()"
-      case NullConstant() => this += "NullConstant()"
+    def visitConstant(x: Constant): this.type = x match
+      case UnitConstant()         => this += "UnitConstant()"
+      case NullConstant()         => this += "NullConstant()"
       case BooleanConstant(value) => this += "BooleanConstant(" += value += ")"
-      case ByteConstant(value) => this += "ByteConstant(" += value += ")"
-      case ShortConstant(value) => this += "ShortConstant(" += value += ")"
-      case IntConstant(value) => this += "IntConstant(" += value += ")"
-      case LongConstant(value) => this += "LongConstant(" += value += "L)"
-      case FloatConstant(value) => this += "FloatConstant(" += value += "f)"
-      case DoubleConstant(value) => this += "DoubleConstant(" += value += "d)"
-      case CharConstant(value) => this += "CharConstant('" += value += "')"
-      case StringConstant(value) => this += "StringConstant(\"" += value += "\")"
+      case ByteConstant(value)    => this += "ByteConstant(" += value += ")"
+      case ShortConstant(value)   => this += "ShortConstant(" += value += ")"
+      case IntConstant(value)     => this += "IntConstant(" += value += ")"
+      case LongConstant(value)    => this += "LongConstant(" += value += "L)"
+      case FloatConstant(value)   => this += "FloatConstant(" += value += "f)"
+      case DoubleConstant(value)  => this += "DoubleConstant(" += value += "d)"
+      case CharConstant(value)    => this += "CharConstant('" += value += "')"
+      case StringConstant(value) =>
+        this += "StringConstant(\"" += value += "\")"
       case ClassOfConstant(value) =>
         this += "ClassOfConstant("
         visitType(value) += ")"
-    }
 
-    def visitType(x: TypeRepr): this.type = x match {
+    def visitType(x: TypeRepr): this.type = x match
       case ConstantType(value) =>
         this += "ConstantType(" += value += ")"
       case TermRef(qual, name) =>
-        this += "TermRef(" += qual+= ", \"" += name += "\")"
+        this += "TermRef(" += qual += ", \"" += name += "\")"
       case TypeRef(qual, name) =>
         this += "TypeRef(" += qual += ", \"" += name += "\")"
       case Refinement(parent, name, info) =>
@@ -239,107 +240,124 @@ object Extractors {
         this += "NoPrefix()"
       case MatchCase(pat, rhs) =>
         this += "MatchCase(" += pat += ", " += rhs += ")"
-    }
 
-    def visitSignature(sig: Signature): this.type = {
+    def visitSignature(sig: Signature): this.type =
       val Signature(params, res) = sig
       this += "Signature(" ++= params.map(_.toString) += ", " += res += ")"
-    }
 
-    def visitSelector(sel: Selector): this.type = sel match {
+    def visitSelector(sel: Selector): this.type = sel match
       case SimpleSelector(id) => this += "SimpleSelector(" += id += ")"
-      case RenameSelector(id1, id2) => this += "RenameSelector(" += id1 += ", " += id2 += ")"
-      case OmitSelector(id) => this += "OmitSelector(" += id += ")"
+      case RenameSelector(id1, id2) =>
+        this += "RenameSelector(" += id1 += ", " += id2 += ")"
+      case OmitSelector(id)     => this += "OmitSelector(" += id += ")"
       case GivenSelector(bound) => this += "GivenSelector(" += bound += ")"
-    }
 
     def visitSymbol(x: Symbol): this.type =
-      if x.isPackageDef  then this += "IsPackageDefSymbol(<" += x.fullName += ">)"
-      else if x.isClassDef then this += "IsClassDefSymbol(<" += x.fullName += ">)"
+      if x.isPackageDef then
+        this += "IsPackageDefSymbol(<" += x.fullName += ">)"
+      else if x.isClassDef then
+        this += "IsClassDefSymbol(<" += x.fullName += ">)"
       else if x.isDefDef then this += "IsDefDefSymbol(<" += x.fullName += ">)"
       else if x.isValDef then this += "IsValDefSymbol(<" += x.fullName += ">)"
       else if x.isTypeDef then this += "IsTypeDefSymbol(<" += x.fullName += ">)"
-      else { assert(x.isNoSymbol); this += "NoSymbol()" }
+      else
+        assert(x.isNoSymbol); this += "NoSymbol()"
 
     def visitParamClause(x: ParamClause): this.type =
       x match
-        case TermParamClause(params) => this += "TermParamClause(" ++= params += ")"
-        case TypeParamClause(params) => this += "TypeParamClause(" ++= params += ")"
+        case TermParamClause(params) =>
+          this += "TermParamClause(" ++= params += ")"
+        case TypeParamClause(params) =>
+          this += "TypeParamClause(" ++= params += ")"
 
-    def +=(x: Boolean): this.type = { sb.append(x); this }
-    def +=(x: Byte): this.type = { sb.append(x); this }
-    def +=(x: Short): this.type = { sb.append(x); this }
-    def +=(x: Int): this.type = { sb.append(x); this }
-    def +=(x: Long): this.type = { sb.append(x); this }
-    def +=(x: Float): this.type = { sb.append(x); this }
-    def +=(x: Double): this.type = { sb.append(x); this }
-    def +=(x: Char): this.type = { sb.append(x); this }
-    def +=(x: String): this.type = { sb.append(x); this }
+    def +=(x: Boolean): this.type =
+      sb.append(x); this
+    def +=(x: Byte): this.type =
+      sb.append(x); this
+    def +=(x: Short): this.type =
+      sb.append(x); this
+    def +=(x: Int): this.type =
+      sb.append(x); this
+    def +=(x: Long): this.type =
+      sb.append(x); this
+    def +=(x: Float): this.type =
+      sb.append(x); this
+    def +=(x: Double): this.type =
+      sb.append(x); this
+    def +=(x: Char): this.type =
+      sb.append(x); this
+    def +=(x: String): this.type =
+      sb.append(x); this
 
     def ++=(xs: List[String]): this.type = visitList[String](xs, +=)
 
-    private implicit class StringOps(buff: self.type) {
-      def +=(x: Option[String]): self.type = { visitOption(x, y => buff += "\"" += y += "\""); buff }
-    }
+    private implicit class StringOps(buff: self.type):
+      def +=(x: Option[String]): self.type =
+        visitOption(x, y => buff += "\"" += y += "\""); buff
 
-    private implicit class TreeOps(buff: self.type) {
-      def +=(x: Tree): self.type = { visitTree(x); buff }
-      def +=(x: Option[Tree]): self.type = { visitOption(x, visitTree); buff }
-      def ++=(x: List[Tree]): self.type = { visitList(x, visitTree); buff }
-      def +++=(x: List[List[Tree]]): self.type = { visitList(x, ++=); buff }
-    }
+    private implicit class TreeOps(buff: self.type):
+      def +=(x: Tree): self.type =
+        visitTree(x); buff
+      def +=(x: Option[Tree]): self.type =
+        visitOption(x, visitTree); buff
+      def ++=(x: List[Tree]): self.type =
+        visitList(x, visitTree); buff
+      def +++=(x: List[List[Tree]]): self.type =
+        visitList(x, ++=); buff
 
-    private implicit class ConstantOps(buff: self.type) {
-      def +=(x: Constant): self.type = { visitConstant(x); buff }
-    }
+    private implicit class ConstantOps(buff: self.type):
+      def +=(x: Constant): self.type =
+        visitConstant(x); buff
 
-    private implicit class TypeOps(buff: self.type) {
-      def +=(x: TypeRepr): self.type = { visitType(x); buff }
-      def +=(x: Option[TypeRepr]): self.type = { visitOption(x, visitType); buff }
-      def ++=(x: List[TypeRepr]): self.type = { visitList(x, visitType); buff }
-    }
+    private implicit class TypeOps(buff: self.type):
+      def +=(x: TypeRepr): self.type =
+        visitType(x); buff
+      def +=(x: Option[TypeRepr]): self.type =
+        visitOption(x, visitType); buff
+      def ++=(x: List[TypeRepr]): self.type =
+        visitList(x, visitType); buff
 
-    private implicit class SignatureOps(buff: self.type) {
-      def +=(x: Option[Signature]): self.type = { visitOption(x, visitSignature); buff }
-    }
+    private implicit class SignatureOps(buff: self.type):
+      def +=(x: Option[Signature]): self.type =
+        visitOption(x, visitSignature); buff
 
-    private implicit class SelectorOps(buff: self.type) {
-      def ++=(x: List[Selector]): self.type = { visitList(x, visitSelector); buff }
-    }
+    private implicit class SelectorOps(buff: self.type):
+      def ++=(x: List[Selector]): self.type =
+        visitList(x, visitSelector); buff
 
-    private implicit class SymbolOps(buff: self.type) {
-      def +=(x: Symbol): self.type = { visitSymbol(x); buff }
-    }
+    private implicit class SymbolOps(buff: self.type):
+      def +=(x: Symbol): self.type =
+        visitSymbol(x); buff
 
-    private implicit class ParamClauseOps(buff: self.type) {
-      def ++=(x: List[ParamClause]): self.type = { visitList(x, visitParamClause); buff }
-    }
+    private implicit class ParamClauseOps(buff: self.type):
+      def ++=(x: List[ParamClause]): self.type =
+        visitList(x, visitParamClause); buff
 
-    private def visitOption[U](opt: Option[U], visit: U => this.type): this.type = opt match {
+    private def visitOption[U](
+        opt: Option[U],
+        visit: U => this.type
+    ): this.type = opt match
       case Some(x) =>
         this += "Some("
         visit(x)
         this += ")"
       case _ =>
         this += "None"
-    }
 
-    private def visitList[U](list: List[U], visit: U => this.type): this.type = list match {
-      case x0 :: xs =>
-        this += "List("
-        visit(x0)
-        def visitNext(xs: List[U]): Unit = xs match {
-          case y :: ys =>
-            this += ", "
-            visit(y)
-            visitNext(ys)
-          case Nil =>
-        }
-        visitNext(xs)
-        this += ")"
-      case Nil =>
-        this += "Nil"
-    }
-  }
-
-}
+    private def visitList[U](list: List[U], visit: U => this.type): this.type =
+      list match
+        case x0 :: xs =>
+          this += "List("
+          visit(x0)
+          def visitNext(xs: List[U]): Unit = xs match
+            case y :: ys =>
+              this += ", "
+              visit(y)
+              visitNext(ys)
+            case Nil =>
+          visitNext(xs)
+          this += ")"
+        case Nil =>
+          this += "Nil"
+  end ExtractorsPrinter
+end Extractors

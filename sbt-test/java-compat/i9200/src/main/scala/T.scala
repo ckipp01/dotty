@@ -1,1 +1,2 @@
-trait T { object O }
+trait T:
+  object O

@@ -1,12 +1,9 @@
 package example
 
-class ReturnTypeClass[T] {
-}
+class ReturnTypeClass[T] {}
 
-class UserDocLinkingClass {
+class UserDocLinkingClass:
   def linkMeFromUserDoc() = ???
-}
 
-object ReturnObjectWithType {
+object ReturnObjectWithType:
   type returnType = Int
-}

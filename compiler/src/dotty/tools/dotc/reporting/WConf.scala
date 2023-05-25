@@ -4,7 +4,7 @@ package reporting
 
 import scala.language.unsafeNulls
 
-import dotty.tools.dotc.core.Contexts._
+import dotty.tools.dotc.core.Contexts.*
 import dotty.tools.dotc.util.SourcePosition
 
 import java.util.regex.PatternSyntaxException
@@ -13,15 +13,16 @@ import scala.util.matching.Regex
 
 enum MessageFilter:
   def matches(message: Diagnostic): Boolean = this match
-    case Any => true
+    case Any        => true
     case Deprecated => message.isInstanceOf[Diagnostic.DeprecationWarning]
-    case Feature => message.isInstanceOf[Diagnostic.FeatureWarning]
-    case Unchecked => message.isInstanceOf[Diagnostic.UncheckedWarning]
+    case Feature    => message.isInstanceOf[Diagnostic.FeatureWarning]
+    case Unchecked  => message.isInstanceOf[Diagnostic.UncheckedWarning]
     case MessagePattern(pattern) =>
-      val noHighlight = message.msg.message.replaceAll("\\e\\[[\\d;]*[^\\d;]","")
+      val noHighlight =
+        message.msg.message.replaceAll("\\e\\[[\\d;]*[^\\d;]", "")
       pattern.findFirstIn(noHighlight).nonEmpty
     case MessageID(errorId) => message.msg.errorId == errorId
-    case None => false
+    case None               => false
 
   case Any, Deprecated, Feature, Unchecked, None
   case MessagePattern(pattern: Regex)
@@ -31,27 +32,31 @@ enum Action:
   case Error, Warning, Verbose, Info, Silent
 
 final case class WConf(confs: List[(List[MessageFilter], Action)]):
-  def action(message: Diagnostic): Action = confs.collectFirst {
-    case (filters, action) if filters.forall(_.matches(message)) => action
-  }.getOrElse(Action.Warning)
+  def action(message: Diagnostic): Action = confs
+    .collectFirst {
+      case (filters, action) if filters.forall(_.matches(message)) => action
+    }
+    .getOrElse(Action.Warning)
 
 object WConf:
-  import Action._
-  import MessageFilter._
+  import Action.*
+  import MessageFilter.*
 
   private type Conf = (List[MessageFilter], Action)
 
   def parseAction(s: String): Either[List[String], Action] = s match
-    case "error" | "e"            => Right(Error)
-    case "warning" | "w"          => Right(Warning)
-    case "verbose" | "v"          => Right(Verbose)
-    case "info" | "i"             => Right(Info)
-    case "silent" | "s"           => Right(Silent)
-    case _                        => Left(List(s"unknown action: `$s`"))
+    case "error" | "e"   => Right(Error)
+    case "warning" | "w" => Right(Warning)
+    case "verbose" | "v" => Right(Verbose)
+    case "info" | "i"    => Right(Info)
+    case "silent" | "s"  => Right(Silent)
+    case _               => Left(List(s"unknown action: `$s`"))
 
   private def regex(s: String) =
     try Right(s.r)
-    catch case e: PatternSyntaxException => Left(s"invalid pattern `$s`: ${e.getMessage}")
+    catch
+      case e: PatternSyntaxException =>
+        Left(s"invalid pattern `$s`: ${e.getMessage}")
 
   @sharable val Splitter = raw"([^=]+)=(.+)".r
   @sharable val ErrorId = raw"E?(\d+)".r
@@ -65,26 +70,31 @@ object WConf:
 
   def parseFilter(s: String): Either[String, MessageFilter] = s match
     case "any" => Right(Any)
-    case Splitter(filter, conf) => filter match
-      case "msg" => regex(conf).map(MessagePattern.apply)
-      case "id" => conf match
-        case ErrorId(num) =>
-          ErrorMessageID.fromErrorNumber(num.toInt) match
-            case Some(errId) if errId.isActive => Right(MessageID(errId))
-            case Some(errId) => Left(s"E${num} is marked as inactive.")
-            case _ => Left(s"Unknown error message number: E${num}")
-        case _ =>
-          Left(s"invalid error message id: $conf")
-      case "name" =>
-        try Right(MessageID(ErrorMessageID.valueOf(conf + "ID")))
-        catch case _: IllegalArgumentException => Left(s"unknown error message name: $conf")
+    case Splitter(filter, conf) =>
+      filter match
+        case "msg" => regex(conf).map(MessagePattern.apply)
+        case "id" =>
+          conf match
+            case ErrorId(num) =>
+              ErrorMessageID.fromErrorNumber(num.toInt) match
+                case Some(errId) if errId.isActive => Right(MessageID(errId))
+                case Some(errId) => Left(s"E${num} is marked as inactive.")
+                case _ => Left(s"Unknown error message number: E${num}")
+            case _ =>
+              Left(s"invalid error message id: $conf")
+        case "name" =>
+          try Right(MessageID(ErrorMessageID.valueOf(conf + "ID")))
+          catch
+            case _: IllegalArgumentException =>
+              Left(s"unknown error message name: $conf")
 
-      case "cat" => conf match
-        case "deprecation" => Right(Deprecated)
-        case "feature"     => Right(Feature)
-        case "unchecked"   => Right(Unchecked)
-        case _             => Left(s"unknown category: $conf")
-      case _ => Left(s"unknown filter: $filter")
+        case "cat" =>
+          conf match
+            case "deprecation" => Right(Deprecated)
+            case "feature"     => Right(Feature)
+            case "unchecked"   => Right(Unchecked)
+            case _             => Left(s"unknown category: $conf")
+        case _ => Left(s"unknown filter: $filter")
     case _ => Left(s"unknown filter: $s")
 
   def parsed(using Context): WConf =
@@ -95,32 +105,51 @@ object WConf:
       ctx.base.wConfCache = (setting, conf.getOrElse(WConf(Nil)))
       conf.swap.foreach(msgs =>
         val multiHelp =
-          if setting.sizeIs > 1 then
-            """
+          if setting.sizeIs > 1 then """
               |Note: for multiple filters, use `-Wconf:filter1:action1,filter2:action2`
               |      or alternatively          `-Wconf:filter1:action1 -Wconf:filter2:action2`""".stripMargin
           else ""
-        report.warning(s"Failed to parse `-Wconf` configuration: ${ctx.settings.Wconf.value.mkString(",")}\n${msgs.mkString("\n")}$multiHelp"))
+        report.warning(
+          s"Failed to parse `-Wconf` configuration: ${ctx.settings.Wconf.value
+              .mkString(",")}\n${msgs.mkString("\n")}$multiHelp"
+        )
+      )
     cached._2
 
   def fromSettings(settings: List[String]): Either[List[String], WConf] =
-    if (settings.isEmpty) Right(WConf(Nil))
+    if settings.isEmpty then Right(WConf(Nil))
     else
-      val parsedConfs: List[Either[List[String], (List[MessageFilter], Action)]] = settings.map(conf =>
-        val filtersAndAction = conf.split(':')
-        if filtersAndAction.length != 2 then Left(List("exactly one `:` expected (<filter>&...&<filter>:<action>)"))
-        else
-          parseFilters(filtersAndAction(0)).flatMap(filters =>
-            parseAction(filtersAndAction(1)).map((filters, _))))
+      val parsedConfs
+          : List[Either[List[String], (List[MessageFilter], Action)]] =
+        settings.map(conf =>
+          val filtersAndAction = conf.split(':')
+          if filtersAndAction.length != 2 then
+            Left(
+              List("exactly one `:` expected (<filter>&...&<filter>:<action>)")
+            )
+          else
+            parseFilters(filtersAndAction(0)).flatMap(filters =>
+              parseAction(filtersAndAction(1)).map((filters, _))
+            )
+        )
       val (parseErrorss, configs) = parsedConfs.partitionMap(identity)
-      if (parseErrorss.nonEmpty) Left(parseErrorss.flatten)
+      if parseErrorss.nonEmpty then Left(parseErrorss.flatten)
       else Right(WConf(configs))
+end WConf
 
-class Suppression(val annotPos: SourcePosition, filters: List[MessageFilter], val start: Int, end: Int, val verbose: Boolean):
+class Suppression(
+    val annotPos: SourcePosition,
+    filters: List[MessageFilter],
+    val start: Int,
+    end: Int,
+    val verbose: Boolean
+):
   private[this] var _used = false
   def used: Boolean = _used
-  def markUsed(): Unit = { _used = true }
+  def markUsed(): Unit = _used = true
 
   def matches(dia: Diagnostic): Boolean =
     val pos = dia.pos
-    pos.exists && start <= pos.start && pos.end <= end && filters.forall(_.matches(dia))
+    pos.exists && start <= pos.start && pos.end <= end && filters.forall(
+      _.matches(dia)
+    )

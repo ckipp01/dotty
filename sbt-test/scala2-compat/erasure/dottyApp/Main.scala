@@ -1,5 +1,5 @@
-object Main {
-  def main(args: Array[String]): Unit = {
+object Main:
+  def main(args: Array[String]): Unit =
     val z = new scala2Lib.Z
 
     def dummy[T]: T = null.asInstanceOf[T]
@@ -102,14 +102,22 @@ object Main {
     z.objectARRAY_89(dummy)
     z.objectARRAY_90(dummy)
 
-    val methods = classOf[scala2Lib.Z].getDeclaredMethods.toList ++ classOf[dottyApp.Z].getDeclaredMethods.toList
+    val methods = classOf[scala2Lib.Z].getDeclaredMethods.toList ++ classOf[
+      dottyApp.Z
+    ].getDeclaredMethods.toList
     methods.foreach { m =>
-      m.getName match {
+      m.getName match
         case s"${prefix}_${suffix}" =>
-          val paramClass = m.getParameterTypes()(0).getSimpleName.toLowerCase.replaceAll("""\[\]""", "ARRAY")
-          assert(prefix == paramClass, s"Method `$m` erased to `$paramClass` which does not match its prefix `$prefix`")
+          val paramClass = m
+            .getParameterTypes()(0)
+            .getSimpleName
+            .toLowerCase
+            .replaceAll("""\[\]""", "ARRAY")
+          assert(
+            prefix == paramClass,
+            s"Method `$m` erased to `$paramClass` which does not match its prefix `$prefix`"
+          )
         case _ =>
-      }
     }
-  }
-}
+  end main
+end Main

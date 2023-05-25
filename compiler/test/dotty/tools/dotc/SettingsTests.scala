@@ -7,37 +7,46 @@ import reporting.StoreReporter
 import vulpix.TestConfiguration
 
 import core.Contexts.{Context, ContextBase}
-import dotty.tools.dotc.config.Settings._
+import dotty.tools.dotc.config.Settings.*
 import dotty.tools.vulpix.TestConfiguration.mkClasspath
 
-import java.nio.file._
+import java.nio.file.*
 
 import org.junit.Test
-import org.junit.Assert._
+import org.junit.Assert.*
 
-class SettingsTests {
+class SettingsTests:
 
   @Test def missingOutputDir: Unit =
     val options = Array("-d", "not_here")
     val reporter = Main.process(options, reporter = StoreReporter())
     assertEquals(1, reporter.errorCount)
-    assertEquals("'not_here' does not exist or is not a directory or .jar file", reporter.allErrors.head.message)
+    assertEquals(
+      "'not_here' does not exist or is not a directory or .jar file",
+      reporter.allErrors.head.message
+    )
 
   @Test def jarOutput: Unit =
     val source = "tests/pos/Foo.scala"
     val out = Paths.get("out/jaredFoo.jar").normalize
-    if (Files.exists(out)) Files.delete(out)
-    val options = Array("-classpath", TestConfiguration.basicClasspath, "-d", out.toString, source)
+    if Files.exists(out) then Files.delete(out)
+    val options = Array(
+      "-classpath",
+      TestConfiguration.basicClasspath,
+      "-d",
+      out.toString,
+      source
+    )
     val reporter = Main.process(options)
     assertEquals(0, reporter.errorCount)
     assertTrue(Files.exists(out))
 
   @Test def `t8124 Don't crash on missing argument`: Unit =
-    val source    = Paths.get("tests/pos/Foo.scala").normalize
+    val source = Paths.get("tests/pos/Foo.scala").normalize
     val outputDir = Paths.get("out/testSettings").normalize
     if Files.notExists(outputDir) then Files.createDirectory(outputDir)
     // -encoding takes an arg!
-    val options  = Array("-encoding", "-d", outputDir.toString, source.toString)
+    val options = Array("-encoding", "-d", outputDir.toString, source.toString)
     val reporter = Main.process(options, reporter = StoreReporter())
     assertEquals(1, reporter.errorCount)
 
@@ -78,7 +87,7 @@ class SettingsTests {
     val args = List.fill(limit)("-option")
     val summary = Settings.processArguments(args, processAll = true)
     assertTrue(summary.errors.isEmpty)
-    assertEquals(limit-1, summary.warnings.size)
+    assertEquals(limit - 1, summary.warnings.size)
     assertTrue(summary.warnings.head.contains("repeatedly"))
     assertEquals(0, summary.arguments.size)
     withProcessedArgs(summary) {
@@ -106,7 +115,11 @@ class SettingsTests {
         false
 
     val default = Settings.defaultState
-    dotty.tools.assertThrows[IllegalArgumentException](checkMessage("found: not an option of type java.lang.String, required: Boolean")) {
+    dotty.tools.assertThrows[IllegalArgumentException](
+      checkMessage(
+        "found: not an option of type java.lang.String, required: Boolean"
+      )
+    ) {
       Settings.option.updateIn(default, "not an option")
     }
 
@@ -162,19 +175,23 @@ class SettingsTests {
       val summary = Settings.processArguments(args, true)
       val expectedErrors = List(
         "a is not a valid choice for -quux",
-        "0 is not a valid choice for -quuz",
+        "0 is not a valid choice for -quuz"
       )
       assertEquals(expectedErrors, summary.errors)
     }
+  end validateChoices
 
   @Test def `Allow IntSetting's to be set with a colon`: Unit =
     object Settings extends SettingGroup:
       val foo = IntSetting("-foo", "foo", 80)
-    import Settings._
+    import Settings.*
 
     val args = List("-foo:100")
     val summary = processArguments(args, processAll = true)
-    assertTrue(s"Setting args errors:\n  ${summary.errors.take(5).mkString("\n  ")}", summary.errors.isEmpty)
+    assertTrue(
+      s"Setting args errors:\n  ${summary.errors.take(5).mkString("\n  ")}",
+      summary.errors.isEmpty
+    )
     withProcessedArgs(summary) {
       assertEquals(100, foo.value)
     }
@@ -185,11 +202,15 @@ class SettingsTests {
       val bar = BooleanSetting("-bar", "bar", true)
       val baz = BooleanSetting("-baz", "baz", false)
       val qux = BooleanSetting("-qux", "qux", false)
-    import Settings._
+    import Settings.*
 
-    val args = List("-foo:true", "-bar:false", "-baz", "-qux:true", "-qux:false")
+    val args =
+      List("-foo:true", "-bar:false", "-baz", "-qux:true", "-qux:false")
     val summary = processArguments(args, processAll = true)
-    assertTrue(s"Setting args errors:\n  ${summary.errors.take(5).mkString("\n  ")}", summary.errors.isEmpty)
+    assertTrue(
+      s"Setting args errors:\n  ${summary.errors.take(5).mkString("\n  ")}",
+      summary.errors.isEmpty
+    )
     withProcessedArgs(summary) {
       assertEquals(true, foo.value)
       assertEquals(false, bar.value)
@@ -198,8 +219,10 @@ class SettingsTests {
       assertEquals(List("Flag -qux set repeatedly"), summary.warnings)
     }
 
-  private def withProcessedArgs(summary: ArgsSummary)(f: SettingsState ?=> Unit) = f(using summary.sstate)
+  private def withProcessedArgs(summary: ArgsSummary)(
+      f: SettingsState ?=> Unit
+  ) = f(using summary.sstate)
 
   extension [T](setting: Setting[T])
     private def value(using ss: SettingsState): T = setting.valueIn(ss)
-}
+end SettingsTests

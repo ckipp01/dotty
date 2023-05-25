@@ -4,7 +4,7 @@ package utils
 import scala.scalajs.js
 import org.scalajs.dom.{html as domhtml, *}
 
-object HTML {
+object HTML:
   type TagArg = domhtml.Element | Seq[domhtml.Element | String] | String
 
   type AttrArg = AppliedAttr | Seq[AppliedAttr]
@@ -12,43 +12,47 @@ object HTML {
   case class Tag[T <: domhtml.Element](private val elemFactory: () => T):
     private def textNode(s: String): Text = document.createTextNode(s)
 
-    def apply(tags: TagArg*): T = apply()(tags:_*)
-    def apply(first: AttrArg, rest: AttrArg*): T = apply((first +: rest):_*)()
+    def apply(tags: TagArg*): T = apply()(tags*)
+    def apply(first: AttrArg, rest: AttrArg*): T = apply((first +: rest)*)()
     def apply(attrs: AttrArg*)(tags: TagArg*): T =
       val elem: T = elemFactory()
       def unpackTags(tags: TagArg*): Unit = tags.foreach {
         case e: domhtml.Element => elem.appendChild(e)
-        case s: String => elem.appendChild(textNode(s))
-        case elemSeq: (Seq[domhtml.Element | String] @unchecked) => unpackTags(elemSeq*)
+        case s: String          => elem.appendChild(textNode(s))
+        case elemSeq: (Seq[domhtml.Element | String] @unchecked) =>
+          unpackTags(elemSeq*)
       }
 
       def unpackAttributes(attrs: AttrArg*): Unit = attrs.foreach {
         case ("id", id) => elem.id = id
-        case ("class", value) => value.split("\\s+").foreach(cls => elem.classList.add(cls))
-        case (attr, value) => elem.setAttribute(attr, value)
+        case ("class", value) =>
+          value.split("\\s+").foreach(cls => elem.classList.add(cls))
+        case (attr, value)       => elem.setAttribute(attr, value)
         case s: Seq[AppliedAttr] => unpackAttributes(s*)
       }
 
-      unpackTags(tags:_*)
-      unpackAttributes(attrs:_*)
+      unpackTags(tags*)
+      unpackAttributes(attrs*)
       elem
 
   object Tag:
     def apply[T <: domhtml.Element](s: String): Tag[T] =
       Tag[T](() => document.createElement(s).asInstanceOf[T])
 
-  extension (s: String) def escapeReservedTokens: String =
-    s.replace("&", "&amp;")
-      .replace("<", "&lt;")
-      .replace(">", "&gt;")
-      .replace("\"", "&quot;")
-      .replace("'", "&apos;")
+  extension (s: String)
+    def escapeReservedTokens: String =
+      s.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;")
+        .replace("'", "&apos;")
 
   case class Attr(name: String):
     def :=(value: String): AppliedAttr = (name, value)
 
-  extension (key: String) def :=(value: String): AppliedAttr =
-    (key, value)
+  extension (key: String)
+    def :=(value: String): AppliedAttr =
+      (key, value)
 
   def aRaw(content: String): domhtml.Element =
     val x = document.createElement("a").asInstanceOf[domhtml.Element]
@@ -114,8 +118,7 @@ object HTML {
   val testId = Attr("data-test-id")
   val alt = Attr("alt")
   val value = Attr("value")
-  val onclick=Attr("onclick")
-  val titleAttr =Attr("title")
+  val onclick = Attr("onclick")
+  val titleAttr = Attr("title")
   val onkeyup = Attr("onkeyup")
-
-}
+end HTML

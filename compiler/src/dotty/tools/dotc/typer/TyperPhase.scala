@@ -2,29 +2,28 @@ package dotty.tools
 package dotc
 package typer
 
-import core._
-import Phases._
-import Contexts._
-import Symbols._
+import core.*
+import Phases.*
+import Contexts.*
+import Symbols.*
 import ImportInfo.withRootImports
-import parsing.{Parser => ParserPhase}
+import parsing.{Parser as ParserPhase}
 import config.Printers.typr
 import inlines.PrepareInlineable
-import util.Stats._
+import util.Stats.*
 
-/**
- *
- * @param addRootImports Set to false in the REPL. Calling [[ImportInfo.withRootImports]] on the [[Context]]
- *                       for each [[CompilationUnit]] causes dotty.tools.repl.ScriptedTests to fail.
- */
-class TyperPhase(addRootImports: Boolean = true) extends Phase {
+/** @param addRootImports
+  *   Set to false in the REPL. Calling [[ImportInfo.withRootImports]] on the
+  *   [[Context]] for each [[CompilationUnit]] causes
+  *   dotty.tools.repl.ScriptedTests to fail.
+  */
+class TyperPhase(addRootImports: Boolean = true) extends Phase:
 
   override def phaseName: String = TyperPhase.name
 
   override def description: String = TyperPhase.description
 
   override def isTyper: Boolean = true
-
 
   override def allowsImplicitSearch: Boolean = true
 
@@ -55,54 +54,59 @@ class TyperPhase(addRootImports: Boolean = true) extends Phase {
 
   def javaCheck(using Context): Unit = monitor("checking java") {
     val unit = ctx.compilationUnit
-    if unit.isJava then
-      JavaChecks.check(unit.tpdTree)
+    if unit.isJava then JavaChecks.check(unit.tpdTree)
   }
 
-  protected def discardAfterTyper(unit: CompilationUnit)(using Context): Boolean =
+  protected def discardAfterTyper(unit: CompilationUnit)(using
+      Context
+  ): Boolean =
     unit.isJava || unit.suspended
 
-  override def runOn(units: List[CompilationUnit])(using Context): List[CompilationUnit] =
+  override def runOn(units: List[CompilationUnit])(using
+      Context
+  ): List[CompilationUnit] =
     val unitContexts =
       for unit <- units yield
         val newCtx0 = ctx.fresh.setPhase(this.start).setCompilationUnit(unit)
         val newCtx = PrepareInlineable.initContext(newCtx0)
         report.inform(s"typing ${unit.source}")
-        if (addRootImports)
-          newCtx.withRootImports
-        else
-          newCtx
+        if addRootImports then newCtx.withRootImports
+        else newCtx
 
     unitContexts.foreach(enterSyms(using _))
 
-    ctx.base.parserPhase match {
+    ctx.base.parserPhase match
       case p: ParserPhase =>
         if p.firstXmlPos.exists && !defn.ScalaXmlPackageClass.exists then
           report.error(
             """To support XML literals, your project must depend on scala-xml.
               |See https://github.com/scala/scala-xml for more information.""".stripMargin,
-            p.firstXmlPos)
+            p.firstXmlPos
+          )
       case _ =>
-    }
 
     unitContexts.foreach(typeCheck(using _))
     record("total trees after typer", ast.Trees.ntrees)
-    unitContexts.foreach(javaCheck(using _)) // after typechecking to avoid cycles
+    unitContexts.foreach(
+      javaCheck(using _)
+    ) // after typechecking to avoid cycles
 
-    val newUnits = unitContexts.map(_.compilationUnit).filterNot(discardAfterTyper)
+    val newUnits =
+      unitContexts.map(_.compilationUnit).filterNot(discardAfterTyper)
     ctx.run.nn.checkSuspendedUnits(newUnits)
     newUnits
+  end runOn
 
   def run(using Context): Unit = unsupported("run")
-}
+end TyperPhase
 
-object TyperPhase {
+object TyperPhase:
   val name: String = "typer"
   val description: String = "type the trees"
-}
 
-@deprecated(message = "FrontEnd has been split into TyperPhase and Parser. Refer to one or the other.")
-object FrontEnd {
+@deprecated(message =
+  "FrontEnd has been split into TyperPhase and Parser. Refer to one or the other."
+)
+object FrontEnd:
   // For backwards compatibility: some plugins refer to FrontEnd so that they can schedule themselves after it.
   val name: String = TyperPhase.name
-}

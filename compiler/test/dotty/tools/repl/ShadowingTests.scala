@@ -14,26 +14,32 @@ import dotc.reporting.TestReporter
 import dotc.interfaces.Diagnostic.ERROR
 import vulpix.{TestConfiguration, TestFlags}
 
-/** Test that the REPL can shadow artifacts in the local filesystem on the classpath.
- *  Since the REPL launches with the current directory on the classpath, stray .class
- *  files containing definitions in the empty package will be in scope in the REPL.
- *  Additionally, any subdirectories will be treated as package names in scope.
- *  As this may come as a surprise to an unsuspecting user, we would like definitions
- *  from the REPL session to shadow these names.
- *
- *  Provided here is a framework for creating the filesystem artifacts to be shadowed
- *  and running scripted REPL tests with them on the claspath.
- */
+/** Test that the REPL can shadow artifacts in the local filesystem on the
+  * classpath. Since the REPL launches with the current directory on the
+  * classpath, stray .class files containing definitions in the empty package
+  * will be in scope in the REPL. Additionally, any subdirectories will be
+  * treated as package names in scope. As this may come as a surprise to an
+  * unsuspecting user, we would like definitions from the REPL session to shadow
+  * these names.
+  *
+  * Provided here is a framework for creating the filesystem artifacts to be
+  * shadowed and running scripted REPL tests with them on the claspath.
+  */
 object ShadowingTests:
-  def classpath = TestConfiguration.basicClasspath + File.pathSeparator + shadowDir
+  def classpath =
+    TestConfiguration.basicClasspath + File.pathSeparator + shadowDir
   def options = ReplTest.commonOptions ++ Array("-classpath", classpath)
   def shadowDir = dir.toAbsolutePath.toString
 
   def createSubDir(name: String): Path =
     val subdir = dir.resolve(name)
     try Files.createDirectory(subdir)
-    catch case _: java.nio.file.FileAlreadyExistsException =>
-      assert(Files.isDirectory(subdir), s"failed to create shadowed subdirectory $subdir")
+    catch
+      case _: java.nio.file.FileAlreadyExistsException =>
+        assert(
+          Files.isDirectory(subdir),
+          s"failed to create shadowed subdirectory $subdir"
+        )
     subdir
 
   // The directory on the classpath containing artifacts to be shadowed
@@ -45,29 +51,42 @@ object ShadowingTests:
   @AfterClass def tearDownDir: Unit =
     Files.walk(dir).sorted(Comparator.reverseOrder).forEach(Files.delete)
     dir = null
+end ShadowingTests
 
 class ShadowingTests extends ReplTest(options = ShadowingTests.options):
   // delete contents of shadowDir after each test
   override def cleanup: Unit =
     super.cleanup
     val dir = ShadowingTests.dir
-    Files.walk(dir)
+    Files
+      .walk(dir)
       .filter(_ != dir)
       .sorted(Comparator.reverseOrder)
       .forEach(Files.delete)
 
-  /** Run a scripted REPL test with the compilation artifacts of `shadowed` on the classpath */
-  def shadowedScriptedTest(name: String, shadowed: String, script: String): Unit =
+  /** Run a scripted REPL test with the compilation artifacts of `shadowed` on
+    * the classpath
+    */
+  def shadowedScriptedTest(
+      name: String,
+      shadowed: String,
+      script: String
+  ): Unit =
     compileShadowed(shadowed)
     testScript(name, script.linesIterator.toList)
 
-  /** Compile the given source text and output to the shadow dir on the classpath */
+  /** Compile the given source text and output to the shadow dir on the
+    * classpath
+    */
   private def compileShadowed(src: String): Unit =
     val file: Path = Files.createTempFile("repl-shadow-test", ".scala")
     Files.write(file, src.getBytes)
 
     val flags =
-      TestFlags(TestConfiguration.basicClasspath, TestConfiguration.noCheckOptions)
+      TestFlags(
+        TestConfiguration.basicClasspath,
+        TestConfiguration.noCheckOptions
+      )
         .and("-d", ShadowingTests.shadowDir)
     val driver = new Driver
     val reporter = TestReporter.reporter(System.out, logLevel = ERROR)
@@ -76,7 +95,8 @@ class ShadowingTests extends ReplTest(options = ShadowingTests.options):
     Files.delete(file)
   end compileShadowed
 
-  @Test def io = shadowedScriptedTest(name = "io",
+  @Test def io = shadowedScriptedTest(
+    name = "io",
     shadowed = """|package io.foo
                   |
                   |object Bar {
@@ -88,10 +108,10 @@ class ShadowingTests extends ReplTest(options = ShadowingTests.options):
                 |""".stripMargin
   )
 
-  @Test def i7635 = shadowedScriptedTest(name = "<i7635>",
+  @Test def i7635 = shadowedScriptedTest(
+    name = "<i7635>",
     shadowed = "class C(val c: Int)",
-    script =
-      """|scala> new C().c
+    script = """|scala> new C().c
          |-- [E171] Type Error: ----------------------------------------------------------
          |1 | new C().c
          |  | ^^^^^^^
@@ -118,7 +138,8 @@ class ShadowingTests extends ReplTest(options = ShadowingTests.options):
     // an existing session followed by the `:reset` command.
 
     ShadowingTests.createSubDir("foo")
-    testScript(name = "<shadow-subdir-foo>",
+    testScript(
+      name = "<shadow-subdir-foo>",
       """|scala> val foo = 3
          |val foo: Int = 3
          |
@@ -128,7 +149,8 @@ class ShadowingTests extends ReplTest(options = ShadowingTests.options):
     )
 
     ShadowingTests.createSubDir("x")
-    testScript(name = "<shadow-subdir-x>",
+    testScript(
+      name = "<shadow-subdir-x>",
       """|scala> val (x, y) = (42, "foo")
          |val x: Int = 42
          |val y: String = foo
@@ -139,7 +161,8 @@ class ShadowingTests extends ReplTest(options = ShadowingTests.options):
     )
 
     ShadowingTests.createSubDir("util")
-    testScript(name = "<shadow-subdir-util>",
+    testScript(
+      name = "<shadow-subdir-util>",
       """|scala> import util.Try
          |-- [E008] Not Found Error: -----------------------------------------------------
          |1 | import util.Try
@@ -155,4 +178,5 @@ class ShadowingTests extends ReplTest(options = ShadowingTests.options):
          |val res0: util.Try = you've gotta try!
          |""".stripMargin.linesIterator.toList
     )
+  end `shadow subdirectories on classpath`
 end ShadowingTests

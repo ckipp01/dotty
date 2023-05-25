@@ -1,13 +1,10 @@
-import scala.quoted._
+import scala.quoted.*
 
-object Macro {
+object Macro:
 
-   inline def f(): Unit = ${ macroImplementation }
+  inline def f(): Unit = ${ macroImplementation }
 
-   def macroImplementation(using Quotes): Expr[Unit] = {
-      import quotes.reflect._
-      report.error("some error", Position.ofMacroExpansion)
-      '{ println("Implementation in MacroCompileError") }
-   }
-
-}
+  def macroImplementation(using Quotes): Expr[Unit] =
+    import quotes.reflect.*
+    report.error("some error", Position.ofMacroExpansion)
+    '{ println("Implementation in MacroCompileError") }

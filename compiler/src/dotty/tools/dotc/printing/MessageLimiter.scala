@@ -2,8 +2,8 @@ package dotty.tools
 package dotc
 package printing
 
-import core._
-import Contexts._
+import core.*
+import Contexts.*
 import util.Property
 import Texts.Text
 
@@ -21,8 +21,7 @@ abstract class MessageLimiter:
       try
         recurseCount += 1
         op
-      finally
-        recurseCount -= 1
+      finally recurseCount -= 1
     else
       recursionLimitExceeded()
       "..."
@@ -49,7 +48,8 @@ class ErrorMessageLimiter extends MessageLimiter:
     textLength += str.length
 
   override def recurseLimit =
-    val freeFraction: Double = ((sizeLimit - textLength) max 0).toDouble / sizeLimit
+    val freeFraction: Double =
+      ((sizeLimit - textLength) max 0).toDouble / sizeLimit
     // 10'000 -     0 / 10'0000 = 100% free
     // 10'000 -   200 / 10'0000 =  98% free * 50 = 49
     // 10'000 - 1'000 / 10'0000 =  90% free * 50 = 45
@@ -57,5 +57,3 @@ class ErrorMessageLimiter extends MessageLimiter:
     // every 200 characters consumes a "recurseCount"
     // which, additionally, is lowered from 100 to 50 here
     (initialRecurseLimit * freeFraction).toInt
-
-

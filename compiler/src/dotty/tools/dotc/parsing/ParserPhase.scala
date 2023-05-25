@@ -1,15 +1,15 @@
 package dotty.tools.dotc.parsing
 
 import dotty.tools.dotc.config.Config
-import dotty.tools.dotc.core.Contexts.{ Context, ctx }
+import dotty.tools.dotc.core.Contexts.{Context, ctx}
 import dotty.tools.dotc.core.Phases.Phase
 import dotty.tools.dotc.typer.ImportInfo.withRootImports
-import dotty.tools.dotc.{ CompilationUnit, ast, report }
-import dotty.tools.dotc.util.{ NoSourcePosition, SourcePosition }
+import dotty.tools.dotc.{CompilationUnit, ast, report}
+import dotty.tools.dotc.util.{NoSourcePosition, SourcePosition}
 import dotty.tools.dotc.util.Stats.record
 import dotty.tools.unsupported
 
-class Parser extends Phase {
+class Parser extends Phase:
 
   override def phaseName: String = Parser.name
   override def description: String = Parser.description
@@ -18,28 +18,31 @@ class Parser extends Phase {
   override def isCheckable: Boolean = false
 
   /** The position of the first XML literal encountered while parsing,
-   *  NoSourcePosition if there were no XML literals.
-   */
+    * NoSourcePosition if there were no XML literals.
+    */
   private[dotc] var firstXmlPos: SourcePosition = NoSourcePosition
 
   def parse(using Context) = monitor("parser") {
     val unit = ctx.compilationUnit
     unit.untpdTree =
-      if (unit.isJava) new JavaParsers.JavaParser(unit.source).parse()
+      if unit.isJava then new JavaParsers.JavaParser(unit.source).parse()
       else {
         val p = new Parsers.Parser(unit.source)
         //  p.in.debugTokenStream = true
         val tree = p.parse()
-        if (p.firstXmlPos.exists && !firstXmlPos.exists)
+        if p.firstXmlPos.exists && !firstXmlPos.exists then
           firstXmlPos = p.firstXmlPos
         tree
       }
-    if (Config.checkPositions)
-      unit.untpdTree.checkPos(nonOverlapping = !unit.isJava && !ctx.reporter.hasErrors)
+    if Config.checkPositions then
+      unit.untpdTree.checkPos(nonOverlapping =
+        !unit.isJava && !ctx.reporter.hasErrors
+      )
   }
 
-
-  override def runOn(units: List[CompilationUnit])(using Context): List[CompilationUnit] = {
+  override def runOn(units: List[CompilationUnit])(using
+      Context
+  ): List[CompilationUnit] =
     val unitContexts =
       for unit <- units yield
         report.inform(s"parsing ${unit.source}")
@@ -49,12 +52,10 @@ class Parser extends Phase {
     record("parsedTrees", ast.Trees.ntrees)
 
     unitContexts.map(_.compilationUnit)
-  }
 
   def run(using Context): Unit = unsupported("run")
-}
+end Parser
 
-object Parser{
+object Parser:
   val name: String = "parser"
   val description: String = "scan and parse sources"
-}

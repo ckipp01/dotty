@@ -4,54 +4,62 @@ package dotc
 
 import scala.language.unsafeNulls
 
-import java.io.{File => JFile}
+import java.io.{File as JFile}
 import java.nio.file.{Files, Path, Paths}
 
 import org.junit.Assume.assumeTrue
 import org.junit.{AfterClass, Test}
 import org.junit.experimental.categories.Category
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import reporting.TestReporter
-import vulpix._
+import vulpix.*
 
-
-class IdempotencyTests {
-  import TestConfiguration._
-  import IdempotencyTests._
+class IdempotencyTests:
+  import TestConfiguration.*
+  import IdempotencyTests.*
   import CompilationTest.aggregateTests
 
   // ignore flaky tests
   val filter = FileFilter.NoFilter
 
   @Category(Array(classOf[SlowTests]))
-  @Test def idempotency: Unit = {
+  @Test def idempotency: Unit =
     implicit val testGroup: TestGroup = TestGroup("idempotency")
     val opt = defaultOptions
 
     val posIdempotency = aggregateTests(
-      compileFilesInDir("tests/pos", opt, filter)(TestGroup("idempotency/posIdempotency1")),
-      compileFilesInDir("tests/pos", opt, filter)(TestGroup("idempotency/posIdempotency2")),
+      compileFilesInDir("tests/pos", opt, filter)(
+        TestGroup("idempotency/posIdempotency1")
+      ),
+      compileFilesInDir("tests/pos", opt, filter)(
+        TestGroup("idempotency/posIdempotency2")
+      )
     )
 
-    val orderIdempotency = {
+    val orderIdempotency =
       val tests =
-        for {
-          testDir <- new JFile("tests/order-idempotency").listFiles() if testDir.isDirectory
-        } yield {
+        for
+          testDir <- new JFile("tests/order-idempotency").listFiles()
+          if testDir.isDirectory
+        yield
           val sources = TestSources.sources(testDir.toPath)
           aggregateTests(
-            compileList(testDir.getName, sources, opt)(TestGroup("idempotency/orderIdempotency1")),
-            compileList(testDir.getName, sources.reverse, opt)(TestGroup("idempotency/orderIdempotency2"))
+            compileList(testDir.getName, sources, opt)(
+              TestGroup("idempotency/orderIdempotency1")
+            ),
+            compileList(testDir.getName, sources.reverse, opt)(
+              TestGroup("idempotency/orderIdempotency2")
+            )
           )
-        }
-      aggregateTests(tests: _*)
-    }
+      aggregateTests(tests*)
 
-    def check(name: String) = {
-      val files = List(s"tests/idempotency/$name.scala", "tests/idempotency/IdempotencyCheck.scala")
+    def check(name: String) =
+      val files = List(
+        s"tests/idempotency/$name.scala",
+        "tests/idempotency/IdempotencyCheck.scala"
+      )
       compileList(name, files, defaultOptions)(TestGroup("idempotency/check"))
-    }
     val allChecks = aggregateTests(
       check("CheckOrderIdempotency"),
       // Disabled until strawman is fixed
@@ -64,11 +72,10 @@ class IdempotencyTests {
     val tests = allTests.keepOutput.checkCompile()
     allChecks.checkRuns()
     tests.delete()
-  }
+  end idempotency
+end IdempotencyTests
 
-}
-
-object IdempotencyTests extends ParallelTesting {
+object IdempotencyTests extends ParallelTesting:
   // Test suite configuration --------------------------------------------------
 
   def maxDuration = 30.seconds
@@ -80,8 +87,6 @@ object IdempotencyTests extends ParallelTesting {
   def failedTests = TestReporter.lastRunFailedTests
 
   implicit val summaryReport: SummaryReporting = new SummaryReport
-  @AfterClass def tearDown(): Unit = {
+  @AfterClass def tearDown(): Unit =
     super.cleanup()
     summaryReport.echoSummary()
-  }
-}

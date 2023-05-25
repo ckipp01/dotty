@@ -1,1 +1,2 @@
-object Bar { Foo.provide.b }
+object Bar:
+  Foo.provide.b

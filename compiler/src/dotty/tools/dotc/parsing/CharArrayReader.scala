@@ -2,9 +2,10 @@ package dotty.tools
 package dotc
 package parsing
 
-import util.Chars._
+import util.Chars.*
 
-abstract class CharArrayReader { self =>
+abstract class CharArrayReader:
+  self =>
 
   val buf: Array[Char]
   protected def startFrom: Int = 0
@@ -33,83 +34,79 @@ abstract class CharArrayReader { self =>
   def isUnicodeEscape: Boolean = charOffset == lastUnicodeOffset
 
   /** Advance one character; reducing CR;LF pairs to just LF */
-  final def nextChar(): Unit = {
+  final def nextChar(): Unit =
     val idx = charOffset
     lastCharOffset = idx
     charOffset = idx + 1
-    if (idx >= buf.length)
-      ch = SU
+    if idx >= buf.length then ch = SU
     else {
       val c = buf(idx)
       ch = c
-      if (c == '\\') potentialUnicode()
-      else if (c < ' ') { skipCR(); potentialLineEnd() }
+      if c == '\\' then potentialUnicode()
+      else if c < ' ' then
+        skipCR(); potentialLineEnd()
     }
-  }
 
-  def getc(): Char = { nextChar() ; ch }
+  def getc(): Char =
+    nextChar(); ch
 
-  /** Advance one character, leaving CR;LF pairs intact.
-   *  This is for use in multi-line strings, so there are no
-   *  "potential line ends" here.
-   */
-  final def nextRawChar(): Unit = {
+  /** Advance one character, leaving CR;LF pairs intact. This is for use in
+    * multi-line strings, so there are no "potential line ends" here.
+    */
+  final def nextRawChar(): Unit =
     val idx = charOffset
     lastCharOffset = idx
     charOffset = idx + 1
-    if (idx >= buf.length)
-      ch = SU
+    if idx >= buf.length then ch = SU
     else {
       val c = buf(idx)
       ch = c
-      if (c == '\\') potentialUnicode()
+      if c == '\\' then potentialUnicode()
     }
-  }
 
   /** Interpret \\uxxxx escapes */
-  private def potentialUnicode(): Unit = {
-    def evenSlashPrefix: Boolean = {
+  private def potentialUnicode(): Unit =
+    def evenSlashPrefix: Boolean =
       var p = charOffset - 2
-      while (p >= 0 && buf(p) == '\\') p -= 1
+      while p >= 0 && buf(p) == '\\' do p -= 1
       (charOffset - p) % 2 == 0
-    }
     def udigit: Int =
-      if (charOffset >= buf.length) {
+      if charOffset >= buf.length then
         // Since the positioning code is very insistent about throwing exceptions,
         // we have to decrement the position so our error message can be seen, since
         // we are one past EOF.  This happens with e.g. val x = \ u 1 <EOF>
         error("incomplete unicode escape", charOffset - 1)
         SU
-      }
       else {
         val d = digit2int(buf(charOffset), 16)
-        if (d >= 0) charOffset += 1
+        if d >= 0 then charOffset += 1
         else error("error in unicode escape", charOffset)
         d
       }
-    if (charOffset < buf.length && buf(charOffset) == 'u' && decodeUni && evenSlashPrefix) {
-      while ({
+    if charOffset < buf.length && buf(
+        charOffset
+      ) == 'u' && decodeUni && evenSlashPrefix
+    then
+      while {
         charOffset += 1
         charOffset < buf.length && buf(charOffset) == 'u'
-      })
-      ()
-      val code = udigit << 12 | udigit << 8 | udigit << 4 | udigit
-      lastUnicodeOffset = charOffset
-      ch = code.toChar
-    }
-  }
+      } do
+        ()
+        val code = udigit << 12 | udigit << 8 | udigit << 4 | udigit
+        lastUnicodeOffset = charOffset
+        ch = code.toChar
+  end potentialUnicode
 
   /** replace CR;LF by LF */
   private def skipCR(): Unit =
-    if (ch == CR)
-      if (charOffset < buf.length && buf(charOffset) == LF) {
+    if ch == CR then
+      if charOffset < buf.length && buf(charOffset) == LF then
         charOffset += 1
         ch = LF
-      }
 
   /** Handle line ends */
   private def potentialLineEnd(): Unit =
-    if (ch == LF || ch == FF) lineStartOffset = charOffset
+    if ch == LF || ch == FF then lineStartOffset = charOffset
 
   def isAtEnd: Boolean = charOffset >= buf.length
 
@@ -118,11 +115,10 @@ abstract class CharArrayReader { self =>
 
   def lookaheadChar(): Char = lookaheadReader().getc()
 
-  class CharArrayLookaheadReader extends CharArrayReader {
+  class CharArrayLookaheadReader extends CharArrayReader:
     val buf: Array[Char] = self.buf
     charOffset = self.charOffset
     ch = self.ch
     override def decodeUni: Boolean = self.decodeUni
     def error(msg: String, offset: Int): Unit = self.error(msg, offset)
-  }
-}
+end CharArrayReader

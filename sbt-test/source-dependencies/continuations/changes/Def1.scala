@@ -1,5 +1,4 @@
-import scala.util.continuations._
+import scala.util.continuations.*
 
-class Baz {
+class Baz:
   def foo = shiftUnit[Foo with BarA, Unit, Unit](null)
-}

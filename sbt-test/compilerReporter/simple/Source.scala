@@ -1,10 +1,8 @@
 trait A
 trait B
 
-trait Wr {
+trait Wr:
   val z: A with B
-}
 
-object Er {
+object Er:
   val a = er1
-}

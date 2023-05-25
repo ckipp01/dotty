@@ -1,5 +1,5 @@
-object Outer {
-  class Inner { type Xyz }
+object Outer:
+  class Inner:
+    type Xyz
 
   type TypeInner = Inner { type Xyz = Int }
-}

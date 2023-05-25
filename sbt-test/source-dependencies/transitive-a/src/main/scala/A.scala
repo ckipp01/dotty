@@ -1,4 +1,2 @@
-object A
-{
-	val x = "a"
-}
+object A:
+  val x = "a"

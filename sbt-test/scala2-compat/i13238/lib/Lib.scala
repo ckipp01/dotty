@@ -1,6 +1,5 @@
 package lib
 
 trait Bar
-class Foo {
+class Foo:
   def foo(out: Foo)(implicit bar: Bar): out.type = out
-}

@@ -1,19 +1,19 @@
 package dotty.tools.scaladoc
 
-import org.scalajs.dom._
-import org.scalajs.dom.ext._
+import org.scalajs.dom.*
+import org.scalajs.dom.ext.*
 
-import scala.util.matching.Regex._
-import scala.util.matching._
+import scala.util.matching.Regex.*
+import scala.util.matching.*
 import org.scalajs.dom.ext.Ajax
 import scala.scalajs.js.JSON
 import scala.scalajs.js
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{Success,Failure}
+import scala.util.{Success, Failure}
 
-import utils.HTML._
+import utils.HTML.*
 
 // Contributors widget
 // see https://stackoverflow.com/a/19200303/4496364
@@ -50,17 +50,24 @@ trait FileChange extends js.Object:
 class ContentContributors:
   val indenticonsUrl = "https://github.com/identicons"
   val htmlElement = window.document.documentElement
-  def githubContributorsUrl() = htmlElement.getAttribute("data-githubContributorsUrl")
-  def githubContributorsFilename() = htmlElement.getAttribute("data-githubContributorsFilename")
-  def linkForFilename(filename: String) = githubContributorsUrl() + s"/commits?path=$filename"
-  def getAuthorsForFilename(filename: String): Future[List[FullAuthor]] = {
+  def githubContributorsUrl() =
+    htmlElement.getAttribute("data-githubContributorsUrl")
+  def githubContributorsFilename() =
+    htmlElement.getAttribute("data-githubContributorsFilename")
+  def linkForFilename(filename: String) =
+    githubContributorsUrl() + s"/commits?path=$filename"
+  def getAuthorsForFilename(filename: String): Future[List[FullAuthor]] =
     val link = linkForFilename(filename)
     Ajax.get(link).map(_.responseText).flatMap { json =>
       val res = JSON.parse(json).asInstanceOf[Commits]
       val authors = res.map { commit =>
         commit.author match
           case null =>
-            FullAuthor(commit.commit.author.name, "", s"$indenticonsUrl/${commit.commit.author.name}.png")
+            FullAuthor(
+              commit.commit.author.name,
+              "",
+              s"$indenticonsUrl/${commit.commit.author.name}.png"
+            )
           case author =>
             FullAuthor(author.login, author.html_url, author.avatar_url)
       }
@@ -70,21 +77,23 @@ class ContentContributors:
         .fold(Future.successful(None)) { link =>
           findRename(link, filename)
         }
-      val previousAuthors = previousFilename.flatMap {
-        case Some(filename) => getAuthorsForFilename(filename)
-        case None => Future.successful(List.empty)
-      }.fallbackTo(Future.successful(List.empty))
+      val previousAuthors = previousFilename
+        .flatMap {
+          case Some(filename) => getAuthorsForFilename(filename)
+          case None           => Future.successful(List.empty)
+        }
+        .fallbackTo(Future.successful(List.empty))
 
       previousAuthors.map(_ ++ authors).map(_.distinct)
     }
-  }
-  def findRename(link: String, filename: String): Future[Option[String]] = {
+  end getAuthorsForFilename
+  def findRename(link: String, filename: String): Future[Option[String]] =
     Ajax.get(link).map(_.responseText).map { json =>
-        val res = JSON.parse(json).asInstanceOf[CommitDescription]
-        val files = res.files
-        files
-          .find(_.filename == filename)
-          .filter(_.status == "renamed")
-          .map(_.previous_filename)
+      val res = JSON.parse(json).asInstanceOf[CommitDescription]
+      val files = res.files
+      files
+        .find(_.filename == filename)
+        .filter(_.status == "renamed")
+        .map(_.previous_filename)
     }
-  }
+end ContentContributors

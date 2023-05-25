@@ -1,18 +1,18 @@
 package dotty.tools.dotc
 package transform
 
-import core._
+import core.*
 import DenotTransformers.SymTransformer
-import Contexts._
-import Flags._
+import Contexts.*
+import Flags.*
 import SymDenotations.SymDenotation
 import collection.mutable
 import MegaPhase.MiniPhase
 import util.Store
 
 /** Lift nested classes to toplevel */
-class Flatten extends MiniPhase with SymTransformer {
-  import ast.tpd._
+class Flatten extends MiniPhase with SymTransformer:
+  import ast.tpd.*
 
   override def phaseName: String = Flatten.name
 
@@ -31,17 +31,20 @@ class Flatten extends MiniPhase with SymTransformer {
     LiftedDefs = ctx.addLocation[mutable.ListBuffer[Tree] | Null](null)
 
   def transformSym(ref: SymDenotation)(using Context): SymDenotation =
-    if (ref.isClass && !ref.is(Package) && !ref.owner.is(Package))
+    if ref.isClass && !ref.is(Package) && !ref.owner.is(Package) then
       ref.copySymDenotation(
         name = ref.flatName,
-        owner = ref.enclosingPackageClass)
+        owner = ref.enclosingPackageClass
+      )
     else ref
 
-  override def prepareForPackageDef(tree: PackageDef)(using Context): FreshContext =
+  override def prepareForPackageDef(tree: PackageDef)(using
+      Context
+  ): FreshContext =
     ctx.fresh.updateStore(LiftedDefs, new mutable.ListBuffer[Tree])
 
   private def liftIfNested(tree: Tree)(using Context) =
-    if (ctx.owner.is(Package)) tree
+    if ctx.owner.is(Package) then tree
     else {
       transformFollowing(tree).foreachInThicket(t => liftedDefs.nn += t)
       EmptyTree
@@ -59,7 +62,7 @@ class Flatten extends MiniPhase with SymTransformer {
 
   override def transformTypeDef(tree: TypeDef)(using Context): Tree =
     liftIfNested(tree)
-}
+end Flatten
 
 object Flatten:
   val name: String = "flatten"

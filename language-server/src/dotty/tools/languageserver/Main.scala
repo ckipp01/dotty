@@ -3,20 +3,20 @@ package languageserver
 
 import java.util.function.Consumer
 
-import java.io.{ File => JFile, InputStream, OutputStream, PrintWriter }
-import java.net._
-import java.nio.channels._
+import java.io.{File as JFile, InputStream, OutputStream, PrintWriter}
+import java.net.*
+import java.nio.channels.*
 
-import org.eclipse.lsp4j._
-import org.eclipse.lsp4j.services._
-import org.eclipse.lsp4j.launch._
+import org.eclipse.lsp4j.*
+import org.eclipse.lsp4j.services.*
+import org.eclipse.lsp4j.launch.*
 import org.eclipse.lsp4j.jsonrpc.Launcher
 
 /** Run the Dotty Language Server.
- */
-object Main {
-  def main(args: Array[String]): Unit = {
-    args.toList match {
+  */
+object Main:
+  def main(args: Array[String]): Unit =
+    args.toList match
       case List("-stdio") =>
         val serverIn = System.in
         val serverOut = System.out
@@ -25,12 +25,12 @@ object Main {
           startServer(serverIn, serverOut)
         }
       case _ =>
-        Console.err.println("Invalid arguments: expected \"-stdio\" or \"-client_command ...\"")
+        Console.err.println(
+          "Invalid arguments: expected \"-stdio\" or \"-client_command ...\""
+        )
         System.exit(1)
-    }
-  }
 
-  def startServer(in: InputStream, out: OutputStream) = {
+  def startServer(in: InputStream, out: OutputStream) =
     val server = new DottyLanguageServer
 
     println("Starting server")
@@ -41,11 +41,10 @@ object Main {
         .setInput(in)
         .setOutput(out)
         // For debugging JSON messages:
-        //.traceMessages(new java.io.PrintWriter(System.err, true))
+        // .traceMessages(new java.io.PrintWriter(System.err, true))
         .create();
 
     val client = launcher.getRemoteProxy()
     server.connect(client)
     launcher.startListening()
-  }
-}
+end Main

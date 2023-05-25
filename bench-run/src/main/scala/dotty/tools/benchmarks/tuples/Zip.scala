@@ -1,9 +1,9 @@
 package dotty.tools.benchmarks.tuples
 
-import org.openjdk.jmh.annotations._
+import org.openjdk.jmh.annotations.*
 
 @State(Scope.Thread)
-class Zip {
+class Zip:
   @Param(Array("0"))
   var size: Int = _
   var tuple1: Tuple = _
@@ -12,26 +12,21 @@ class Zip {
   var array2: Array[Object] = _
 
   @Setup
-  def setup(): Unit = {
+  def setup(): Unit =
     tuple1 = Tuple()
     tuple2 = Tuple()
 
-    for (i <- 1 to size) {
+    for i <- 1 to size do
       tuple1 = "el" *: tuple1
       tuple2 = "em" *: tuple2
-    }
 
     array1 = Array.fill(size)("el")
     array2 = Array.fill(size)("em")
-  }
 
   @Benchmark
-  def tupleZip(): Tuple = {
+  def tupleZip(): Tuple =
     runtime.Tuples.zip(tuple1, tuple2)
-  }
 
   @Benchmark
-  def arrayZip(): Array[(Object, Object)] = {
+  def arrayZip(): Array[(Object, Object)] =
     array1.zip(array2)
-  }
-}

@@ -1,6 +1,4 @@
-package object abc {
-  object BuildInfoKey {
+package object abc:
+  object BuildInfoKey:
     sealed trait Entry
-  }
   class Foo
-}

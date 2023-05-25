@@ -1,46 +1,51 @@
 package dotty.communitybuild
 
-import java.nio.file._
+import java.nio.file.*
 import java.io.{PrintWriter, File}
 import java.nio.charset.StandardCharsets.UTF_8
 
 object CommunityBuildRunner:
 
-  /** Depending on the mode of operation, either
-   *  runs the test or updates the project. Updating
-   *  means that all the dependencies are fetched but
-   *  minimal other extra other work is done. Updating
-   *  is necessary since we run tests each time on a fresh
-   *  Docker container. We run the update on Docker container
-   *  creation time to create the cache of the dependencies
-   *  and avoid network overhead. See https://github.com/lampepfl/dotty-drone
-   *  for more infrastructural details.
-   */
-  extension (self: CommunityProject) def run()(using suite: CommunityBuildRunner): Unit =
-    if self.requiresExperimental && !compilerSupportExperimental then
-      log(s"Skipping ${self.project} - it needs experimental features unsupported in this build.")
-      return
-    self.dependencies.foreach(_.publish())
-    self.testOnlyDependencies().foreach(_.publish())
-    suite.runProject(self)
+  /** Depending on the mode of operation, either runs the test or updates the
+    * project. Updating means that all the dependencies are fetched but minimal
+    * other extra other work is done. Updating is necessary since we run tests
+    * each time on a fresh Docker container. We run the update on Docker
+    * container creation time to create the cache of the dependencies and avoid
+    * network overhead. See https://github.com/lampepfl/dotty-drone for more
+    * infrastructural details.
+    */
+  extension (self: CommunityProject)
+    def run()(using suite: CommunityBuildRunner): Unit =
+      if self.requiresExperimental && !compilerSupportExperimental then
+        log(
+          s"Skipping ${self.project} - it needs experimental features unsupported in this build."
+        )
+        return
+      self.dependencies.foreach(_.publish())
+      self.testOnlyDependencies().foreach(_.publish())
+      suite.runProject(self)
 
 trait CommunityBuildRunner:
 
   /** fails the current operation, can be specialised in a concrete Runner
-   *  - overridden in `CommunityBuildTest`
-   */
+    *   - overridden in `CommunityBuildTest`
+    */
   def failWith(msg: String): Nothing = throw IllegalStateException(msg)
 
   /** Build the given project with the published local compiler and sbt plugin.
-   *
-   *  This test reads the compiler version from community-build/dotty-bootstrapped.version
-   *  and expects community-build/sbt-injected-plugins to set any necessary plugins.
-   *
-   *  @param project    The project name, should be a git submodule in community-build/
-   *  @param command    The binary file of the program used to test the project – usually
-   *                    a build tool like SBT or Mill
-   *  @param arguments  Arguments to pass to the testing program
-   */
+    *
+    * This test reads the compiler version from
+    * community-build/dotty-bootstrapped.version and expects
+    * community-build/sbt-injected-plugins to set any necessary plugins.
+    *
+    * @param project
+    *   The project name, should be a git submodule in community-build/
+    * @param command
+    *   The binary file of the program used to test the project – usually a
+    *   build tool like SBT or Mill
+    * @param arguments
+    *   Arguments to pass to the testing program
+    */
   def runProject(projectDef: CommunityProject): Unit =
     val project = projectDef.project
     val command = projectDef.binaryName
@@ -52,17 +57,17 @@ trait CommunityBuildRunner:
       if exitCode == 0
       then true
       else if timesToRerun == 0
-        then false
-        else
-          log(s"Rerunning tests in $project because of a previous run failure.")
-          execTimes(task, timesToRerun - 1)
+      then false
+      else
+        log(s"Rerunning tests in $project because of a previous run failure.")
+        execTimes(task, timesToRerun - 1)
 
     log(s"Building $project with dotty-bootstrapped $compilerVersion...")
 
-    val projectDir = communitybuildDir.resolve("community-projects").resolve(project)
+    val projectDir =
+      communitybuildDir.resolve("community-projects").resolve(project)
 
-    if !Files.exists(projectDir.resolve(".git")) then
-      failWith(s"""
+    if !Files.exists(projectDir.resolve(".git")) then failWith(s"""
         |
         |Missing $project submodule. You can initialize this module using
         |
@@ -72,8 +77,7 @@ trait CommunityBuildRunner:
 
     val testsCompletedSuccessfully = execTimes(projectDef.build, 3)
 
-    if !testsCompletedSuccessfully then
-      failWith(s"""
+    if !testsCompletedSuccessfully then failWith(s"""
           |
           |$command exited with an error code. To reproduce without JUnit, use:
           |

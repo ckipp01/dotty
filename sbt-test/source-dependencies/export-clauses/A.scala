@@ -1,18 +1,13 @@
-class A {
+class A:
 
   private val b: B = new B
-  export b._
+  export b.*
 
-  class Inner {
+  class Inner:
     private val c: C = new C
-    export c._
-  }
+    export c.*
 
-  def local = {
-    class Local {
+  def local =
+    class Local:
       private val d: D = new D
-      export d._
-    }
-  }
-
-}
+      export d.*

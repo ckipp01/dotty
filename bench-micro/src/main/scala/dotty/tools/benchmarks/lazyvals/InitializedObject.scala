@@ -12,11 +12,9 @@ import java.util.concurrent.TimeUnit
 @Measurement(iterations = 5)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
-class InitializedObject {
+class InitializedObject:
 
   @Benchmark
-  def measureInitialized(bh: Blackhole) = {
+  def measureInitialized(bh: Blackhole) =
     bh.consume(ObjectHolder)
     bh.consume(ObjectHolder.value)
-  }
-}

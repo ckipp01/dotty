@@ -1,3 +1,2 @@
-object A {
-	def x: { def q: Int } = sys.error("not important")
-}
+object A:
+  def x: { def q: Int } = sys.error("not important")

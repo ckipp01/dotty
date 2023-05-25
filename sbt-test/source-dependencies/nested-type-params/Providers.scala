@@ -1,4 +1,5 @@
-trait Provider { type Operations = A }
+trait Provider:
+  type Operations = A
 
-object Providers { type SomeProvider = Provider }
-
+object Providers:
+  type SomeProvider = Provider

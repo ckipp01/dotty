@@ -2,7 +2,7 @@ package dotty.tools.scaladoc
 package util
 
 import org.junit.Test
-import org.junit.Assert._
+import org.junit.Assert.*
 
 class JSONTest:
   @Test

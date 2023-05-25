@@ -1,7 +1,8 @@
-object Test extends App {
-  val c = new reallongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongname
+object Test extends App:
+  val c =
+    new reallongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongnamereallylongname
 
-  import c._
+  import c.*
 
   val o0 = obj0
   val o1 = obj01
@@ -38,4 +39,4 @@ object Test extends App {
   val t8 = new trt012345678 {}
   val t9 = new trt0123456789 {}
   val t10 = new trt01234567890 {}
-}
+end Test

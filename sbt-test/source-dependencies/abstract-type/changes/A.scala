@@ -1,3 +1,2 @@
-trait A {
-	type S
-}
+trait A:
+  type S

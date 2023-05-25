@@ -1,3 +1,2 @@
-object A {
-	def x: List[Int] = List(3)
-}
+object A:
+  def x: List[Int] = List(3)

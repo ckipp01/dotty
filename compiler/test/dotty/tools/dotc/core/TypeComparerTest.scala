@@ -2,7 +2,8 @@ package dotty.tools
 package dotc
 package core
 
-import Contexts.*, Decorators.*, Denotations.*, SymDenotations.*, Symbols.*, Types.*
+import Contexts.*, Decorators.*, Denotations.*, SymDenotations.*, Symbols.*,
+  Types.*
 import printing.Formatting.Show
 
 import org.junit.Test

@@ -1,4 +1,2 @@
-object B {
+object B:
   implicit val x: Ordering[Int] = ???
-}
-

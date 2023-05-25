@@ -6,10 +6,10 @@ import dotty.tools.dotc.core.Types.TypeBounds
 import dotty.tools.dotc.typer.ProtoTypes.newTypeVar
 import org.junit.Test
 
-class SubtypingInvariantTests extends DottyTest {
+class SubtypingInvariantTests extends DottyTest:
 
   @Test
-  def typeVarInvariant(): Unit = {
+  def typeVarInvariant(): Unit =
     checkCompile("typer", "class A") { (_, ctx0) =>
       given Context = ctx0
       val a = newTypeVar(TypeBounds.empty)
@@ -17,6 +17,3 @@ class SubtypingInvariantTests extends DottyTest {
       assert(a <:< b)
       assert(a frozen_<:< b)
     }
-  }
-
-}

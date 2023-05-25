@@ -17,26 +17,24 @@ abstract class ScaladocTest(val name: String):
     given DocContext = moduleDocContext
     op(ScalaModuleProvider.mkModule())
 
-  protected def getTempDir() : TemporaryFolder =
+  protected def getTempDir(): TemporaryFolder =
     val folder = new TemporaryFolder()
     folder.create()
     folder
 
   def args = Scaladoc.Args(
-      name = "test",
-      tastyFiles = tastyFiles(name),
-      output = getTempDir().getRoot,
-      projectVersion = Some("1.0"),
-      sourceLinks = List("github://lampepfl/dotty/master")
-    )
+    name = "test",
+    tastyFiles = tastyFiles(name),
+    output = getTempDir().getRoot,
+    projectVersion = Some("1.0"),
+    sourceLinks = List("github://lampepfl/dotty/master")
+  )
 
   @Test
   def runTest: Unit
-
 
   @Rule
   def collector = _collector
   private val _collector = new ErrorCollector();
   def reportError(msg: String) = collector.addError(new AssertionError(msg))
-
-
+end ScaladocTest

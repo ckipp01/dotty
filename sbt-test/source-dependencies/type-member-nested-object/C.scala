@@ -1,3 +1,2 @@
-object C extends B {
+object C extends B:
   val proxy: String = t
-}

@@ -14,7 +14,9 @@ extension (sym: Symbol)
   def constructorName(using Context) =
     sym.owner.fullName ++ ";init;"
 
-  /** Mangle a JVM symbol name in a format better suited for internal uses by sbt. */
+  /** Mangle a JVM symbol name in a format better suited for internal uses by
+    * sbt.
+    */
   def zincMangledName(using Context): Name =
-    if (sym.isConstructor) constructorName
+    if sym.isConstructor then constructorName
     else sym.name.stripModuleClassSuffix

@@ -1,4 +1,4 @@
-import scala.quoted._, staging._
+import scala.quoted.*, staging.*
 
 given Compiler = Compiler.make(getClass.getClassLoader)
 
@@ -8,7 +8,6 @@ val f: Array[Int] => Int = run {
   stagedSum
 }
 
-object Main {
+object Main:
   def main(args: Array[String]): Unit =
     f.apply(Array(1, 2, 3)) // Returns 6
-}

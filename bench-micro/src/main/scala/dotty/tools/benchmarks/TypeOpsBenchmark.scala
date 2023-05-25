@@ -15,7 +15,17 @@ class TypeOpsBenchmark:
   var tp: Type = null
   var context: Context = null
 
-  @Param(Array("int", "singletonsSum", "intsSum", "deepSingletonsSum", "deepIntsSum", "singletonsIntersection", "singletonsUnion"))
+  @Param(
+    Array(
+      "int",
+      "singletonsSum",
+      "intsSum",
+      "deepSingletonsSum",
+      "deepIntsSum",
+      "singletonsIntersection",
+      "singletonsUnion"
+    )
+  )
   var valName: String = "int"
 
   @Setup(Level.Iteration)
@@ -28,11 +38,14 @@ class TypeOpsBenchmark:
           context = ctx
         }
         super.finish(compiler, run)
-    driver.process(Array(
-      "-classpath", System.getProperty("BENCH_CLASS_PATH"),
-      "-Ystop-after:typer",
-      "tests/someTypes.scala"
-    ))
+    driver.process(
+      Array(
+        "-classpath",
+        System.getProperty("BENCH_CLASS_PATH"),
+        "-Ystop-after:typer",
+        "tests/someTypes.scala"
+      )
+    )
 
   @Benchmark
   def isStable(): Unit = tp.isStable(using context)
@@ -54,3 +67,4 @@ class TypeOpsBenchmark:
 
   @Benchmark
   def isProvisional(): Unit = tp.isProvisional(using context)
+end TypeOpsBenchmark

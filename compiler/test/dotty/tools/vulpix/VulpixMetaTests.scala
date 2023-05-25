@@ -1,28 +1,32 @@
 package dotty.tools
 package vulpix
 
-import org.junit.{ Test, AfterClass }
+import org.junit.{Test, AfterClass}
 import org.junit.experimental.categories.Category
-import scala.concurrent.duration._
-import TestConfiguration._
+import scala.concurrent.duration.*
+import TestConfiguration.*
 
 /** Meta tests for the Vulpix test suite. This test follows the structure of
- *  CompilationTests.scala. It is meant to be called from bash to diff with
- *  output against an expected result.
- */
+  * CompilationTests.scala. It is meant to be called from bash to diff with
+  * output against an expected result.
+  */
 @Category(Array(classOf[dotty.VulpixMetaTests]))
-class VulpixMetaTests {
-  import VulpixMetaTests._
+class VulpixMetaTests:
+  import VulpixMetaTests.*
 
   implicit val summaryReport: SummaryReporting = new SummaryReport
   implicit def testGroup: TestGroup = TestGroup("VulpixMetaTests")
 
-  @Test def compilePos: Unit = compileFilesInDir("tests/vulpix-tests/meta/pos", defaultOptions).checkCompile()
-  @Test def compileNeg: Unit = compileFilesInDir("tests/vulpix-tests/meta/neg", defaultOptions).checkExpectedErrors()
-  @Test def runAll: Unit     = compileFilesInDir("tests/vulpix-tests/meta/run", defaultOptions).checkRuns()
-}
+  @Test def compilePos: Unit =
+    compileFilesInDir("tests/vulpix-tests/meta/pos", defaultOptions)
+      .checkCompile()
+  @Test def compileNeg: Unit =
+    compileFilesInDir("tests/vulpix-tests/meta/neg", defaultOptions)
+      .checkExpectedErrors()
+  @Test def runAll: Unit =
+    compileFilesInDir("tests/vulpix-tests/meta/run", defaultOptions).checkRuns()
 
-object VulpixMetaTests extends ParallelTesting {
+object VulpixMetaTests extends ParallelTesting:
   def maxDuration = 1.seconds
   // Ensure maximum reproducibility.
   def numberOfSlaves = 1
@@ -34,4 +38,3 @@ object VulpixMetaTests extends ParallelTesting {
 
   @AfterClass
   def tearDown() = this.cleanup()
-}

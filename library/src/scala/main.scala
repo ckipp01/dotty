@@ -9,5 +9,5 @@
 package scala
 
 /** An annotation that designates a main function
- */
+  */
 class main extends scala.annotation.Annotation {}

@@ -8,21 +8,23 @@ import java.io.{File, FileWriter}
 import java.nio.file.Files
 
 @sharable // avoids false positive by -Ycheck-reentrant
-object Invoker {
+object Invoker:
   private val runtimeUUID = java.util.UUID.randomUUID()
 
   private val MeasurementsPrefix = "scoverage.measurements."
   private val threadFiles = new ThreadLocal[AnyRefMap[String, FileWriter]]
   private val dataDirToSet = TrieMap.empty[String, BitSet]
 
-  /** We record that the given id has been invoked by appending its id to the coverage data file.
+  /** We record that the given id has been invoked by appending its id to the
+    * coverage data file.
     *
-    * This will happen concurrently on as many threads as the application is using, so we use one
-    * file per thread, named for the thread id.
+    * This will happen concurrently on as many threads as the application is
+    * using, so we use one file per thread, named for the thread id.
     *
-    * This method is not thread-safe if the threads are in different JVMs, because the thread IDs
-    * may collide. You may not use `scoverage` on multiple processes in parallel without risking
-    * corruption of the measurement file.
+    * This method is not thread-safe if the threads are in different JVMs,
+    * because the thread IDs may collide. You may not use `scoverage` on
+    * multiple processes in parallel without risking corruption of the
+    * measurement file.
     *
     * @param id
     *   the id of the statement that was invoked
@@ -47,10 +49,11 @@ object Invoker {
         writer.write(Integer.toString(id))
         writer.write('\n')
         writer.flush()
+  end invoked
 
   @nowarn("cat=deprecation")
   def measurementFile(dataDir: String): File = new File(
     dataDir,
     MeasurementsPrefix + runtimeUUID + "." + Thread.currentThread.nn.getId
   )
-}
+end Invoker

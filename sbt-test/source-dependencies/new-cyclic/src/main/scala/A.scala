@@ -1,1 +1,2 @@
-trait A { val x = "hello" }
+trait A:
+  val x = "hello"

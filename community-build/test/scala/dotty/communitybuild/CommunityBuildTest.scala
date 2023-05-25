@@ -1,6 +1,6 @@
 package dotty.communitybuild
 
-import java.nio.file._
+import java.nio.file.*
 import java.io.{PrintWriter, File}
 import java.nio.charset.StandardCharsets.UTF_8
 import org.junit.{Ignore, Test}
@@ -12,7 +12,8 @@ import CommunityBuildRunner.run
 class TestCategory
 
 given testRunner: CommunityBuildRunner with
-  override def failWith(msg: String) = { fail(msg); ??? }
+  override def failWith(msg: String) =
+    fail(msg); ???
 
 @Category(Array(classOf[TestCategory]))
 class CommunityBuildTestA:
@@ -50,7 +51,8 @@ class CommunityBuildTestB:
   @Test def scalacheckEffect = projects.scalacheckEffect.run()
   @Test def scodec = projects.scodec.run()
   @Test def scodecBits = projects.scodecBits.run()
-  @Test def simulacrumScalafixAnnotations = projects.simulacrumScalafixAnnotations.run()
+  @Test def simulacrumScalafixAnnotations =
+    projects.simulacrumScalafixAnnotations.run()
   @Test def spire = projects.spire.run()
   @Test def http4s = projects.http4s.run()
 end CommunityBuildTestB

@@ -3,28 +3,31 @@ package dotc.util
 
 object GenericHashMap:
 
-  /** The number of elements up to which dense packing is used.
-   *  If the number of elements reaches `DenseLimit` a hash table is used instead
-   */
+  /** The number of elements up to which dense packing is used. If the number of
+    * elements reaches `DenseLimit` a hash table is used instead
+    */
   inline val DenseLimit = 8
 
-/** A hash table using open hashing with linear scan which is also very space efficient
- *  at small sizes. The implementations of `hash` and `isEqual` are left open. They have
- *  to be provided by subclasses.
- *
- *  @param  initialCapacity  Indicates the initial number of slots in the hash table.
- *                           The actual number of slots is always a power of 2, so the
- *                           initial size of the table will be the smallest power of two
- *                           that is equal or greater than the given `initialCapacity`.
- *                           Minimum value is 4.
- *  @param  capacityMultiple The minimum multiple of capacity relative to used elements.
- *                           The hash table will be re-sized once the number of elements
- *                           multiplied by capacityMultiple exceeds the current size of the hash table.
- *                           However, a table of size up to DenseLimit will be re-sized only
- *                           once the number of elements reaches the table's size.
- */
-abstract class GenericHashMap[Key, Value]
-    (initialCapacity: Int, capacityMultiple: Int) extends MutableMap[Key, Value]:
+/** A hash table using open hashing with linear scan which is also very space
+  * efficient at small sizes. The implementations of `hash` and `isEqual` are
+  * left open. They have to be provided by subclasses.
+  *
+  * @param initialCapacity
+  *   Indicates the initial number of slots in the hash table. The actual number
+  *   of slots is always a power of 2, so the initial size of the table will be
+  *   the smallest power of two that is equal or greater than the given
+  *   `initialCapacity`. Minimum value is 4.
+  * @param capacityMultiple
+  *   The minimum multiple of capacity relative to used elements. The hash table
+  *   will be re-sized once the number of elements multiplied by
+  *   capacityMultiple exceeds the current size of the hash table. However, a
+  *   table of size up to DenseLimit will be re-sized only once the number of
+  *   elements reaches the table's size.
+  */
+abstract class GenericHashMap[Key, Value](
+    initialCapacity: Int,
+    capacityMultiple: Int
+) extends MutableMap[Key, Value]:
   import GenericHashMap.DenseLimit
 
   protected var used: Int = _
@@ -34,14 +37,17 @@ abstract class GenericHashMap[Key, Value]
 
   private def allocate(capacity: Int) =
     table = new Array[AnyRef | Null](capacity * 2)
-    limit = if capacity <= DenseLimit then capacity - 1 else capacity / capacityMultiple
+    limit =
+      if capacity <= DenseLimit then capacity - 1
+      else capacity / capacityMultiple
 
   private def roundToPower(n: Int) =
     if n < 4 then 4
     else if Integer.bitCount(n) == 1 then n
     else 1 << (32 - Integer.numberOfLeadingZeros(n))
 
-  /** Remove all elements from this table and set back to initial configuration */
+  /** Remove all elements from this table and set back to initial configuration
+    */
   def clear(resetToInitial: Boolean): Unit =
     used = 0
     if resetToInitial then allocate(roundToPower(initialCapacity))
@@ -115,8 +121,8 @@ abstract class GenericHashMap[Key, Value]
           val eidx = index(hash(k))
           if isDense
             || index(eidx - (hole + 2)) > index(idx - (hole + 2))
-               // entry `e` at `idx` can move unless `index(hash(e))` is in
-               // the (ring-)interval [hole + 2 .. idx]
+            // entry `e` at `idx` can move unless `index(hash(e))` is in
+            // the (ring-)interval [hole + 2 .. idx]
           then
             setKey(hole, k)
             setValue(hole, valueAt(idx))
@@ -147,19 +153,20 @@ abstract class GenericHashMap[Key, Value]
     setValue(idx, value)
 
   def copyFrom(oldTable: Array[AnyRef | Null]): Unit =
-    if isDense then
-      Array.copy(oldTable, 0, table, 0, oldTable.length)
+    if isDense then Array.copy(oldTable, 0, table, 0, oldTable.length)
     else
       var idx = 0
       while idx < oldTable.length do
         val key = oldTable(idx)
-        if key != null then addOld(key.asInstanceOf[Key], oldTable(idx + 1).asInstanceOf[Value])
+        if key != null then
+          addOld(key.asInstanceOf[Key], oldTable(idx + 1).asInstanceOf[Value])
         idx += 2
 
   protected def growTable(): Unit =
     val oldTable = table
     val newLength =
-      if table.length == DenseLimit * 2 then table.length * roundToPower(capacityMultiple)
+      if table.length == DenseLimit * 2 then
+        table.length * roundToPower(capacityMultiple)
       else table.length
     allocate(newLength)
     copyFrom(oldTable)
@@ -172,7 +179,8 @@ abstract class GenericHashMap[Key, Value]
       idx < table.length
     def next() =
       require(hasNext)
-      try entry(idx) finally idx += 2
+      try entry(idx)
+      finally idx += 2
 
   def iterator: Iterator[(Key, Value)] = new EntryIterator:
     def entry(idx: Int) = (keyAt(idx), valueAt(idx))

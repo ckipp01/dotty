@@ -1,7 +1,6 @@
 package foo
 
-trait Usage {
+trait Usage:
   def x: FactoryProvider.type#MyFactory#Product
 
   x.foo
-}

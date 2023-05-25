@@ -1,5 +1,4 @@
 package pkg1
 
-class B {
+class B:
   def bar(a: A): Int = a.foo
-}

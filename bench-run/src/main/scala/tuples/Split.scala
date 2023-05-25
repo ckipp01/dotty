@@ -1,9 +1,9 @@
 package dotty.tools.benchmarks.tuples
 
-import org.openjdk.jmh.annotations._
+import org.openjdk.jmh.annotations.*
 
 @State(Scope.Thread)
-class Split {
+class Split:
   @Param(Array("0"))
   var size: Int = _
   var tuple: Tuple = _
@@ -11,23 +11,18 @@ class Split {
   var half: Int = _
 
   @Setup
-  def setup(): Unit = {
+  def setup(): Unit =
     tuple = Tuple()
     half = size / 2
 
-    for (i <- 1 to size)
-      tuple = "elem" *: tuple
+    for i <- 1 to size do tuple = "elem" *: tuple
 
     array = new Array[Object](size)
-  }
 
   @Benchmark
-  def tupleSplit(): (Tuple, Tuple) = {
+  def tupleSplit(): (Tuple, Tuple) =
     runtime.Tuples.splitAt(tuple, half)
-  }
 
   @Benchmark
-  def arraySplit(): (Array[Object], Array[Object]) = {
+  def arraySplit(): (Array[Object], Array[Object]) =
     array.splitAt(half)
-  }
-}

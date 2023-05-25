@@ -1,7 +1,6 @@
 package dotty.tools
 package dottydoc
 
-
 import dotc.reporting.Reporter
 import dotc.Driver
 import dotc.core.Contexts.Context

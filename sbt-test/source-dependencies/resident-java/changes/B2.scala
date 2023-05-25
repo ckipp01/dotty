@@ -1,3 +1,2 @@
-object B {
-	val x: String = (new example.A).x
-}
+object B:
+  val x: String = (new example.A).x

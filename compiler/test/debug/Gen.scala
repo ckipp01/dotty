@@ -5,22 +5,22 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Using
 
 /** Automate testing debuggability of generated code using JDB and expect
- *
- *  The debugging information is annotated as comments to the code in brackets:
- *
- *  val x = f(3) // [break] [next: line=5]
- *  val y = 5
- *
- *  1. A jdb command must be wrapped in brackets, like `[step]`. All jdb commands can be used.
- *  2. To check output of jdb for a command, use `[cmd: expect]`.
- *  3. If `expect` is wrapped in double quotes, regex is supported.
- *  4. Break commands are collected and set globally.
- *  5. Other commands will be send to jdb in the order they appear in the source file
- *
- *  Note: jdb uses line number starts from 1
- */
+  *
+  * The debugging information is annotated as comments to the code in brackets:
+  *
+  * val x = f(3) // [break] [next: line=5] val y = 5
+  *
+  *   1. A jdb command must be wrapped in brackets, like `[step]`. All jdb
+  *      commands can be used. 2. To check output of jdb for a command, use
+  *      `[cmd: expect]`. 3. If `expect` is wrapped in double quotes, regex is
+  *      supported. 4. Break commands are collected and set globally. 5. Other
+  *      commands will be send to jdb in the order they appear in the source
+  *      file
+  *
+  * Note: jdb uses line number starts from 1
+  */
 
-object Gen {
+object Gen:
   val MainObject = "Test"
   val CommandWait = 1
 
@@ -28,7 +28,8 @@ object Gen {
 
   case class Break(line: Int) extends Tree
 
-  case class Command(val name: String, val expect: Expect = EmptyExpect) extends Tree
+  case class Command(val name: String, val expect: Expect = EmptyExpect)
+      extends Tree
 
   sealed trait Expect
 
@@ -40,69 +41,70 @@ object Gen {
 
   case class Program(breaks: Seq[Break], commands: Seq[Command])
 
-  def error(msg: String): Nothing = {
+  def error(msg: String): Nothing =
     throw new Exception(msg)
-  }
 
-  def parseCommand(command: String, lineNo: Int): Tree = {
+  def parseCommand(command: String, lineNo: Int): Tree =
     val index = command.indexOf(':')
-    if (index == -1) {
+    if index == -1 then
       // simple command
-      if (command == "break") Break(lineNo)
+      if command == "break" then Break(lineNo)
       else Command(command)
-    } else {
+    else {
       val Seq(cmd, rhs) = command.split(":", 2).toSeq.map(_.trim)
-      if (rhs.startsWith("\"")) {
+      if rhs.startsWith("\"") then
         // regex match
         val content = "\"(.+)\"".r
-        rhs match {
+        rhs match
           case content(expect) => Command(cmd, PatExpect(expect))
-          case _ => error(s"""incorrect specification: `$rhs` for `$cmd` at line $lineNo. Ending " expected.""")
-        }
-      } else {
+          case _ =>
+            error(
+              s"""incorrect specification: `$rhs` for `$cmd` at line $lineNo. Ending " expected."""
+            )
+      else
         // literal match
         Command(cmd, LitExpect(rhs))
-      }
     }
-  }
 
-  def parse(file: String): Program = {
+  def parse(file: String): Program =
     val lines = Using(Source.fromFile(file))(_.getLines().toBuffer).get
 
     val breaks = new ListBuffer[Break]()
     val cmds = new ListBuffer[Command]()
     lines.zipWithIndex.map { case (code, line) =>
-      val comment = if (code.indexOf("//") != -1) code.split("//").last else ""
+      val comment =
+        if code.indexOf("//") != -1 then code.split("//").last else ""
       val regex = """(?<=\[).*?(?=\])""".r
-      for (p <- regex findAllIn comment) parseCommand(p.trim, line + 1) match { // jdb index from 0
-        case b: Break   => breaks += b
-        case c: Command => cmds += c
-      }
+      for p <- regex findAllIn comment do
+        parseCommand(p.trim, line + 1) match // jdb index from 0
+          case b: Break   => breaks += b
+          case c: Command => cmds += c
     }
 
     Program(breaks.toList, cmds.toList)
-  }
 
-  def generate(program: Program, source: String = "tests/debug/"): String = {
+  def generate(program: Program, source: String = "tests/debug/"): String =
     val Program(breaks, cmds) = program
-    val breakpoints = (breaks.map {
-      case Break(point) =>
-          s"""|send "stop at $MainObject$$:$point\\r"
+    val breakpoints = (breaks
+      .map { case Break(point) =>
+        s"""|send "stop at $MainObject$$:$point\\r"
               |sleep $CommandWait
               |expect "breakpoint $MainObject$$:$point"
               |expect -re $$
               """.stripMargin
-    }).mkString("\n\n")
+      })
+      .mkString("\n\n")
 
-    val commands = (cmds.map {
-    case Command(cmd, EmptyExpect)      =>
-        s"""|# send_user "send command `$cmd`\\n"
+    val commands = (cmds
+      .map {
+        case Command(cmd, EmptyExpect) =>
+          s"""|# send_user "send command `$cmd`\\n"
             |send "$cmd\\r"
             |sleep $CommandWait
             |expect -re $$
             """.stripMargin
-    case Command(cmd, LitExpect(lit))   =>
-        s"""|# send_user "send command `$cmd`\\n"
+        case Command(cmd, LitExpect(lit)) =>
+          s"""|# send_user "send command `$cmd`\\n"
             |send "$cmd\\r"
             |sleep $CommandWait
             |expect {
@@ -114,8 +116,8 @@ object Gen {
             |}
             |expect -re $$
             |""".stripMargin
-    case Command(cmd, PatExpect(pat))   =>
-        s"""|# send_user "send command `$cmd`\\n"
+        case Command(cmd, PatExpect(pat)) =>
+          s"""|# send_user "send command `$cmd`\\n"
             |send "$cmd\\r"
             |sleep $CommandWait
             |expect {
@@ -127,7 +129,8 @@ object Gen {
             |}
             |expect -re $$
             |""".stripMargin
-    }).mkString("\n\n")
+      })
+      .mkString("\n\n")
 
     s"""|#!/usr/bin/expect
         |
@@ -161,14 +164,13 @@ object Gen {
         |
         |# interactions
         |$commands""".stripMargin
-  }
+  end generate
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     val prog = Gen.parse(args(0))
     // println("--------------------------------")
     // println("prog:" + prog)
     // println("\n\n\n scrip:")
     // println("--------------------------------")
     println(Gen.generate(prog))
-  }
-}
+end Gen

@@ -1,4 +1,2 @@
-class C
-{
+class C:
   val y = 4
-}

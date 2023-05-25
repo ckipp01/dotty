@@ -1,5 +1,5 @@
-object B {
-  def main(args: Array[String]): Unit = {
+object B:
+  def main(args: Array[String]): Unit =
     val a = new A
 
     a.poly1(new Poly(1))
@@ -16,5 +16,3 @@ object B {
     a.arrRef2(new ArrRef(Array("")))
     a.arrRef3(new ArrRef(Array(Array(1))))
     a.arrRef4(new ArrRef(Array(Array(""))))
-  }
-}

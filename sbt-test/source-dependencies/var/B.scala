@@ -1,4 +1,2 @@
-class B extends A
-{
-	override var x = 3
-}
+class B extends A:
+  override var x = 3

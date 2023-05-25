@@ -1,4 +1,2 @@
-object A {
+object A:
   type X = Option[Int]
-}
-

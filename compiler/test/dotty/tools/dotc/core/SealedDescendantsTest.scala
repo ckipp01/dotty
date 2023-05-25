@@ -3,12 +3,12 @@ package dotty.tools.dotc.core
 import dotty.tools.dotc.core.Contexts.Context
 import dotty.tools.dotc.core.Symbols.*
 
-import org.junit.Assert._
+import org.junit.Assert.*
 import org.junit.Test
 
 import dotty.tools.DottyTest
 
-class SealedDescendantsTest extends DottyTest {
+class SealedDescendantsTest extends DottyTest:
 
   @Test
   def zincIssue979: Unit =
@@ -21,12 +21,14 @@ class SealedDescendantsTest extends DottyTest {
       class D extends A
       """
 
-    expectedDescendents(source, "Z",
+    expectedDescendents(
+      source,
+      "Z",
       "Z" ::
-      "A" ::
-      "B" ::
-      "C" ::
-      "D" :: Nil
+        "A" ::
+        "B" ::
+        "C" ::
+        "D" :: Nil
     )
   end zincIssue979
 
@@ -40,10 +42,12 @@ class SealedDescendantsTest extends DottyTest {
       }
       """
 
-    expectedDescendents(source, "Opt",
-      "Opt"       ::
-      "Some"      ::
-      "None.type" :: Nil
+    expectedDescendents(
+      source,
+      "Opt",
+      "Opt" ::
+        "Some" ::
+        "None.type" :: Nil
     )
   end enumOpt
 
@@ -60,12 +64,14 @@ class SealedDescendantsTest extends DottyTest {
       case object Y extends Q
       """
 
-    expectedDescendents(source, "Z",
-      "Z"      ::
-      "A"      ::
-      "Q"      ::
-      "X"      ::
-      "Y.type" :: Nil
+    expectedDescendents(
+      source,
+      "Z",
+      "Z" ::
+        "A" ::
+        "Q" ::
+        "X" ::
+        "Y.type" :: Nil
     )
   end hierarchicalSharedChildren
 
@@ -81,23 +87,33 @@ class SealedDescendantsTest extends DottyTest {
       sealed trait E extends D
       """
 
-    expectedDescendents(source, "Z",
-      "Z"      ::
-      "A.type" ::
-      "B"      ::
-      "C"      ::
-      "D"      ::
-      "E"      :: Nil
+    expectedDescendents(
+      source,
+      "Z",
+      "Z" ::
+        "A.type" ::
+        "B" ::
+        "C" ::
+        "D" ::
+        "E" :: Nil
     )
   end hierarchicalSharedChildrenB
 
-  def expectedDescendents(source: String, root: String, expected: List[String]) =
+  def expectedDescendents(
+      source: String,
+      root: String,
+      expected: List[String]
+  ) =
     exploreRoot(source, root) { rootCls =>
-      val descendents = rootCls.sealedDescendants.map(sym => s"${sym.name}${if (sym.isTerm) ".type" else ""}")
+      val descendents = rootCls.sealedDescendants.map(sym =>
+        s"${sym.name}${if sym.isTerm then ".type" else ""}"
+      )
       assertEquals(expected.toString, descendents.toString)
     }
 
-  def exploreRoot(source: String, root: String)(op: Context ?=> ClassSymbol => Unit) =
+  def exploreRoot(source: String, root: String)(
+      op: Context ?=> ClassSymbol => Unit
+  ) =
     val source0 = source.linesIterator.map(_.trim).mkString("\n|")
     val source1 = s"""package testsealeddescendants
                      |$source0""".stripMargin
@@ -105,4 +121,4 @@ class SealedDescendantsTest extends DottyTest {
       given Context = context
       op(requiredClass(s"testsealeddescendants.$root"))
     }
-}
+end SealedDescendantsTest

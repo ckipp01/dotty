@@ -1,7 +1,7 @@
 package hello
 
-object Hello {
-  def main(args: Array[String]): Unit = {
+object Hello:
+  def main(args: Array[String]): Unit =
     val dotty: Int | String = "dotty"
 
     val y = 5 / 0 // error
@@ -10,5 +10,3 @@ object Hello {
     val z = 7 / 0.0 // error
 
     println(s"Hello $dotty!")
-  }
-}

@@ -14,14 +14,13 @@ class D
 
 class VC(val self: A) extends AnyVal
 
-class Outer {
+class Outer:
   class E
   trait F extends E
-}
 
 // The parameter type of `a_XX` should erase to A, `b_XX` to `B`, etc.
 // This is enforced by dottyApp/Main.scala
-class Z {
+class Z:
   def a_01(a: A with B): Unit = {}
   def b_02X(b: B with A): Unit = {}
   def a_02(a: A with B with A): Unit = {}
@@ -96,18 +95,22 @@ class Z {
   def f_33(f: Outer#E with Outer#F): Unit = {}
   def f_34(f: Outer#F with Outer#E): Unit = {}
 
-  val structural1: { type DSub <: D } = new { type DSub <: D }
+  val structural1: { type DSub <: D } = new:
+    type DSub <: D
   def a_35(a: A with structural1.DSub): Unit = {}
   def d_36(a: structural1.DSub with A): Unit = {}
   def z_37(z: Z with structural1.DSub): Unit = {}
   def z_38(z: structural1.DSub with Z): Unit = {}
 
-  val structural2: { type SubCB <: C with B } = new { type SubCB <: C with B }
+  val structural2: { type SubCB <: C with B } = new:
+    type SubCB <: C with B
   def c_39(c: structural2.SubCB with B): Unit = {}
   def c_40(c: B with structural2.SubCB): Unit = {}
 
-  val structural3a: { type SubB <: B; type SubCB <: C with SubB } = new { type SubB <: B; type SubCB <: C with SubB }
-  val structural3b: { type SubB <: B; type SubCB <: C with SubB } = new { type SubB <: B; type SubCB <: C with SubB }
+  val structural3a: { type SubB <: B; type SubCB <: C with SubB } = new:
+    type SubB <: B; type SubCB <: C with SubB
+  val structural3b: { type SubB <: B; type SubCB <: C with SubB } = new:
+    type SubB <: B; type SubCB <: C with SubB
   def c_41(c: structural3a.SubB with structural3a.SubCB): Unit = {}
   def c_42(c: structural3a.SubCB with structural3a.SubB): Unit = {}
   def b_43(b: structural3a.SubB with structural3b.SubCB): Unit = {}
@@ -138,8 +141,10 @@ class Z {
   def a_53(a: F3 @foo with Rec6): Unit = {}
   def c_54(a: F3 with Rec6): Unit = {}
 
-  val structural4a: { type M[X] <: A } = new { type M[X] <: A }
-  val structural4b: { type N <: B with structural4a.M[Int] } = new { type N <: B with structural4a.M[Int] }
+  val structural4a: { type M[X] <: A } = new:
+    type M[X] <: A
+  val structural4b: { type N <: B with structural4a.M[Int] } = new:
+    type N <: B with structural4a.M[Int]
   def b_55(x: structural4a.M[Any] with structural4b.N): Unit = {}
 
   type Bla = A { type M[X] <: A }
@@ -156,34 +161,34 @@ class Z {
   def int_63(x: AnyVal with Int): Unit = {}
 
   def intARRAY_64(x: Array[Int with Singleton]): Unit = {}
-  def object_65(x: Array[_ <: Int]): Unit = {}
-  def object_66(x: Array[_ <: Int with Singleton]): Unit = {}
-  def object_67(x: Array[_ <: Singleton with Int]): Unit = {}
-  def object_68(x: Array[_ <: Int with Any]): Unit = {}
-  def object_69(x: Array[_ <: Any with Int]): Unit = {}
-  def object_70(x: Array[_ <: Int with AnyVal]): Unit = {}
-  def object_71(x: Array[_ <: AnyVal with Int]): Unit = {}
+  def object_65(x: Array[? <: Int]): Unit = {}
+  def object_66(x: Array[? <: Int with Singleton]): Unit = {}
+  def object_67(x: Array[? <: Singleton with Int]): Unit = {}
+  def object_68(x: Array[? <: Int with Any]): Unit = {}
+  def object_69(x: Array[? <: Any with Int]): Unit = {}
+  def object_70(x: Array[? <: Int with AnyVal]): Unit = {}
+  def object_71(x: Array[? <: AnyVal with Int]): Unit = {}
 
   def stringARRAY_72(x: Array[String with Singleton]): Unit = {}
-  def stringARRAY_73(x: Array[_ <: String]): Unit = {}
-  def stringARRAY_74(x: Array[_ <: String with Singleton]): Unit = {}
-  def stringARRAY_75(x: Array[_ <: Singleton with String]): Unit = {}
-  def stringARRAY_76(x: Array[_ <: String with Any]): Unit = {}
-  def stringARRAY_77(x: Array[_ <: Any with String]): Unit = {}
-  def stringARRAY_78(x: Array[_ <: String with AnyRef]): Unit = {}
-  def stringARRAY_79(x: Array[_ <: AnyRef with String]): Unit = {}
+  def stringARRAY_73(x: Array[? <: String]): Unit = {}
+  def stringARRAY_74(x: Array[? <: String with Singleton]): Unit = {}
+  def stringARRAY_75(x: Array[? <: Singleton with String]): Unit = {}
+  def stringARRAY_76(x: Array[? <: String with Any]): Unit = {}
+  def stringARRAY_77(x: Array[? <: Any with String]): Unit = {}
+  def stringARRAY_78(x: Array[? <: String with AnyRef]): Unit = {}
+  def stringARRAY_79(x: Array[? <: AnyRef with String]): Unit = {}
 
-  def object_80(x: Array[_ <: Singleton]): Unit = {}
-  def object_81(x: Array[_ <: AnyVal]): Unit = {}
-  def objectARRAY_82(x: Array[_ <: AnyRef]): Unit = {}
-  def object_83(x: Array[_ <: Any]): Unit = {}
+  def object_80(x: Array[? <: Singleton]): Unit = {}
+  def object_81(x: Array[? <: AnyVal]): Unit = {}
+  def objectARRAY_82(x: Array[? <: AnyRef]): Unit = {}
+  def object_83(x: Array[? <: Any]): Unit = {}
 
-  def object_84(x: Array[_ <: Serializable]): Unit = {}
-  def object_85(x: Array[_ <: Univ]): Unit = {}
-  def aARRAY_86(x: Array[_ <: A]): Unit = {}
-  def aARRAY_87(x: Array[_ <: A with B]): Unit = {}
+  def object_84(x: Array[? <: Serializable]): Unit = {}
+  def object_85(x: Array[? <: Univ]): Unit = {}
+  def aARRAY_86(x: Array[? <: A]): Unit = {}
+  def aARRAY_87(x: Array[? <: A with B]): Unit = {}
 
   def objectARRAY_88(x: Array[Any]): Unit = {}
   def objectARRAY_89(x: Array[AnyRef]): Unit = {}
   def objectARRAY_90(x: Array[AnyVal]): Unit = {}
-}
+end Z

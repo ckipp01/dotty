@@ -15,26 +15,33 @@ class AbstractFileClassLoaderTest:
 
   given `we love utf8`: Codec = UTF8
 
-  def closing[T <: Closeable, U](stream: T)(f: T => U): U = try f(stream) finally stream.close()
+  def closing[T <: Closeable, U](stream: T)(f: T => U): U = try f(stream)
+  finally stream.close()
 
-  extension (f: AbstractFile) def writeContent(s: String): Unit = closing(f.bufferedOutput)(_.write(s.getBytes(UTF8.charSet)))
-  def slurp(inputStream: => InputStream)(implicit codec: Codec): String = closing(Source.fromInputStream(inputStream)(codec))(_.mkString)
+  extension (f: AbstractFile)
+    def writeContent(s: String): Unit =
+      closing(f.bufferedOutput)(_.write(s.getBytes(UTF8.charSet)))
+  def slurp(inputStream: => InputStream)(implicit codec: Codec): String =
+    closing(Source.fromInputStream(inputStream)(codec))(_.mkString)
   def slurp(url: URL)(implicit codec: Codec): String = slurp(url.openStream())
 
-  extension (input: InputStream) def bytes: Array[Byte] =
-    val bis = new BufferedInputStream(input)
-    val it  = Iterator.continually(bis.read()).takeWhile(_ != -1).map(_.toByte)
-    new ArrayBuffer[Byte]().addAll(it).toArray
+  extension (input: InputStream)
+    def bytes: Array[Byte] =
+      val bis = new BufferedInputStream(input)
+      val it = Iterator.continually(bis.read()).takeWhile(_ != -1).map(_.toByte)
+      new ArrayBuffer[Byte]().addAll(it).toArray
 
   // cf ScalaClassLoader#classBytes
   extension (loader: ClassLoader)
     // An InputStream representing the given class name, or null if not found.
     def classAsStream(className: String) = loader.getResourceAsStream {
       if className.endsWith(".class") then className
-      else s"${className.replace('.', '/')}.class"  // classNameToPath
+      else s"${className.replace('.', '/')}.class" // classNameToPath
     }
     // The actual bytes for a class file, or an empty array if it can't be found.
-    def classBytes(className: String): Array[Byte] = classAsStream(className) match
+    def classBytes(className: String): Array[Byte] = classAsStream(
+      className
+    ) match
       case null   => Array()
       case stream => stream.bytes
 
@@ -114,7 +121,10 @@ class AbstractFileClassLoaderTest:
     val x = new AbstractFileClassLoader(fuzz, NoClassLoader)
     val r = x.getResourceAsStream("buzz/booz.class")
     assertNotNull(r)
-    assertEquals("hello, world", closing(r)(is => Source.fromInputStream(is).mkString))
+    assertEquals(
+      "hello, world",
+      closing(r)(is => Source.fromInputStream(is).mkString)
+    )
 
   @Test def afclGetsClassBytes(): Unit =
     val (fuzz, booz) = fuzzBuzzBooz

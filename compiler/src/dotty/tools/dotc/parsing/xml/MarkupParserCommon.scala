@@ -9,154 +9,154 @@ package dotty.tools.dotc
 package parsing
 package xml
 
-import Utility._
+import Utility.*
 import util.Chars.SU
 import scala.collection.BufferedIterator
 
-/** This is not a public trait - it contains common code shared
- *  between the library level XML parser and the compiler's.
- *  All members should be accessed through those.
- */
-private[dotty] trait MarkupParserCommon {
+/** This is not a public trait - it contains common code shared between the
+  * library level XML parser and the compiler's. All members should be accessed
+  * through those.
+  */
+private[dotty] trait MarkupParserCommon:
   protected def unreachable: Nothing = scala.sys.error("Cannot be reached.")
 
   // type HandleType       // MarkupHandler, SymbolicXMLBuilder
-  type InputType        // Source, CharArrayReader
-  type PositionType     // Int, Position
-  type ElementType      // NodeSeq, Tree
-  type NamespaceType    // NamespaceBinding, Any
-  type AttributesType   // (MetaData, NamespaceBinding), mutable.Map[String, Tree]
+  type InputType // Source, CharArrayReader
+  type PositionType // Int, Position
+  type ElementType // NodeSeq, Tree
+  type NamespaceType // NamespaceBinding, Any
+  type AttributesType // (MetaData, NamespaceBinding), mutable.Map[String, Tree]
 
   def mkAttributes(name: String, pscope: NamespaceType): AttributesType
-  def mkProcInstr(position: PositionType, name: String, text: String): ElementType
+  def mkProcInstr(
+      position: PositionType,
+      name: String,
+      text: String
+  ): ElementType
 
-  /** parse a start or empty tag.
-   *  [40] STag         ::= '<' Name { S Attribute } [S]
-   *  [44] EmptyElemTag ::= '<' Name { S Attribute } [S]
-   */
-  protected def xTag(pscope: NamespaceType): (String, AttributesType) = {
+  /** parse a start or empty tag. [40] STag ::= '<' Name { S Attribute } [S]
+    * [44] EmptyElemTag ::= '<' Name { S Attribute } [S]
+    */
+  protected def xTag(pscope: NamespaceType): (String, AttributesType) =
     val name = xName
     xSpaceOpt()
 
     (name, mkAttributes(name, pscope))
-  }
 
   /** '<?' ProcInstr ::= Name [S ({Char} - ({Char}'>?' {Char})]'?>'
-   *
-   * see [15]
-   */
-  def xProcInstr: ElementType = {
+    *
+    * see [15]
+    */
+  def xProcInstr: ElementType =
     val n = xName
     xSpaceOpt()
     xTakeUntil(mkProcInstr(_, n, _), () => tmppos, "?>")
-  }
 
-  /** attribute value, terminated by either `'` or `"`. value may not contain `<`.
-   @param endCh either `'` or `"`
-   */
-  def xAttributeValue(endCh: Char): String = {
+  /** attribute value, terminated by either `'` or `"`. value may not contain
+    * `<`.
+    * @param endCh
+    *   either `'` or `"`
+    */
+  def xAttributeValue(endCh: Char): String =
     val buf = new StringBuilder
-    while (ch != endCh) {
+    while ch != endCh do
       // well-formedness constraint
-      if (ch == '<') return errorAndResult("'<' not allowed in attrib value", "")
-      else if (ch == SU) truncatedError("")
+      if ch == '<' then
+        return errorAndResult("'<' not allowed in attrib value", "")
+      else if ch == SU then truncatedError("")
       else buf append ch_returning_nextch
-    }
     ch_returning_nextch
     // @todo: normalize attribute value
     buf.toString
-  }
 
-  def xAttributeValue(): String = {
+  def xAttributeValue(): String =
     val str = xAttributeValue(ch_returning_nextch)
     // well-formedness constraint
     normalizeAttributeValue(str)
-  }
 
-  private def takeUntilChar(it: Iterator[Char], end: Char): String = {
+  private def takeUntilChar(it: Iterator[Char], end: Char): String =
     val buf = new StringBuilder
-    while (it.hasNext) it.next() match {
-      case `end`  => return buf.toString
-      case ch     => buf append ch
-    }
+    while it.hasNext do
+      it.next() match
+        case `end` => return buf.toString
+        case ch    => buf append ch
     scala.sys.error("Expected '%s'".format(end))
-  }
 
-  /** [42]  '<' xmlEndTag ::=  '<' '/' Name S? '>'
-   */
-  def xEndTag(startName: String): Unit = {
+  /** [42] '<' xmlEndTag ::= '<' '/' Name S? '>'
+    */
+  def xEndTag(startName: String): Unit =
     xToken('/')
-    if (xName != startName)
-      errorNoEnd(startName)
+    if xName != startName then errorNoEnd(startName)
 
     xSpaceOpt()
     xToken('>')
-  }
 
-  /** actually, Name ::= (Letter | '_' | ':') (NameChar)*  but starting with ':' cannot happen
-   *  Name ::= (Letter | '_') (NameChar)*
-   *
-   *  see  [5] of XML 1.0 specification
-   *
-   *  pre-condition:  ch != ':' // assured by definition of XMLSTART token
-   *  post-condition: name does neither start, nor end in ':'
-   */
-  def xName: String = {
-    if (ch == SU)
-      truncatedError("")
-    else if (!isNameStart(ch))
-      return errorAndResult("name expected, but char '%s' cannot start a name" format ch, "")
+  /** actually, Name ::= (Letter | '_' | ':') (NameChar)* but starting with ':'
+    * cannot happen Name ::= (Letter | '_') (NameChar)*
+    *
+    * see [5] of XML 1.0 specification
+    *
+    * pre-condition: ch != ':' // assured by definition of XMLSTART token
+    * post-condition: name does neither start, nor end in ':'
+    */
+  def xName: String =
+    if ch == SU then truncatedError("")
+    else if !isNameStart(ch) then
+      return errorAndResult(
+        "name expected, but char '%s' cannot start a name" format ch,
+        ""
+      )
 
     val buf = new StringBuilder
 
-    while ({ buf append ch_returning_nextch ; isNameChar(ch) }) ()
+    while { buf append ch_returning_nextch; isNameChar(ch) } do ()
 
-    if (buf.last == ':') {
-      reportSyntaxError( "name cannot end in ':'" )
+    if buf.last == ':' then
+      reportSyntaxError("name cannot end in ':'")
       buf.toString dropRight 1
-    }
     else buf.toString
-  }
 
-  private def attr_unescape(s: String) = s match {
-    case "lt"     => "<"
-    case "gt"     => ">"
-    case "amp"    => "&"
-    case "apos"   => "'"
-    case "quot"   => "\""
-    case "quote"  => "\""
-    case _        => "&" + s + ";"
-  }
+  private def attr_unescape(s: String) = s match
+    case "lt"    => "<"
+    case "gt"    => ">"
+    case "amp"   => "&"
+    case "apos"  => "'"
+    case "quot"  => "\""
+    case "quote" => "\""
+    case _       => "&" + s + ";"
 
-  /** Replaces only character references right now.
-   *  see spec 3.3.3
-   */
-  private def normalizeAttributeValue(attval: String): String = {
+  /** Replaces only character references right now. see spec 3.3.3
+    */
+  private def normalizeAttributeValue(attval: String): String =
     val buf = new StringBuilder
     val it = attval.iterator.buffered
 
-    while (it.hasNext) buf append (it.next() match {
-      case ' ' | '\t' | '\n' | '\r' => " "
-      case '&' if it.head == '#'    => it.next() ; xCharRef(it)
-      case '&'                      => attr_unescape(takeUntilChar(it, ';'))
-      case c                        => c
-    })
+    while it.hasNext do
+      buf append (it.next() match
+        case ' ' | '\t' | '\n' | '\r' => " "
+        case '&' if it.head == '#'    => it.next(); xCharRef(it)
+        case '&'                      => attr_unescape(takeUntilChar(it, ';'))
+        case c                        => c
+      )
 
     buf.toString
-  }
 
   /** CharRef ::= "&#" '0'..'9' {'0'..'9'} ";"
-   *            | "&#x" '0'..'9'|'A'..'F'|'a'..'f' { hexdigit } ";"
-   *
-   * see [66]
-   */
+    * \| "&#x" '0'..'9'|'A'..'F'|'a'..'f' { hexdigit } ";"
+    *
+    * see [66]
+    */
   def xCharRef(ch: () => Char, nextch: () => Unit): String =
     Utility.parseCharRef(ch, nextch, reportSyntaxError _, truncatedError _)
 
-  def xCharRef(it: Iterator[Char]): String = {
+  def xCharRef(it: Iterator[Char]): String =
     var c = it.next()
-    Utility.parseCharRef(() => c, () => { c = it.next() }, reportSyntaxError _, truncatedError _)
-  }
+    Utility.parseCharRef(
+      () => c,
+      () => c = it.next(),
+      reportSyntaxError _,
+      truncatedError _
+    )
 
   def xCharRef: String = xCharRef(() => ch, () => nextch())
 
@@ -164,12 +164,12 @@ private[dotty] trait MarkupParserCommon {
   def lookahead(): BufferedIterator[Char]
 
   /** The library and compiler parsers had the interesting distinction of
-   *  different behavior for nextch (a function for which there are a total
-   *  of two plausible behaviors, so we know the design space was fully
-   *  explored.) One of them returned the value of nextch before the increment
-   *  and one of them the new value.  So to unify code we have to at least
-   *  temporarily abstract over the nextchs.
-   */
+    * different behavior for nextch (a function for which there are a total of
+    * two plausible behaviors, so we know the design space was fully explored.)
+    * One of them returned the value of nextch before the increment and one of
+    * them the new value. So to unify code we have to at least temporarily
+    * abstract over the nextchs.
+    */
   def ch: Char
   def nextch(): Unit
   protected def ch_returning_nextch: Char
@@ -185,72 +185,68 @@ private[dotty] trait MarkupParserCommon {
   def truncatedError(msg: String): Nothing
   def errorNoEnd(tag: String): Nothing
 
-  protected def errorAndResult[T](msg: String, x: T): T = {
+  protected def errorAndResult[T](msg: String, x: T): T =
     reportSyntaxError(msg)
     x
-  }
 
-  def xToken(that: Char): Unit = {
-    if (ch == that) nextch()
+  def xToken(that: Char): Unit =
+    if ch == that then nextch()
     else xHandleError(that, "'%s' expected instead of '%s'".format(that, ch))
-  }
-  def xToken(that: Seq[Char]): Unit = { that foreach xToken }
+  def xToken(that: Seq[Char]): Unit = that foreach xToken
 
-  /** scan [S] '=' [S]*/
-  def xEQ(): Unit = { xSpaceOpt(); xToken('='); xSpaceOpt() }
+  /** scan [S] '=' [S] */
+  def xEQ(): Unit =
+    xSpaceOpt(); xToken('='); xSpaceOpt()
 
   /** skip optional space S? */
-  def xSpaceOpt(): Unit = while (isSpace(ch) && !eof) nextch()
+  def xSpaceOpt(): Unit = while isSpace(ch) && !eof do nextch()
 
   /** scan [3] S ::= (#x20 | #x9 | #xD | #xA)+ */
   def xSpace(): Unit =
-    if (isSpace(ch)) { nextch(); xSpaceOpt() }
+    if isSpace(ch) then
+      nextch(); xSpaceOpt()
     else xHandleError(ch, "whitespace expected")
 
   /** Apply a function and return the passed value */
-  def returning[T](x: T)(f: T => Unit): T = { f(x); x }
+  def returning[T](x: T)(f: T => Unit): T =
+    f(x); x
 
   /** Execute body with a variable saved and restored after execution */
-  def saving[A, B](getter: A, setter: A => Unit)(body: => B): B = {
+  def saving[A, B](getter: A, setter: A => Unit)(body: => B): B =
     val saved = getter
     try body
     finally setter(saved)
-  }
 
-  /** Take characters from input stream until given String "until"
-   *  is seen.  Once seen, the accumulated characters are passed
-   *  along with the current Position to the supplied handler function.
-   */
+  /** Take characters from input stream until given String "until" is seen. Once
+    * seen, the accumulated characters are passed along with the current
+    * Position to the supplied handler function.
+    */
   protected def xTakeUntil[T](
-    handler: (PositionType, String) => T,
-    positioner: () => PositionType,
-    until: String): T =
-  {
+      handler: (PositionType, String) => T,
+      positioner: () => PositionType,
+      until: String
+  ): T =
     val sb = new StringBuilder
     val head = until.head
     val rest = until.tail
 
-    while (true) {
-      if (ch == head && peek(rest))
-        return handler(positioner(), sb.toString)
-      else if (ch == SU)
-        truncatedError("")  // throws TruncatedXMLControl in compiler
+    while true do
+      if ch == head && peek(rest) then return handler(positioner(), sb.toString)
+      else if ch == SU then
+        truncatedError("") // throws TruncatedXMLControl in compiler
 
       sb append ch
       nextch()
-    }
     unreachable
-  }
 
-  /** Create a non-destructive lookahead reader and see if the head
-   *  of the input would match the given String.  If yes, return true
-   *  and drop the entire String from input; if no, return false
-   *  and leave input unchanged.
-   */
+  /** Create a non-destructive lookahead reader and see if the head of the input
+    * would match the given String. If yes, return true and drop the entire
+    * String from input; if no, return false and leave input unchanged.
+    */
   private def peek(lookingFor: String): Boolean =
     (lookahead() take lookingFor.length sameElements lookingFor.iterator) && {
       // drop the chars from the real reader (all lookahead + orig)
       (0 to lookingFor.length) foreach (_ => nextch())
       true
     }
-}
+end MarkupParserCommon

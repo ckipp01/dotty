@@ -1,3 +1,2 @@
-object Baz {
-	implicit val myNr: Int = 1234
-}
+object Baz:
+  implicit val myNr: Int = 1234

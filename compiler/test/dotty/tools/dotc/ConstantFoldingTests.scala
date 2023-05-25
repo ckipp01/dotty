@@ -2,16 +2,16 @@ package dotty.tools.dotc
 
 import scala.language.unsafeNulls
 
-import org.junit.Assert._
+import org.junit.Assert.*
 import org.junit.Test
-import dotty.tools.backend.jvm._
+import dotty.tools.backend.jvm.*
 import dotty.tools.dotc.config.CompilerCommand
 import dotty.tools.dotc.core.Contexts.FreshContext
 import scala.tools.asm.tree.MethodNode
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
-class ConstantFoldingTests extends DottyBytecodeTest {
+class ConstantFoldingTests extends DottyBytecodeTest:
 
   val conditionSrc = """class Test {
   def someCondition: Boolean = ???
@@ -58,11 +58,11 @@ class ConstantFoldingTests extends DottyBytecodeTest {
 }
 """
 
-  @Test def constantFoldConditions: Unit = {
-    import ASMConverters._
+  @Test def constantFoldConditions: Unit =
+    import ASMConverters.*
 
     checkBCode(conditionSrc) { dir =>
-      val clsIn   = dir.lookupName(s"Test.class", directory = false).input
+      val clsIn = dir.lookupName(s"Test.class", directory = false).input
       val methods = loadClassNode(clsIn).methods.asScala
 
       val whenTrue = methods.find(_.name == "whenTrue").get
@@ -73,16 +73,17 @@ class ConstantFoldingTests extends DottyBytecodeTest {
       val reduceToFalse = methods.filter(_.name.startsWith("reduceToFalse"))
       val reduceToCond = methods.filter(_.name.startsWith("reduceToCond"))
 
-      def compare(expected: MethodNode, actual: MethodNode) = {
+      def compare(expected: MethodNode, actual: MethodNode) =
         val expectedInstrs = instructionsFromMethod(expected)
         val actualInstrs = instructionsFromMethod(actual)
         val diff = diffInstructions(expectedInstrs, actualInstrs)
-        assert(expectedInstrs == actualInstrs,
-          s"Different bytecode between ${expected.name} and ${actual.name}\n$diff")
-      }
+        assert(
+          expectedInstrs == actualInstrs,
+          s"Different bytecode between ${expected.name} and ${actual.name}\n$diff"
+        )
       reduceToTrue.foreach(compare(whenTrue, _))
       reduceToFalse.foreach(compare(whenFalse, _))
       reduceToCond.foreach(compare(whenCond, _))
     }
-  }
-}
+  end constantFoldConditions
+end ConstantFoldingTests

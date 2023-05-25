@@ -1,13 +1,14 @@
 package dotty.tools.dotc
 package transform
 
-import core._
+import core.*
 import Contexts.*
 import DenotTransformers.IdentityDenotTransformer
 import SyntheticMembers.*
 import ast.tpd.*
 
-/** A phase that adds mirror support for anonymous mirrors created at inlining. */
+/** A phase that adds mirror support for anonymous mirrors created at inlining.
+  */
 class PostInlining extends MacroTransform, IdentityDenotTransformer:
   thisPhase =>
 
@@ -26,7 +27,8 @@ class PostInlining extends MacroTransform, IdentityDenotTransformer:
     override def transform(tree: Tree)(using Context): Tree =
       super.transform(tree) match
         case tree1: Template
-        if tree1.hasAttachment(ExtendsSingletonMirror) || tree1.hasAttachment(ExtendsSumOrProductMirror) =>
+            if tree1.hasAttachment(ExtendsSingletonMirror) || tree1
+              .hasAttachment(ExtendsSumOrProductMirror) =>
           synthMbr.addMirrorSupport(tree1)
         case tree1 => tree1
 

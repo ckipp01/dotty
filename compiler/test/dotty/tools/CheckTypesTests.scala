@@ -1,13 +1,13 @@
 package dotty.tools
 
 import org.junit.Test
-import org.junit.Assert.{ assertFalse, assertTrue, fail }
+import org.junit.Assert.{assertFalse, assertTrue, fail}
 
 import dotc.core.Contexts.Context
 
-class CheckTypeTest extends DottyTest {
+class CheckTypeTest extends DottyTest:
   @Test
-  def checkTypesTest: Unit = {
+  def checkTypesTest: Unit =
     val source = """
       |class A
       |class B extends A
@@ -24,23 +24,23 @@ class CheckTypeTest extends DottyTest {
       "List[B]"
     )
 
-    checkTypes(source, types: _*) {
+    checkTypes(source, types*) {
       case (List(a, b, lu, li, lr, ls, la, lb), context) =>
         given Context = context
 
-        assertTrue  ( b <:<  a)
-        assertTrue  (li <:< lu)
-        assertFalse (li <:< lr)
-        assertTrue  (ls <:< lr)
-        assertTrue  (lb <:< la)
-        assertFalse (la <:< lb)
+        assertTrue(b <:< a)
+        assertTrue(li <:< lu)
+        assertFalse(li <:< lr)
+        assertTrue(ls <:< lr)
+        assertTrue(lb <:< la)
+        assertFalse(la <:< lb)
 
       case _ => fail
     }
-  }
+  end checkTypesTest
 
   @Test
-  def checkTypessTest: Unit = {
+  def checkTypessTest: Unit =
     val source = """
       |class A
       |class B extends A
@@ -64,5 +64,4 @@ class CheckTypeTest extends DottyTest {
 
       case _ => fail
     }
-  }
-}
+end CheckTypeTest

@@ -8,9 +8,9 @@ import scala.beans.{BooleanBeanProperty, BeanProperty}
 import scala.util.Try
 
 case class BlogConfig(
-  @BeanProperty input: String,
-  @BeanProperty output: String,
-  @BooleanBeanProperty hidden: Boolean
+    @BeanProperty input: String,
+    @BeanProperty output: String,
+    @BooleanBeanProperty hidden: Boolean
 ):
   def this() = this(null, null, false)
 
@@ -22,5 +22,7 @@ object BlogParser:
     content match
       case f: File =>
         val ymlFile = f.toPath.resolve("blog.yml").toFile
-        if ymlFile.exists then mapper.readValue(ymlFile, classOf[BlogConfig]) else new BlogConfig
-      case s: String => Try(mapper.readValue(s, classOf[BlogConfig])).getOrElse(new BlogConfig)
+        if ymlFile.exists then mapper.readValue(ymlFile, classOf[BlogConfig])
+        else new BlogConfig
+      case s: String =>
+        Try(mapper.readValue(s, classOf[BlogConfig])).getOrElse(new BlogConfig)

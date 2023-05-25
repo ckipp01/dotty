@@ -1,12 +1,8 @@
-
-class Container {
-  def foo = {
+class Container:
+  def foo =
     class C
-  }
-  def bar = {
+  def bar =
     // anonymous class
     new T {}
-  }
-}
 
 trait T

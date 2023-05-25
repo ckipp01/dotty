@@ -1,9 +1,6 @@
-import scala.quoted._
+import scala.quoted.*
 
-object MacroRuntime {
+object MacroRuntime:
 
-   def impl()(using q: Quotes): Expr[Unit] = {
-      '{ ??? }
-   }
-
-}
+  def impl()(using q: Quotes): Expr[Unit] =
+    '{ ??? }

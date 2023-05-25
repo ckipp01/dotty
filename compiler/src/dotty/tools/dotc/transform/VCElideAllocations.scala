@@ -2,21 +2,19 @@ package dotty.tools.dotc
 package transform
 
 import ast.tpd
-import core._
-import Contexts._, Symbols._, Types._, Flags._, Phases._
-import DenotTransformers._, MegaPhase._
-import TreeExtractors._, ValueClasses._
+import core.*
+import Contexts.*, Symbols.*, Types.*, Flags.*, Phases.*
+import DenotTransformers.*, MegaPhase.*
+import TreeExtractors.*, ValueClasses.*
 
 /** This phase elides unnecessary value class allocations
- *
- *  For a value class V defined as:
- *    class V(val underlying: U) extends AnyVal
- *  we avoid unnecessary allocations:
- *     new V(u1) == new V(u2) => u1 == u2   provided V does not redefine `equals`
- *    (new V(u)).underlying() => u
- */
-class VCElideAllocations extends MiniPhase with IdentityDenotTransformer {
-  import tpd._
+  *
+  * For a value class V defined as: class V(val underlying: U) extends AnyVal we
+  * avoid unnecessary allocations: new V(u1) == new V(u2) => u1 == u2 provided V
+  * does not redefine `equals` (new V(u)).underlying() => u
+  */
+class VCElideAllocations extends MiniPhase with IdentityDenotTransformer:
+  import tpd.*
 
   override def phaseName: String = VCElideAllocations.name
 
@@ -31,13 +29,13 @@ class VCElideAllocations extends MiniPhase with IdentityDenotTransformer {
       }
       eql.owner != defn.AnyClass && !eql.is(Synthetic)
 
-    tree match {
+    tree match
       // new V(u1) == new V(u2) => u1 == u2, unless V defines its own equals.
       // (We don't handle != because it has been eliminated by InterceptedMethods)
       case BinaryOp(NewWithArgs(tp1, List(u1)), op, NewWithArgs(tp2, List(u2)))
-      if (tp1 eq tp2) && (op eq defn.Any_==)
-         && isDerivedValueClass(tp1.typeSymbol)
-         && !hasUserDefinedEquals(tp1) =>
+          if (tp1 eq tp2) && (op eq defn.Any_==)
+            && isDerivedValueClass(tp1.typeSymbol)
+            && !hasUserDefinedEquals(tp1) =>
         // == is overloaded in primitive classes
         u1.equal(u2)
 
@@ -47,9 +45,9 @@ class VCElideAllocations extends MiniPhase with IdentityDenotTransformer {
 
       case _ =>
         tree
-    }
-}
+end VCElideAllocations
 
 object VCElideAllocations:
   val name: String = "vcElideAllocations"
-  val description: String = "peep-hole optimization to eliminate unnecessary value class allocations"
+  val description: String =
+    "peep-hole optimization to eliminate unnecessary value class allocations"

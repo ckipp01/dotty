@@ -6,7 +6,6 @@ import java.nio.file.Files
 
 class IndexPagesTest extends BaseHtmlTest:
 
-
   private val baseArgs = Scaladoc.Args(
     name = projectName,
     tastyFiles = Seq("site").flatMap(tastyFiles(_)),
@@ -15,25 +14,51 @@ class IndexPagesTest extends BaseHtmlTest:
   )
 
   @Test
-  def staticSiteAndApiSubdirectory = gridTest(baseArgs.copy(docsRoot = Some(testDocPath.resolve("noIndexes").toAbsolutePath.toString), apiSubdirectory = true))
+  def staticSiteAndApiSubdirectory = gridTest(
+    baseArgs.copy(
+      docsRoot = Some(testDocPath.resolve("noIndexes").toAbsolutePath.toString),
+      apiSubdirectory = true
+    )
+  )
 
   @Test
-  def staticSiteAndNOApiSubdirectoryAndReadyToGoIndex = gridTest(baseArgs.copy(docsRoot = Some(testDocPath.resolve("basic").toAbsolutePath.toString), apiSubdirectory = false))
+  def staticSiteAndNOApiSubdirectoryAndReadyToGoIndex = gridTest(
+    baseArgs.copy(
+      docsRoot = Some(testDocPath.resolve("basic").toAbsolutePath.toString),
+      apiSubdirectory = false
+    )
+  )
 
   @Test
-  def staticSiteAndApiSubdirectoryAndReadyToGoIndex = gridTest(baseArgs.copy(docsRoot = Some(testDocPath.resolve("basic").toAbsolutePath.toString), apiSubdirectory = true))
+  def staticSiteAndApiSubdirectoryAndReadyToGoIndex = gridTest(
+    baseArgs.copy(
+      docsRoot = Some(testDocPath.resolve("basic").toAbsolutePath.toString),
+      apiSubdirectory = true
+    )
+  )
 
   @Test
-  def staticSiteAndNOApiSubdirectory = gridTest(baseArgs.copy(docsRoot = Some(testDocPath.resolve("noIndexes").toAbsolutePath.toString), apiSubdirectory = false))
+  def staticSiteAndNOApiSubdirectory = gridTest(
+    baseArgs.copy(
+      docsRoot = Some(testDocPath.resolve("noIndexes").toAbsolutePath.toString),
+      apiSubdirectory = false
+    )
+  )
 
   @Test
-  def NOstaticSiteAndApSubdirectory = gridTest(baseArgs.copy(docsRoot = None, apiSubdirectory = true))
+  def NOstaticSiteAndApSubdirectory = gridTest(
+    baseArgs.copy(docsRoot = None, apiSubdirectory = true)
+  )
 
   @Test
-  def NOstaticSiteAndNOApiSubdirectory = gridTest(baseArgs.copy(docsRoot = None, apiSubdirectory = false))
+  def NOstaticSiteAndNOApiSubdirectory = gridTest(
+    baseArgs.copy(docsRoot = None, apiSubdirectory = false)
+  )
 
-  private def gridTest(args: Scaladoc.Args) = withGeneratedDoc(Seq.empty, None, customArgs = Some(args)) {
-    withHtmlFile("index.html") { content  =>
-      content.fileExists
+  private def gridTest(args: Scaladoc.Args) =
+    withGeneratedDoc(Seq.empty, None, customArgs = Some(args)) {
+      withHtmlFile("index.html") { content =>
+        content.fileExists
+      }
     }
-  }
+end IndexPagesTest

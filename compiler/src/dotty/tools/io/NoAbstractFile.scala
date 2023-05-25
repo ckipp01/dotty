@@ -9,12 +9,12 @@ import scala.language.unsafeNulls
 
 import java.io.InputStream
 
-/** A distinguished object so you can avoid both null
- *  and Option.
- *
- *  ''Note:  This library is considered experimental and should not be used unless you know what you are doing.''
- */
-object NoAbstractFile extends AbstractFile {
+/** A distinguished object so you can avoid both null and Option.
+  *
+  * ''Note: This library is considered experimental and should not be used
+  * unless you know what you are doing.''
+  */
+object NoAbstractFile extends AbstractFile:
   def absolute: AbstractFile = this
   def container: AbstractFile = this
   def create(): Unit = ???
@@ -32,4 +32,3 @@ object NoAbstractFile extends AbstractFile {
   def path: String = ""
   override def toByteArray: Array[Byte] = Array[Byte]()
   override def toString: String = "<no file>"
-}

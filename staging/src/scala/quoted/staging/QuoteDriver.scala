@@ -5,21 +5,27 @@ import dotty.tools.dotc.ast.tpd
 import dotty.tools.dotc.Driver
 import dotty.tools.dotc.core.Contexts.{Context, ContextBase, FreshContext}
 import dotty.tools.dotc.quoted.QuotesCache
-import dotty.tools.io.{AbstractFile, Directory, PlainDirectory, VirtualDirectory}
+import dotty.tools.io.{
+  AbstractFile,
+  Directory,
+  PlainDirectory,
+  VirtualDirectory
+}
 import dotty.tools.repl.AbstractFileClassLoader
-import dotty.tools.dotc.reporting._
+import dotty.tools.dotc.reporting.*
 import dotty.tools.dotc.util.ClasspathFromClassloader
-import scala.quoted._
+import scala.quoted.*
 import scala.quoted.staging.Compiler
 import java.io.File
 import scala.annotation.tailrec
 
 /** Driver to compile quoted code
- *
- * @param appClassloader classloader of the application that generated the quotes
- */
+  *
+  * @param appClassloader
+  *   classloader of the application that generated the quotes
+  */
 private class QuoteDriver(appClassloader: ClassLoader) extends Driver:
-  import tpd._
+  import tpd.*
 
   private[this] val contextBase: ContextBase = new ContextBase
 
@@ -34,11 +40,14 @@ private class QuoteDriver(appClassloader: ClassLoader) extends Driver:
           new VirtualDirectory("<quote compilation output>")
     end outDir
 
-    val ctx = {
+    val ctx =
       val ctx0 = QuotesCache.init(initCtx.fresh)
-      val ctx1 = setup(settings.compilerArgs.toArray :+ "dummy.scala", ctx0).get._2
-      setCompilerSettings(ctx1.fresh.setSetting(ctx1.settings.outputDir, outDir), settings)
-    }
+      val ctx1 =
+        setup(settings.compilerArgs.toArray :+ "dummy.scala", ctx0).get._2
+      setCompilerSettings(
+        ctx1.fresh.setSetting(ctx1.settings.outputDir, outDir),
+        settings
+      )
 
     new QuoteCompiler().newRun(ctx).compileExpr(exprBuilder) match
       case Right(value) =>
@@ -60,10 +69,15 @@ private class QuoteDriver(appClassloader: ClassLoader) extends Driver:
 
   override def initCtx: Context =
     val ictx = contextBase.initialCtx
-    ictx.settings.classpath.update(ClasspathFromClassloader(appClassloader))(using ictx)
+    ictx.settings.classpath.update(ClasspathFromClassloader(appClassloader))(
+      using ictx
+    )
     ictx
 
-  private def setCompilerSettings(ctx: FreshContext, settings: Compiler.Settings): ctx.type =
+  private def setCompilerSettings(
+      ctx: FreshContext,
+      settings: Compiler.Settings
+  ): ctx.type =
     // An error in the generated code is a bug in the compiler
     // Setting the throwing reporter however will report any exception
     ctx.setReporter(new ThrowingReporter(ctx.reporter))

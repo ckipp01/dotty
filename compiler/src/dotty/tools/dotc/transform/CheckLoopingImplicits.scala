@@ -10,27 +10,28 @@ import StdNames.*
 
 object CheckLoopingImplicits:
   val name: String = "checkLoopingImplicits"
-  val description: String = "check that implicit defs do not call themselves in an infinite loop"
+  val description: String =
+    "check that implicit defs do not call themselves in an infinite loop"
 
-/** Checks that some definitions do not call themselves in an infinite loop
- *  This is an incomplete check, designed to catch some likely bugs instead
- *  of being exhaustive. The situations where infinite loops are diagnosed are
- *   1. A given method should not directly call itself
- *   2. An apply method in a given object should not directly call itself
- *   3. A lazy val should not directly force itself
- *   4. An extension method should not directly call itself
- *
- *  In all these cases, there are some situations which would not lead to
- *  an infinite loop at runtime. For instance, the call could go at runtime to an
- *  overriding version of the method or val which breaks the loop. That's why
- *  this phase only issues warnings, not errors, and also why we restrict
- *  checks to the 4 cases above, where a recursion is somewhat hidden.
- *  There are also other more complicated calling patterns that could also
- *  be diagnosed as loops with more effort. This could be improved in the future.
- */
+/** Checks that some definitions do not call themselves in an infinite loop This
+  * is an incomplete check, designed to catch some likely bugs instead of being
+  * exhaustive. The situations where infinite loops are diagnosed are
+  *   1. A given method should not directly call itself 2. An apply method in a
+  *      given object should not directly call itself 3. A lazy val should not
+  *      directly force itself 4. An extension method should not directly call
+  *      itself
+  *
+  * In all these cases, there are some situations which would not lead to an
+  * infinite loop at runtime. For instance, the call could go at runtime to an
+  * overriding version of the method or val which breaks the loop. That's why
+  * this phase only issues warnings, not errors, and also why we restrict checks
+  * to the 4 cases above, where a recursion is somewhat hidden. There are also
+  * other more complicated calling patterns that could also be diagnosed as
+  * loops with more effort. This could be improved in the future.
+  */
 class CheckLoopingImplicits extends MiniPhase:
   thisPhase =>
-  import tpd._
+  import tpd.*
 
   override def phaseName: String = CheckLoopingImplicits.name
 
@@ -47,11 +48,11 @@ class CheckLoopingImplicits extends MiniPhase:
 
     def checkNotSelfRef(t: RefTree) =
       if t.symbol eq sym then
-          report.warning(
-              em"""Infinite loop in function body
+        report.warning(
+          em"""Infinite loop in function body
                   |${mdef.rhs}""",
-              mdef.rhs.srcPos
-            )
+          mdef.rhs.srcPos
+        )
 
     def checkNotLooping(t: Tree): Unit = t match
       case t: Ident =>
@@ -63,9 +64,9 @@ class CheckLoopingImplicits extends MiniPhase:
         checkNotLooping(fn)
         fn.tpe.widen match
           case mt: MethodType
-               // Boolean && and || aren't defined with by-name parameters
-               // and therefore their type isn't an ExprType, so we exempt them by symbol name
-               if t.symbol != defn.Boolean_&& && t.symbol != defn.Boolean_|| =>
+              // Boolean && and || aren't defined with by-name parameters
+              // and therefore their type isn't an ExprType, so we exempt them by symbol name
+              if t.symbol != defn.Boolean_&& && t.symbol != defn.Boolean_|| =>
             args.lazyZip(mt.paramInfos).foreach { (arg, pinfo) =>
               if !pinfo.isInstanceOf[ExprType] then checkNotLooping(arg)
             }
@@ -103,9 +104,9 @@ class CheckLoopingImplicits extends MiniPhase:
       case _ =>
 
     if sym.isOneOf(GivenOrImplicit | Lazy | ExtensionMethod)
-      || sym.name == nme.apply && sym.owner.is(Module) && sym.owner.sourceModule.isOneOf(GivenOrImplicit)
-    then
-      checkNotLooping(mdef.rhs)
+      || sym.name == nme.apply && sym.owner.is(Module) && sym.owner.sourceModule
+        .isOneOf(GivenOrImplicit)
+    then checkNotLooping(mdef.rhs)
     mdef
   end transform
 end CheckLoopingImplicits

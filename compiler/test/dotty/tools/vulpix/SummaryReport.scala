@@ -7,14 +7,14 @@ import scala.collection.mutable
 import dotc.reporting.TestReporter
 
 /** `SummaryReporting` can be used by unit tests by utilizing `@AfterClass` to
- *  call `echoSummary`
- *
- *  This is used in vulpix by passing the companion object's `SummaryReporting`
- *  to each test, the `@AfterClass def` then calls the `SummaryReport`'s
- *  `echoSummary` method in order to dump the summary to both stdout and a log
- *  file
- */
-trait SummaryReporting {
+  * call `echoSummary`
+  *
+  * This is used in vulpix by passing the companion object's `SummaryReporting`
+  * to each test, the `@AfterClass def` then calls the `SummaryReport`'s
+  * `echoSummary` method in order to dump the summary to both stdout and a log
+  * file
+  */
+trait SummaryReporting:
   /** Report a failed test */
   def reportFailed(): Unit
 
@@ -41,11 +41,10 @@ trait SummaryReporting {
 
   /** Echoes contents of `it` to file *immediately* then flushes */
   def echoToLog(it: Iterator[String]): Unit
-
-}
+end SummaryReporting
 
 /** A summary report that doesn't do anything */
-final class NoSummaryReport extends SummaryReporting {
+final class NoSummaryReport extends SummaryReporting:
   def reportFailed(): Unit = ()
   def reportPassed(): Unit = ()
   def addFailedTest(msg: FailedTestInfo): Unit = ()
@@ -56,18 +55,21 @@ final class NoSummaryReport extends SummaryReporting {
   def echoToLog(msg: String): Unit = ()
   def echoToLog(it: Iterator[String]): Unit = ()
   def updateCheckFiles: Boolean = false
-}
 
 /** A summary report that logs to both stdout and the `TestReporter.logWriter`
- *  which outputs to a log file in `./testlogs/`
- */
-final class SummaryReport extends SummaryReporting {
-  import scala.jdk.CollectionConverters._
+  * which outputs to a log file in `./testlogs/`
+  */
+final class SummaryReport extends SummaryReporting:
+  import scala.jdk.CollectionConverters.*
 
-  private val startingMessages = new java.util.concurrent.ConcurrentLinkedDeque[String]
-  private val failedTests = new java.util.concurrent.ConcurrentLinkedDeque[FailedTestInfo]
-  private val reproduceInstructions = new java.util.concurrent.ConcurrentLinkedDeque[String]
-  private val cleanUps = new java.util.concurrent.ConcurrentLinkedDeque[() => Unit]
+  private val startingMessages =
+    new java.util.concurrent.ConcurrentLinkedDeque[String]
+  private val failedTests =
+    new java.util.concurrent.ConcurrentLinkedDeque[FailedTestInfo]
+  private val reproduceInstructions =
+    new java.util.concurrent.ConcurrentLinkedDeque[String]
+  private val cleanUps =
+    new java.util.concurrent.ConcurrentLinkedDeque[() => Unit]
 
   private var passed = 0
   private var failed = 0
@@ -91,8 +93,8 @@ final class SummaryReport extends SummaryReporting {
     cleanUps.add(f)
 
   /** Both echoes the summary to stdout and prints to file */
-  def echoSummary(): Unit = {
-    import SummaryReport._
+  def echoSummary(): Unit =
+    import SummaryReport.*
 
     val rep = new StringBuilder
     rep.append(
@@ -107,34 +109,36 @@ final class SummaryReport extends SummaryReporting {
 
     startingMessages.asScala.foreach(rep.append)
 
-    failedTests.asScala.map(x => s"    ${x.title}${x.extra}\n").foreach(rep.append)
+    failedTests.asScala
+      .map(x => s"    ${x.title}${x.extra}\n")
+      .foreach(rep.append)
     TestReporter.writeFailedTests(failedTests.asScala.toList.map(_.title))
 
     // If we're compiling locally, we don't need instructions on how to
     // reproduce failures
-    if (isInteractive) {
+    if isInteractive then
       println(rep.toString)
-      if (failed > 0) println {
-        s"""|
+      if failed > 0 then
+        println {
+          s"""|
             |--------------------------------------------------------------------------------
             |Note - reproduction instructions have been dumped to log file:
             |    ${TestReporter.logPath}
             |--------------------------------------------------------------------------------""".stripMargin
-      }
-    }
+        }
 
     rep += '\n'
 
     reproduceInstructions.asScala.foreach(rep.append)
 
     // If we're on the CI, we want everything
-    if (!isInteractive) println(rep.toString)
+    if !isInteractive then println(rep.toString)
 
     TestReporter.logPrintln(rep.toString)
 
     // Perform cleanup callback:
-    if (!cleanUps.isEmpty()) cleanUps.asScala.foreach(_.apply())
-  }
+    if !cleanUps.isEmpty() then cleanUps.asScala.foreach(_.apply())
+  end echoSummary
 
   private def removeColors(msg: String): String =
     msg.replaceAll("\u001b\\[.*?m", "")
@@ -142,12 +146,10 @@ final class SummaryReport extends SummaryReporting {
   def echoToLog(msg: String): Unit =
     TestReporter.logPrintln(removeColors(msg))
 
-  def echoToLog(it: Iterator[String]): Unit = {
+  def echoToLog(it: Iterator[String]): Unit =
     it.foreach(msg => TestReporter.logPrint(removeColors(msg)))
     TestReporter.logFlush()
-  }
-}
+end SummaryReport
 
-object SummaryReport {
+object SummaryReport:
   val isInteractive = Properties.testsInteractive && !Properties.isRunByCI
-}

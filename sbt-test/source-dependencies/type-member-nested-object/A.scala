@@ -1,6 +1,4 @@
-abstract class A {
+abstract class A:
   val t: AnyRef
-  object X {
+  object X:
     def foo: t.type = t
-  }
-}

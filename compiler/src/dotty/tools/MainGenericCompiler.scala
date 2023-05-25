@@ -27,20 +27,20 @@ enum CompileMode:
   case Run
 
 case class CompileSettings(
-  verbose: Boolean = false,
-  classPath: List[String] = List.empty,
-  compileMode: CompileMode = CompileMode.Guess,
-  exitCode: Int = 0,
-  javaArgs: List[String] = List.empty,
-  javaProps: List[(String, String)] = List.empty,
-  scalaArgs: List[String] = List.empty,
-  residualArgs: List[String] = List.empty,
-  scriptArgs: List[String] = List.empty,
-  targetScript: String = "",
-  compiler: Boolean = false,
-  quiet: Boolean = false,
-  colors: Boolean = false,
-) {
+    verbose: Boolean = false,
+    classPath: List[String] = List.empty,
+    compileMode: CompileMode = CompileMode.Guess,
+    exitCode: Int = 0,
+    javaArgs: List[String] = List.empty,
+    javaProps: List[(String, String)] = List.empty,
+    scalaArgs: List[String] = List.empty,
+    residualArgs: List[String] = List.empty,
+    scriptArgs: List[String] = List.empty,
+    targetScript: String = "",
+    compiler: Boolean = false,
+    quiet: Boolean = false,
+    colors: Boolean = false
+):
   def withCompileMode(em: CompileMode): CompileSettings = this.compileMode match
     case CompileMode.Guess =>
       this.copy(compileMode = em)
@@ -59,15 +59,19 @@ case class CompileSettings(
     this.copy(javaProps = javaProps.appendedAll(args.toList))
 
   def withResidualArgs(args: String*): CompileSettings =
-    this.copy(residualArgs = residualArgs.appendedAll(args.toList.filter(_.nonEmpty)))
+    this.copy(residualArgs =
+      residualArgs.appendedAll(args.toList.filter(_.nonEmpty))
+    )
 
   def withScriptArgs(args: String*): CompileSettings =
-    this.copy(scriptArgs = scriptArgs.appendedAll(args.toList.filter(_.nonEmpty)))
+    this.copy(scriptArgs =
+      scriptArgs.appendedAll(args.toList.filter(_.nonEmpty))
+    )
 
   def withTargetScript(file: String): CompileSettings =
     Try(Source.fromFile(file)).toOption match
       case Some(_) => this.copy(targetScript = file)
-      case None      =>
+      case None =>
         println(s"not found $file")
         this.copy(exitCode = 2)
   end withTargetScript
@@ -83,62 +87,74 @@ case class CompileSettings(
 
   def withNoColors: CompileSettings =
     this.copy(colors = false)
-}
+end CompileSettings
 
-object MainGenericCompiler {
+object MainGenericCompiler:
 
   val classpathSeparator = File.pathSeparator
 
   @sharable val javaOption = raw"""-J(.*)""".r
   @sharable val javaPropOption = raw"""-D(.+?)=(.?)""".r
   @tailrec
-  def process(args: List[String], settings: CompileSettings): CompileSettings = args match
-    case Nil =>
-      settings
-    case "--" :: tail =>
-      process(Nil, settings.withResidualArgs(tail.toList*))
-    case ("-v" | "-verbose" | "--verbose") :: tail =>
-      process(tail, settings.withScalaArgs("-verbose"))
-    case ("-q" | "-quiet") :: tail =>
-      process(tail, settings.withQuiet)
-    case "-repl" :: tail =>
-      process(tail, settings.withCompileMode(CompileMode.Repl))
-    case "-script" :: targetScript :: tail =>
-      process(Nil, settings
-        .withCompileMode(CompileMode.Script)
-        .withJavaProps("script.path" -> targetScript)
-        .withTargetScript(targetScript)
-        .withScriptArgs(tail*))
-    case "-compile" :: tail =>
-      process(tail, settings.withCompileMode(CompileMode.Compile))
-    case "-decompile" :: tail =>
-      process(tail, settings.withCompileMode(CompileMode.Decompile))
-    case "-print-tasty" :: tail =>
-      process(tail, settings.withCompileMode(CompileMode.PrintTasty))
-    case "-run" :: tail =>
-      process(tail, settings.withCompileMode(CompileMode.Run))
-    case "-colors" :: tail =>
-      process(tail, settings.withColors)
-    case "-no-colors" :: tail =>
-      process(tail, settings.withNoColors)
-    case "-with-compiler" :: tail =>
-      process(tail, settings.withCompiler)
-    case ("-cp" | "-classpath" | "--class-path") :: cp :: tail =>
-      val (tailargs, newEntries) = MainGenericRunner.processClasspath(cp, tail)
-      process(tailargs, settings.copy(classPath = settings.classPath ++ newEntries.filter(_.nonEmpty)))
-    case "-Oshort" :: tail =>
-      // Nothing is to be done here. Request that the user adds the relevant flags manually.
-      // i.e this has no effect when MainGenericRunner is invoked programatically.
-      val addTC="-XX:+TieredCompilation"
-      val tStopAtLvl="-XX:TieredStopAtLevel=1"
-      println(s"ignoring deprecated -Oshort flag, please add `-J$addTC` and `-J$tStopAtLvl` flags manually")
-      process(tail, settings)
-    case javaOption(stripped) :: tail =>
-      process(tail, settings.withJavaArgs(stripped))
-    case javaPropOption(opt, value) :: tail =>
-      process(tail, settings.withJavaProps(opt -> value))
-    case arg :: tail =>
-      process(tail, settings.withResidualArgs(arg))
+  def process(args: List[String], settings: CompileSettings): CompileSettings =
+    args match
+      case Nil =>
+        settings
+      case "--" :: tail =>
+        process(Nil, settings.withResidualArgs(tail.toList*))
+      case ("-v" | "-verbose" | "--verbose") :: tail =>
+        process(tail, settings.withScalaArgs("-verbose"))
+      case ("-q" | "-quiet") :: tail =>
+        process(tail, settings.withQuiet)
+      case "-repl" :: tail =>
+        process(tail, settings.withCompileMode(CompileMode.Repl))
+      case "-script" :: targetScript :: tail =>
+        process(
+          Nil,
+          settings
+            .withCompileMode(CompileMode.Script)
+            .withJavaProps("script.path" -> targetScript)
+            .withTargetScript(targetScript)
+            .withScriptArgs(tail*)
+        )
+      case "-compile" :: tail =>
+        process(tail, settings.withCompileMode(CompileMode.Compile))
+      case "-decompile" :: tail =>
+        process(tail, settings.withCompileMode(CompileMode.Decompile))
+      case "-print-tasty" :: tail =>
+        process(tail, settings.withCompileMode(CompileMode.PrintTasty))
+      case "-run" :: tail =>
+        process(tail, settings.withCompileMode(CompileMode.Run))
+      case "-colors" :: tail =>
+        process(tail, settings.withColors)
+      case "-no-colors" :: tail =>
+        process(tail, settings.withNoColors)
+      case "-with-compiler" :: tail =>
+        process(tail, settings.withCompiler)
+      case ("-cp" | "-classpath" | "--class-path") :: cp :: tail =>
+        val (tailargs, newEntries) =
+          MainGenericRunner.processClasspath(cp, tail)
+        process(
+          tailargs,
+          settings.copy(classPath =
+            settings.classPath ++ newEntries.filter(_.nonEmpty)
+          )
+        )
+      case "-Oshort" :: tail =>
+        // Nothing is to be done here. Request that the user adds the relevant flags manually.
+        // i.e this has no effect when MainGenericRunner is invoked programatically.
+        val addTC = "-XX:+TieredCompilation"
+        val tStopAtLvl = "-XX:TieredStopAtLevel=1"
+        println(
+          s"ignoring deprecated -Oshort flag, please add `-J$addTC` and `-J$tStopAtLvl` flags manually"
+        )
+        process(tail, settings)
+      case javaOption(stripped) :: tail =>
+        process(tail, settings.withJavaArgs(stripped))
+      case javaPropOption(opt, value) :: tail =>
+        process(tail, settings.withJavaProps(opt -> value))
+      case arg :: tail =>
+        process(tail, settings.withResidualArgs(arg))
   end process
 
   def main(args: Array[String]): Unit =
@@ -172,8 +188,8 @@ object MainGenericCompiler {
         addJavaProps()
         val properArgs =
           reconstructedArgs()
-          ++ List("-script", settings.targetScript)
-          ++ settings.scriptArgs
+            ++ List("-script", settings.targetScript)
+            ++ settings.scriptArgs
         scripting.Main.main(properArgs.toArray)
       case CompileMode.Repl | CompileMode.Run =>
         addJavaProps()
@@ -185,4 +201,4 @@ object MainGenericCompiler {
 
     run(settings)
   end main
-}
+end MainGenericCompiler

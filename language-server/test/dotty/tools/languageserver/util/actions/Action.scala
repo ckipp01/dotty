@@ -4,13 +4,12 @@ import dotty.tools.languageserver.DottyLanguageServer
 import dotty.tools.languageserver.util.PositionContext
 import dotty.tools.languageserver.util.server.{TestClient, TestServer}
 
-import PositionContext._
+import PositionContext.*
 
-/**
- * Base trait for representing an action performed against a language server (such as hover, go to
- * definition, etc.)
- */
-trait Action {
+/** Base trait for representing an action performed against a language server
+  * (such as hover, go to definition, etc.)
+  */
+trait Action:
   type Exec[T] = (TestServer, TestClient, PositionContext) ?=> T
 
   /** Execute the action. */
@@ -32,5 +31,3 @@ trait Action {
   /** An ordering for `Range` that compares string representations. */
   implicit def rangeOrdering: Ordering[org.eclipse.lsp4j.Range] =
     Ordering.by(_.toString)
-
-}

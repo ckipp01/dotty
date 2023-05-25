@@ -1,6 +1,4 @@
 package example
 
-object A
-{
-	val x: String = B.y
-}
+object A:
+  val x: String = B.y

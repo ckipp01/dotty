@@ -14,4 +14,4 @@ object Test:
   private[this] var x: AnyRef = _
 
   // under -source:future, `_` is deprecated for wildcard arguments of types: use `?` instead
-  val xs: List[_] = Nil
+  val xs: List[?] = Nil

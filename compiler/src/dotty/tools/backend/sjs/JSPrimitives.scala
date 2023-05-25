@@ -1,72 +1,83 @@
 package dotty.tools.backend.sjs
 
-import dotty.tools.dotc.core._
+import dotty.tools.dotc.core.*
 import Names.TermName
-import Types._
-import Contexts._
-import Symbols._
+import Types.*
+import Contexts.*
+import Symbols.*
 import Decorators.em
 
-import dotty.tools.dotc.ast.tpd._
+import dotty.tools.dotc.ast.tpd.*
 import dotty.tools.backend.jvm.DottyPrimitives
 import dotty.tools.dotc.report
 import dotty.tools.dotc.util.ReadOnlyMap
 
-object JSPrimitives {
+object JSPrimitives:
 
   inline val FirstJSPrimitiveCode = 300
 
-  inline val DYNNEW = FirstJSPrimitiveCode + 1 // Instantiate a new JavaScript object
+  inline val DYNNEW =
+    FirstJSPrimitiveCode + 1 // Instantiate a new JavaScript object
 
   inline val ARR_CREATE = DYNNEW + 1 // js.Array.apply (array literal syntax)
 
   inline val TYPEOF = ARR_CREATE + 1 // typeof x
-  inline val JS_NATIVE = TYPEOF + 1  // js.native. Marker method. Fails if tried to be emitted.
+  inline val JS_NATIVE =
+    TYPEOF + 1 // js.native. Marker method. Fails if tried to be emitted.
 
   inline val UNITVAL = JS_NATIVE + 1 // () value, which is undefined
 
   inline val JS_NEW_TARGET = UNITVAL + 1 // js.new.target
 
-  inline val JS_IMPORT = JS_NEW_TARGET + 1  // js.import.apply(specifier)
+  inline val JS_IMPORT = JS_NEW_TARGET + 1 // js.import.apply(specifier)
   inline val JS_IMPORT_META = JS_IMPORT + 1 // js.import.meta
 
-  inline val CONSTRUCTOROF = JS_IMPORT_META + 1                         // runtime.constructorOf(clazz)
-  inline val CREATE_INNER_JS_CLASS = CONSTRUCTOROF + 1                  // runtime.createInnerJSClass
-  inline val CREATE_LOCAL_JS_CLASS = CREATE_INNER_JS_CLASS + 1          // runtime.createLocalJSClass
-  inline val WITH_CONTEXTUAL_JS_CLASS_VALUE = CREATE_LOCAL_JS_CLASS + 1 // runtime.withContextualJSClassValue
-  inline val LINKING_INFO = WITH_CONTEXTUAL_JS_CLASS_VALUE + 1          // runtime.linkingInfo
-  inline val DYNAMIC_IMPORT = LINKING_INFO + 1                          // runtime.dynamicImport
+  inline val CONSTRUCTOROF = JS_IMPORT_META + 1 // runtime.constructorOf(clazz)
+  inline val CREATE_INNER_JS_CLASS =
+    CONSTRUCTOROF + 1 // runtime.createInnerJSClass
+  inline val CREATE_LOCAL_JS_CLASS =
+    CREATE_INNER_JS_CLASS + 1 // runtime.createLocalJSClass
+  inline val WITH_CONTEXTUAL_JS_CLASS_VALUE =
+    CREATE_LOCAL_JS_CLASS + 1 // runtime.withContextualJSClassValue
+  inline val LINKING_INFO =
+    WITH_CONTEXTUAL_JS_CLASS_VALUE + 1 // runtime.linkingInfo
+  inline val DYNAMIC_IMPORT = LINKING_INFO + 1 // runtime.dynamicImport
 
-  inline val STRICT_EQ = DYNAMIC_IMPORT + 1                // js.special.strictEquals
-  inline val IN = STRICT_EQ + 1                            // js.special.in
-  inline val INSTANCEOF = IN + 1                           // js.special.instanceof
-  inline val DELETE = INSTANCEOF + 1                       // js.special.delete
-  inline val FORIN = DELETE + 1                            // js.special.forin
-  inline val JS_THROW = FORIN + 1                          // js.special.throw
-  inline val JS_TRY_CATCH = JS_THROW + 1                   // js.special.tryCatch
-  inline val WRAP_AS_THROWABLE = JS_TRY_CATCH + 1          // js.special.wrapAsThrowable
-  inline val UNWRAP_FROM_THROWABLE = WRAP_AS_THROWABLE + 1 // js.special.unwrapFromThrowable
-  inline val DEBUGGER = UNWRAP_FROM_THROWABLE + 1          // js.special.debugger
+  inline val STRICT_EQ = DYNAMIC_IMPORT + 1 // js.special.strictEquals
+  inline val IN = STRICT_EQ + 1 // js.special.in
+  inline val INSTANCEOF = IN + 1 // js.special.instanceof
+  inline val DELETE = INSTANCEOF + 1 // js.special.delete
+  inline val FORIN = DELETE + 1 // js.special.forin
+  inline val JS_THROW = FORIN + 1 // js.special.throw
+  inline val JS_TRY_CATCH = JS_THROW + 1 // js.special.tryCatch
+  inline val WRAP_AS_THROWABLE = JS_TRY_CATCH + 1 // js.special.wrapAsThrowable
+  inline val UNWRAP_FROM_THROWABLE =
+    WRAP_AS_THROWABLE + 1 // js.special.unwrapFromThrowable
+  inline val DEBUGGER = UNWRAP_FROM_THROWABLE + 1 // js.special.debugger
 
   inline val THROW = DEBUGGER + 1
 
-  inline val UNION_FROM = THROW + 1                       // js.|.from
-  inline val UNION_FROM_TYPE_CONSTRUCTOR = UNION_FROM + 1 // js.|.fromTypeConstructor
+  inline val UNION_FROM = THROW + 1 // js.|.from
+  inline val UNION_FROM_TYPE_CONSTRUCTOR =
+    UNION_FROM + 1 // js.|.fromTypeConstructor
 
-  inline val REFLECT_SELECTABLE_SELECTDYN = UNION_FROM_TYPE_CONSTRUCTOR + 1 // scala.reflect.Selectable.selectDynamic
-  inline val REFLECT_SELECTABLE_APPLYDYN = REFLECT_SELECTABLE_SELECTDYN + 1 // scala.reflect.Selectable.applyDynamic
+  inline val REFLECT_SELECTABLE_SELECTDYN =
+    UNION_FROM_TYPE_CONSTRUCTOR + 1 // scala.reflect.Selectable.selectDynamic
+  inline val REFLECT_SELECTABLE_APPLYDYN =
+    REFLECT_SELECTABLE_SELECTDYN + 1 // scala.reflect.Selectable.applyDynamic
 
   inline val LastJSPrimitiveCode = REFLECT_SELECTABLE_APPLYDYN
 
   def isJSPrimitive(code: Int): Boolean =
     code >= FirstJSPrimitiveCode && code <= LastJSPrimitiveCode
+end JSPrimitives
 
-}
+class JSPrimitives(ictx: Context) extends DottyPrimitives(ictx):
+  import JSPrimitives.*
 
-class JSPrimitives(ictx: Context) extends DottyPrimitives(ictx) {
-  import JSPrimitives._
-
-  private lazy val jsPrimitives: ReadOnlyMap[Symbol, Int] = initJSPrimitives(using ictx)
+  private lazy val jsPrimitives: ReadOnlyMap[Symbol, Int] = initJSPrimitives(
+    using ictx
+  )
 
   override def getPrimitive(sym: Symbol): Int =
     jsPrimitives.getOrElse(sym, super.getPrimitive(sym))
@@ -81,26 +92,23 @@ class JSPrimitives(ictx: Context) extends DottyPrimitives(ictx) {
     jsPrimitives.contains(fun.symbol(using ictx)) || super.isPrimitive(fun)
 
   /** Initialize the primitive map */
-  private def initJSPrimitives(using Context): ReadOnlyMap[Symbol, Int] = {
+  private def initJSPrimitives(using Context): ReadOnlyMap[Symbol, Int] =
 
     val primitives = MutableSymbolMap[Int]()
 
     // !!! Code duplicate with DottyPrimitives
     /** Add a primitive operation to the map */
-    def addPrimitive(s: Symbol, code: Int): Unit = {
+    def addPrimitive(s: Symbol, code: Int): Unit =
       assert(!(primitives contains s), "Duplicate primitive " + s)
       primitives(s) = code
-    }
 
-    def addPrimitives(cls: Symbol, method: TermName, code: Int)(using Context): Unit = {
+    def addPrimitives(cls: Symbol, method: TermName, code: Int)(using
+        Context
+    ): Unit =
       val alts = cls.info.member(method).alternatives.map(_.symbol)
-      if (alts.isEmpty) {
+      if alts.isEmpty then
         report.error(em"Unknown primitive method $cls.$method")
-      } else {
-        for (s <- alts)
-          addPrimitive(s, code)
-      }
-    }
+      else for s <- alts do addPrimitive(s, code)
 
     val jsdefn = JSDefinitions.jsdefn
 
@@ -121,7 +129,10 @@ class JSPrimitives(ictx: Context) extends DottyPrimitives(ictx) {
     addPrimitive(jsdefn.Runtime_constructorOf, CONSTRUCTOROF)
     addPrimitive(jsdefn.Runtime_createInnerJSClass, CREATE_INNER_JS_CLASS)
     addPrimitive(jsdefn.Runtime_createLocalJSClass, CREATE_LOCAL_JS_CLASS)
-    addPrimitive(jsdefn.Runtime_withContextualJSClassValue, WITH_CONTEXTUAL_JS_CLASS_VALUE)
+    addPrimitive(
+      jsdefn.Runtime_withContextualJSClassValue,
+      WITH_CONTEXTUAL_JS_CLASS_VALUE
+    )
     addPrimitive(jsdefn.Runtime_linkingInfo, LINKING_INFO)
     addPrimitive(jsdefn.Runtime_dynamicImport, DYNAMIC_IMPORT)
 
@@ -139,12 +150,20 @@ class JSPrimitives(ictx: Context) extends DottyPrimitives(ictx) {
     addPrimitive(defn.throwMethod, THROW)
 
     addPrimitive(jsdefn.PseudoUnion_from, UNION_FROM)
-    addPrimitive(jsdefn.PseudoUnion_fromTypeConstructor, UNION_FROM_TYPE_CONSTRUCTOR)
+    addPrimitive(
+      jsdefn.PseudoUnion_fromTypeConstructor,
+      UNION_FROM_TYPE_CONSTRUCTOR
+    )
 
-    addPrimitive(jsdefn.ReflectSelectable_selectDynamic, REFLECT_SELECTABLE_SELECTDYN)
-    addPrimitive(jsdefn.ReflectSelectable_applyDynamic, REFLECT_SELECTABLE_APPLYDYN)
+    addPrimitive(
+      jsdefn.ReflectSelectable_selectDynamic,
+      REFLECT_SELECTABLE_SELECTDYN
+    )
+    addPrimitive(
+      jsdefn.ReflectSelectable_applyDynamic,
+      REFLECT_SELECTABLE_APPLYDYN
+    )
 
     primitives
-  }
-
-}
+  end initJSPrimitives
+end JSPrimitives

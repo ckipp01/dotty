@@ -8,11 +8,11 @@ import org.junit.Test
 
 import dotty.tools.backend.jvm.DottyBytecodeTest
 
-class SpecializeFunctionsTests extends DottyBytecodeTest {
+class SpecializeFunctionsTests extends DottyBytecodeTest:
 
-  import scala.jdk.CollectionConverters._
+  import scala.jdk.CollectionConverters.*
 
-  @Test def specializeParentIntToInt = {
+  @Test def specializeParentIntToInt =
     val source = """
                  |class Foo extends Function1[Int, Int] {
                  |  def apply(i: Int) = i
@@ -21,12 +21,13 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
 
     checkBCode(source) { dir =>
       val applys =
-        findClass("Foo", dir).methods.asScala.collect {
-          case m if m.name == "apply$mcII$sp" => m
-          case m if m.name == "apply" => m
-        }
-        .map(_.name)
-        .toList
+        findClass("Foo", dir).methods.asScala
+          .collect {
+            case m if m.name == "apply$mcII$sp" => m
+            case m if m.name == "apply"         => m
+          }
+          .map(_.name)
+          .toList
 
       assert(
         // there should be two "apply", one generic and the one overwritten and
@@ -34,12 +35,18 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
         applys.length == 3,
         s"Wrong number of specialized applys, actual length: ${applys.length} $applys"
       )
-      assert(applys.contains("apply"), "Foo did not contain `apply` forwarder method")
-      assert(applys.contains("apply$mcII$sp"), "Foo did not contain specialized apply")
+      assert(
+        applys.contains("apply"),
+        "Foo did not contain `apply` forwarder method"
+      )
+      assert(
+        applys.contains("apply$mcII$sp"),
+        "Foo did not contain specialized apply"
+      )
     }
-  }
+  end specializeParentIntToInt
 
-  @Test def specializeFunction2Applys = {
+  @Test def specializeFunction2Applys =
     val source =
       """|class Func2 extends Function2[Int, Int, Int] {
          |    def apply(i: Int, j: Int): Int = i + j
@@ -47,25 +54,34 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
 
     checkBCode(source) { dir =>
       val apps =
-        findClass("Func2", dir).methods.asScala.collect {
-          case m if m.name == "apply$mcIII$sp" =>
-            assert(!hasInvokeStatic(m)) // should not call super specialized method
-            m
-          case m if m.name == "apply" => m
-        }
-        .map(_.name)
-        .toList
+        findClass("Func2", dir).methods.asScala
+          .collect {
+            case m if m.name == "apply$mcIII$sp" =>
+              assert(
+                !hasInvokeStatic(m)
+              ) // should not call super specialized method
+              m
+            case m if m.name == "apply" => m
+          }
+          .map(_.name)
+          .toList
 
       assert(
         apps.length == 3,
         s"Wrong number of specialized applys, actual length: ${apps.length} - $apps"
       )
-      assert(apps.contains("apply"), "Func2 did not contain `apply` forwarder method")
-      assert(apps.contains("apply$mcIII$sp"), "Func2 did not contain specialized apply")
+      assert(
+        apps.contains("apply"),
+        "Func2 did not contain `apply` forwarder method"
+      )
+      assert(
+        apps.contains("apply$mcIII$sp"),
+        "Func2 did not contain specialized apply"
+      )
     }
-  }
+  end specializeFunction2Applys
 
-  @Test def notSpecializeAbstractMethod = {
+  @Test def notSpecializeAbstractMethod =
     val source =
       """|trait Vector extends (Int=>Int) {
          |  override def apply(i: Int): Int
@@ -73,21 +89,21 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
 
     checkBCode(source) { dir =>
       val apps =
-        findClass("Vector", dir).methods.asScala.collect {
-          case m if m.name == "apply$mcII$sp" => m
-          case m if m.name == "apply" => m
-        }
-        .map(_.name)
-        .toList
+        findClass("Vector", dir).methods.asScala
+          .collect {
+            case m if m.name == "apply$mcII$sp" => m
+            case m if m.name == "apply"         => m
+          }
+          .map(_.name)
+          .toList
 
       assert(
         apps.length == 1,
         s"Wrong number of specialized applys, actual length: ${apps.length} - $apps"
       )
     }
-  }
 
-  @Test def noBoxingSpecFunction0 = {
+  @Test def noBoxingSpecFunction0 =
     implicit val source: String =
       """|class Test {
          |  class Func0 extends Function0[Int] {
@@ -100,9 +116,8 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
     checkBCode(source) { dir =>
       assertNoBoxing("<init>", findClass("Test", dir).methods)
     }
-  }
 
-  @Test def boxingFunction1 = {
+  @Test def boxingFunction1 =
     implicit val source: String =
       """|class Test {
          |  class Func1 extends Function1[Char, Int] {
@@ -116,9 +131,8 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
       // No specialization for Function1[Char, Int]
       assertBoxing("<init>", findClass("Test", dir).methods)
     }
-  }
 
-  @Test def noBoxingSpecFunction1 = {
+  @Test def noBoxingSpecFunction1 =
     implicit val source: String =
       """|class Test {
          |  class Func1 extends Function1[Int, Int] {
@@ -131,9 +145,8 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
     checkBCode(source) { dir =>
       assertNoBoxing("<init>", findClass("Test", dir).methods)
     }
-  }
 
-  @Test def noBoxingSpecFunction2 = {
+  @Test def noBoxingSpecFunction2 =
     implicit val source: String =
       """|class Test {
          |  class Func2 extends Function2[Int, Int, Int] {
@@ -146,9 +159,8 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
     checkBCode(source) { dir =>
       assertNoBoxing("<init>", findClass("Test", dir).methods)
     }
-  }
 
-  @Test def boxingFunction2 = {
+  @Test def boxingFunction2 =
     implicit val source: String =
       """|class Test {
          |  class Func2 extends Function2[Char, Char, Char] {
@@ -162,9 +174,8 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
       // No specialization for Function2[Char, Char, Char]
       assertBoxing("<init>", findClass("Test", dir).methods)
     }
-  }
 
-  @Test def multipleParentsNoBoxing = {
+  @Test def multipleParentsNoBoxing =
     implicit val source: String =
       """|class Test {
          |  class Func01 extends Function0[Int] with Function1[Int, Int] {
@@ -178,9 +189,8 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
     checkBCode(source) { dir =>
       assertNoBoxing("<init>", findClass("Test", dir).methods)
     }
-  }
 
-  @Test def multipleLevelInheritanceNoBoxing = {
+  @Test def multipleLevelInheritanceNoBoxing =
     implicit val source: String =
       """|class Test {
          |  class Func1[T](fn: T => Int) extends Function1[T, Int] {
@@ -193,9 +203,8 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
     checkBCode(source) { dir =>
       assertNoBoxing("<init>", findClass("Test", dir).methods)
     }
-  }
 
-  @Test def lambdaNoBoxing1 = {
+  @Test def lambdaNoBoxing1 =
     implicit val source: String =
       """|class Test {
          |  val fn = (x: Int) => x + 1
@@ -205,9 +214,8 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
     checkBCode(source) { dir =>
       assertNoBoxing("<init>", findClass("Test", dir).methods)
     }
-  }
 
-  @Test def lambdaNoBoxing2 = {
+  @Test def lambdaNoBoxing2 =
     implicit val source: String =
       """|class Test {
          |  def fn[T, U, V](op0: T => U, op1: U => V): T => V = (x: T) => op1(op0(x))
@@ -220,9 +228,8 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
     checkBCode(source) { dir =>
       assertNoBoxing("<init>", findClass("Test", dir).methods)
     }
-  }
 
-  @Test def classWithFieldBoxing = {
+  @Test def classWithFieldBoxing =
     implicit val source: String =
       """|class Test {
          |  class Func0[T](x: T) extends Function0[T] {
@@ -235,9 +242,8 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
       // Boxing happens because of the field of `Func0`.
       assertBoxing("<init>", findClass("Test", dir).methods)
     }
-  }
 
-  @Test def passByNameNoBoxing = {
+  @Test def passByNameNoBoxing =
     implicit val source: String =
       """|class Test {
          |  def fn(x: => Int): Int = x
@@ -247,5 +253,4 @@ class SpecializeFunctionsTests extends DottyBytecodeTest {
     checkBCode(source) { dir =>
       assertNoBoxing("fn", findClass("Test", dir).methods)
     }
-  }
-}
+end SpecializeFunctionsTests

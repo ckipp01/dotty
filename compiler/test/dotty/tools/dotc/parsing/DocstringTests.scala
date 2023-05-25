@@ -2,24 +2,25 @@ package dotty.tools
 package dotc
 package parsing
 
-import dotty.tools.dotc.ast.Trees._
+import dotty.tools.dotc.ast.Trees.*
 
-import org.junit.Assert._
+import org.junit.Assert.*
 import org.junit.Test
 
-class DocstringTests extends DocstringTest {
+class DocstringTests extends DocstringTest:
 
-  @Test def noComment = {
-    import dotty.tools.dotc.ast.untpd._
+  @Test def noComment =
+    import dotty.tools.dotc.ast.untpd.*
     val source = "class Class"
 
-    checkFrontend(source) {
-      case PackageDef(_, Seq(c: TypeDef)) =>
-        assert(c.rawComment.map(_.raw) == None, "Should not have a comment, mainly used for exhaustive tests")
+    checkFrontend(source) { case PackageDef(_, Seq(c: TypeDef)) =>
+      assert(
+        c.rawComment.map(_.raw) == None,
+        "Should not have a comment, mainly used for exhaustive tests"
+      )
     }
-  }
 
-  @Test def singleClassInPackage = {
+  @Test def singleClassInPackage =
     val source =
       """
       |package a
@@ -29,12 +30,12 @@ class DocstringTests extends DocstringTest {
       """.stripMargin
 
     checkFrontend(source) {
-      case PackageDef(_, Seq(t @ TypeDef(name, _))) if name.toString == "Class" =>
+      case PackageDef(_, Seq(t @ TypeDef(name, _)))
+          if name.toString == "Class" =>
         checkDocString(t.rawComment.map(_.raw), "/** Hello world! */")
     }
-  }
 
-  @Test def multipleOpenedOnSingleClassInPackage = {
+  @Test def multipleOpenedOnSingleClassInPackage =
     val source =
       """
       |package a
@@ -44,11 +45,14 @@ class DocstringTests extends DocstringTest {
       """.stripMargin
 
     checkFrontend(source) {
-      case PackageDef(_, Seq(t @ TypeDef(name, _))) if name.toString == "Class" =>
-        checkDocString(t.rawComment.map(_.raw), "/** Hello /* multiple open */ world! */")
+      case PackageDef(_, Seq(t @ TypeDef(name, _)))
+          if name.toString == "Class" =>
+        checkDocString(
+          t.rawComment.map(_.raw),
+          "/** Hello /* multiple open */ world! */"
+        )
     }
-  }
-  @Test def multipleClassesInPackage: Unit = {
+  @Test def multipleClassesInPackage: Unit =
     val source =
       """
       |package a
@@ -61,36 +65,31 @@ class DocstringTests extends DocstringTest {
       """.stripMargin
 
     checkCompile("typer", source) { (_, ctx) =>
-      ctx.compilationUnit.untpdTree match {
-        case PackageDef(_, Seq(c1 @ TypeDef(_,_), c2 @ TypeDef(_,_))) => {
+      ctx.compilationUnit.untpdTree match
+        case PackageDef(_, Seq(c1 @ TypeDef(_, _), c2 @ TypeDef(_, _))) =>
           checkDocString(c1.rawComment.map(_.raw), "/** Class1 docstring */")
           checkDocString(c2.rawComment.map(_.raw), "/** Class2 docstring */")
-        }
-      }
     }
-  }
 
-  @Test def singleCaseClassWithoutPackage = {
+  @Test def singleCaseClassWithoutPackage =
     val source =
       """
       |/** Class without package */
       |case class Class(val x: Int)
       """.stripMargin
 
-    checkFrontend(source) {
-      case PackageDef(_, Seq(t @ TypeDef(_,_))) => checkDocString(t.rawComment.map(_.raw), "/** Class without package */")
+    checkFrontend(source) { case PackageDef(_, Seq(t @ TypeDef(_, _))) =>
+      checkDocString(t.rawComment.map(_.raw), "/** Class without package */")
     }
-  }
 
-  @Test def SingleTraitWihoutPackage = {
+  @Test def SingleTraitWihoutPackage =
     val source = "/** Trait docstring */\ntrait Trait"
 
-    checkFrontend(source) {
-      case PackageDef(_, Seq(t @ TypeDef(_,_))) => checkDocString(t.rawComment.map(_.raw), "/** Trait docstring */")
+    checkFrontend(source) { case PackageDef(_, Seq(t @ TypeDef(_, _))) =>
+      checkDocString(t.rawComment.map(_.raw), "/** Trait docstring */")
     }
-  }
 
-  @Test def multipleTraitsWithoutPackage = {
+  @Test def multipleTraitsWithoutPackage =
     val source =
       """
       |/** Trait1 docstring */
@@ -101,14 +100,12 @@ class DocstringTests extends DocstringTest {
       """.stripMargin
 
     checkFrontend(source) {
-      case PackageDef(_, Seq(t1 @ TypeDef(_,_), t2 @ TypeDef(_,_))) => {
+      case PackageDef(_, Seq(t1 @ TypeDef(_, _), t2 @ TypeDef(_, _))) =>
         checkDocString(t1.rawComment.map(_.raw), "/** Trait1 docstring */")
         checkDocString(t2.rawComment.map(_.raw), "/** Trait2 docstring */")
-      }
     }
-  }
 
-  @Test def multipleMixedEntitiesWithPackage = {
+  @Test def multipleMixedEntitiesWithPackage =
     val source =
       """
       |/** Trait1 docstring */
@@ -127,16 +124,27 @@ class DocstringTests extends DocstringTest {
       """.stripMargin
 
     checkFrontend(source) {
-      case PackageDef(_, Seq(t1 @ TypeDef(_,_), c2 @ TypeDef(_,_), cc3 @ TypeDef(_,_), _, ac4 @ TypeDef(_,_))) => {
+      case PackageDef(
+            _,
+            Seq(
+              t1 @ TypeDef(_, _),
+              c2 @ TypeDef(_, _),
+              cc3 @ TypeDef(_, _),
+              _,
+              ac4 @ TypeDef(_, _)
+            )
+          ) =>
         checkDocString(t1.rawComment.map(_.raw), "/** Trait1 docstring */")
         checkDocString(c2.rawComment.map(_.raw), "/** Class2 docstring */")
         checkDocString(cc3.rawComment.map(_.raw), "/** CaseClass3 docstring */")
-        checkDocString(ac4.rawComment.map(_.raw), "/** AbstractClass4 docstring */")
-      }
+        checkDocString(
+          ac4.rawComment.map(_.raw),
+          "/** AbstractClass4 docstring */"
+        )
     }
-  }
+  end multipleMixedEntitiesWithPackage
 
-  @Test def nestedClass = {
+  @Test def nestedClass =
     val source =
       """
       |/** Outer docstring */
@@ -147,17 +155,18 @@ class DocstringTests extends DocstringTest {
       """.stripMargin
 
     checkFrontend(source) {
-      case PackageDef(_, Seq(outer @ TypeDef(_, tpl @ Template(_,_,_,_)))) => {
+      case PackageDef(_, Seq(outer @ TypeDef(_, tpl @ Template(_, _, _, _)))) =>
         checkDocString(outer.rawComment.map(_.raw), "/** Outer docstring */")
-        tpl.body match {
-          case (inner @ TypeDef(_,_)) :: _ => checkDocString(inner.rawComment.map(_.raw), "/** Inner docstring */")
+        tpl.body match
+          case (inner @ TypeDef(_, _)) :: _ =>
+            checkDocString(
+              inner.rawComment.map(_.raw),
+              "/** Inner docstring */"
+            )
           case _ => assert(false, "Couldn't find inner class")
-        }
-      }
     }
-  }
 
-  @Test def nestedClassThenOuter = {
+  @Test def nestedClassThenOuter =
     val source =
       """
       |/** Outer1 docstring */
@@ -171,18 +180,22 @@ class DocstringTests extends DocstringTest {
       """.stripMargin
 
     checkFrontend(source) {
-      case PackageDef(_, Seq(o1 @ TypeDef(_, tpl @ Template(_,_,_,_)), o2 @ TypeDef(_,_))) => {
+      case PackageDef(
+            _,
+            Seq(o1 @ TypeDef(_, tpl @ Template(_, _, _, _)), o2 @ TypeDef(_, _))
+          ) =>
         checkDocString(o1.rawComment.map(_.raw), "/** Outer1 docstring */")
         checkDocString(o2.rawComment.map(_.raw), "/** Outer2 docstring */")
-        tpl.body match {
-          case (inner @ TypeDef(_,_)) :: _ => checkDocString(inner.rawComment.map(_.raw), "/** Inner docstring */")
+        tpl.body match
+          case (inner @ TypeDef(_, _)) :: _ =>
+            checkDocString(
+              inner.rawComment.map(_.raw),
+              "/** Inner docstring */"
+            )
           case _ => assert(false, "Couldn't find inner class")
-        }
-      }
     }
-  }
 
-  @Test def objects = {
+  @Test def objects =
     val source =
       """
       |package p
@@ -195,16 +208,17 @@ class DocstringTests extends DocstringTest {
       """.stripMargin
 
     checkFrontend(source) {
-      case p @ PackageDef(_, Seq(o1: MemberDef[Untyped], o2: MemberDef[Untyped])) => {
+      case p @ PackageDef(
+            _,
+            Seq(o1: MemberDef[Untyped], o2: MemberDef[Untyped])
+          ) =>
         assertEquals(o1.name.toString, "Object1")
         checkDocString(o1.rawComment.map(_.raw), "/** Object1 docstring */")
         assertEquals(o2.name.toString, "Object2")
         checkDocString(o2.rawComment.map(_.raw), "/** Object2 docstring */")
-      }
     }
-  }
 
-  @Test def objectsNestedClass = {
+  @Test def objectsNestedClass =
     val source =
       """
       |package p
@@ -220,23 +234,25 @@ class DocstringTests extends DocstringTest {
       |}
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
+    import dotty.tools.dotc.ast.untpd.*
     checkFrontend(source) {
-      case p @ PackageDef(_, Seq(o1: ModuleDef, o2: ModuleDef)) => {
+      case p @ PackageDef(_, Seq(o1: ModuleDef, o2: ModuleDef)) =>
         assert(o1.name.toString == "Object1")
         checkDocString(o1.rawComment.map(_.raw), "/** Object1 docstring */")
         assert(o2.name.toString == "Object2")
         checkDocString(o2.rawComment.map(_.raw), "/** Object2 docstring */")
 
-        o2.impl.body match {
-          case _ :: (inner @ TypeDef(_,_)) :: _ => checkDocString(inner.rawComment.map(_.raw), "/** Inner docstring */")
+        o2.impl.body match
+          case _ :: (inner @ TypeDef(_, _)) :: _ =>
+            checkDocString(
+              inner.rawComment.map(_.raw),
+              "/** Inner docstring */"
+            )
           case _ => assert(false, "Couldn't find inner class")
-        }
-      }
     }
-  }
+  end objectsNestedClass
 
-  @Test def packageObject = {
+  @Test def packageObject =
     val source =
       """
       |/** Package object docstring */
@@ -255,25 +271,27 @@ class DocstringTests extends DocstringTest {
       |}
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case PackageDef(_, Seq(p: ModuleDef)) => {
-        checkDocString(p.rawComment.map(_.raw), "/** Package object docstring */")
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case PackageDef(_, Seq(p: ModuleDef)) =>
+      checkDocString(p.rawComment.map(_.raw), "/** Package object docstring */")
 
-        p.impl.body match {
-          case (b: TypeDef) :: (t: TypeDef) :: (o: ModuleDef) :: Nil => {
-            checkDocString(b.rawComment.map(_.raw), "/** Boo docstring */")
-            checkDocString(t.rawComment.map(_.raw), "/** Trait docstring */")
-            checkDocString(o.rawComment.map(_.raw), "/** InnerObject docstring */")
-            checkDocString(o.impl.body.head.asInstanceOf[TypeDef].rawComment.map(_.raw), "/** InnerClass docstring */")
-          }
-          case _ => assert(false, "Incorrect structure inside package object")
-        }
-      }
+      p.impl.body match
+        case (b: TypeDef) :: (t: TypeDef) :: (o: ModuleDef) :: Nil =>
+          checkDocString(b.rawComment.map(_.raw), "/** Boo docstring */")
+          checkDocString(t.rawComment.map(_.raw), "/** Trait docstring */")
+          checkDocString(
+            o.rawComment.map(_.raw),
+            "/** InnerObject docstring */"
+          )
+          checkDocString(
+            o.impl.body.head.asInstanceOf[TypeDef].rawComment.map(_.raw),
+            "/** InnerClass docstring */"
+          )
+        case _ => assert(false, "Incorrect structure inside package object")
     }
-  }
+  end packageObject
 
-  @Test def multipleDocStringsBeforeEntity = {
+  @Test def multipleDocStringsBeforeEntity =
     val source =
       """
       |/** First comment */
@@ -282,14 +300,12 @@ class DocstringTests extends DocstringTest {
       |class Class
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case PackageDef(_, Seq(c: TypeDef)) =>
-        checkDocString(c.rawComment.map(_.raw), "/** Real comment */")
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case PackageDef(_, Seq(c: TypeDef)) =>
+      checkDocString(c.rawComment.map(_.raw), "/** Real comment */")
     }
-  }
 
-  @Test def multipleDocStringsBeforeAndAfter = {
+  @Test def multipleDocStringsBeforeAndAfter =
     val source =
       """
       |/** First comment */
@@ -301,14 +317,12 @@ class DocstringTests extends DocstringTest {
       |/** Following comment 3 */
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case PackageDef(_, Seq(c: TypeDef)) =>
-        checkDocString(c.rawComment.map(_.raw), "/** Real comment */")
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case PackageDef(_, Seq(c: TypeDef)) =>
+      checkDocString(c.rawComment.map(_.raw), "/** Real comment */")
     }
-  }
 
-  @Test def valuesWithDocString = {
+  @Test def valuesWithDocString =
     val source =
       """
       |object Object {
@@ -325,22 +339,17 @@ class DocstringTests extends DocstringTest {
       |}
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case PackageDef(_, Seq(o: ModuleDef)) => {
-        o.impl.body match {
-          case (v1: MemberDef) :: (v2: MemberDef) :: (v3: MemberDef) :: Nil => {
-            checkDocString(v1.rawComment.map(_.raw), "/** val1 */")
-            checkDocString(v2.rawComment.map(_.raw), "/** val2 */")
-            checkDocString(v3.rawComment.map(_.raw), "/** val3 */")
-          }
-          case _ => assert(false, "Incorrect structure inside object")
-        }
-      }
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case PackageDef(_, Seq(o: ModuleDef)) =>
+      o.impl.body match
+        case (v1: MemberDef) :: (v2: MemberDef) :: (v3: MemberDef) :: Nil =>
+          checkDocString(v1.rawComment.map(_.raw), "/** val1 */")
+          checkDocString(v2.rawComment.map(_.raw), "/** val2 */")
+          checkDocString(v3.rawComment.map(_.raw), "/** val3 */")
+        case _ => assert(false, "Incorrect structure inside object")
     }
-  }
 
-  @Test def varsWithDocString = {
+  @Test def varsWithDocString =
     val source =
       """
       |object Object {
@@ -357,22 +366,17 @@ class DocstringTests extends DocstringTest {
       |}
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case PackageDef(_, Seq(o: ModuleDef)) => {
-        o.impl.body match {
-          case (v1: MemberDef) :: (v2: MemberDef) :: (v3: MemberDef) :: Nil => {
-            checkDocString(v1.rawComment.map(_.raw), "/** var1 */")
-            checkDocString(v2.rawComment.map(_.raw), "/** var2 */")
-            checkDocString(v3.rawComment.map(_.raw), "/** var3 */")
-          }
-          case _ => assert(false, "Incorrect structure inside object")
-        }
-      }
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case PackageDef(_, Seq(o: ModuleDef)) =>
+      o.impl.body match
+        case (v1: MemberDef) :: (v2: MemberDef) :: (v3: MemberDef) :: Nil =>
+          checkDocString(v1.rawComment.map(_.raw), "/** var1 */")
+          checkDocString(v2.rawComment.map(_.raw), "/** var2 */")
+          checkDocString(v3.rawComment.map(_.raw), "/** var3 */")
+        case _ => assert(false, "Incorrect structure inside object")
     }
-  }
 
-  @Test def defsWithDocString = {
+  @Test def defsWithDocString =
     val source =
       """
       |object Object {
@@ -389,22 +393,17 @@ class DocstringTests extends DocstringTest {
       |}
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case PackageDef(_, Seq(o: ModuleDef)) => {
-        o.impl.body match {
-          case (v1: MemberDef) :: (v2: MemberDef) :: (v3: MemberDef) :: Nil => {
-            checkDocString(v1.rawComment.map(_.raw), "/** def1 */")
-            checkDocString(v2.rawComment.map(_.raw), "/** def2 */")
-            checkDocString(v3.rawComment.map(_.raw), "/** def3 */")
-          }
-          case _ => assert(false, "Incorrect structure inside object")
-        }
-      }
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case PackageDef(_, Seq(o: ModuleDef)) =>
+      o.impl.body match
+        case (v1: MemberDef) :: (v2: MemberDef) :: (v3: MemberDef) :: Nil =>
+          checkDocString(v1.rawComment.map(_.raw), "/** def1 */")
+          checkDocString(v2.rawComment.map(_.raw), "/** def2 */")
+          checkDocString(v3.rawComment.map(_.raw), "/** def3 */")
+        case _ => assert(false, "Incorrect structure inside object")
     }
-  }
 
-  @Test def typesWithDocString = {
+  @Test def typesWithDocString =
     val source =
       """
       |object Object {
@@ -421,22 +420,17 @@ class DocstringTests extends DocstringTest {
       |}
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case PackageDef(_, Seq(o: ModuleDef)) => {
-        o.impl.body match {
-          case (v1: MemberDef) :: (v2: MemberDef) :: (v3: MemberDef) :: Nil => {
-            checkDocString(v1.rawComment.map(_.raw), "/** type1 */")
-            checkDocString(v2.rawComment.map(_.raw), "/** type2 */")
-            checkDocString(v3.rawComment.map(_.raw), "/** type3 */")
-          }
-          case _ => assert(false, "Incorrect structure inside object")
-        }
-      }
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case PackageDef(_, Seq(o: ModuleDef)) =>
+      o.impl.body match
+        case (v1: MemberDef) :: (v2: MemberDef) :: (v3: MemberDef) :: Nil =>
+          checkDocString(v1.rawComment.map(_.raw), "/** type1 */")
+          checkDocString(v2.rawComment.map(_.raw), "/** type2 */")
+          checkDocString(v3.rawComment.map(_.raw), "/** type3 */")
+        case _ => assert(false, "Incorrect structure inside object")
     }
-  }
 
-  @Test def defInnerClass = {
+  @Test def defInnerClass =
     val source =
       """
       |object Foo {
@@ -447,18 +441,15 @@ class DocstringTests extends DocstringTest {
       |}
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case PackageDef(_, Seq(o: ModuleDef)) =>
-        o.impl.body match {
-          case (foo: MemberDef) :: Nil =>
-            expectNoDocString(foo.rawComment.map(_.raw))
-          case _ => assert(false, "Incorrect structure inside object")
-        }
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case PackageDef(_, Seq(o: ModuleDef)) =>
+      o.impl.body match
+        case (foo: MemberDef) :: Nil =>
+          expectNoDocString(foo.rawComment.map(_.raw))
+        case _ => assert(false, "Incorrect structure inside object")
     }
-  }
 
-  @Test def withExtends = {
+  @Test def withExtends =
     val source =
       """
       |trait Trait1
@@ -466,15 +457,12 @@ class DocstringTests extends DocstringTest {
       |class Class1 extends Trait1
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case p @ PackageDef(_, Seq(_, c: TypeDef)) =>
-        checkDocString(c.rawComment.map(_.raw), "/** Class1 */")
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case p @ PackageDef(_, Seq(_, c: TypeDef)) =>
+      checkDocString(c.rawComment.map(_.raw), "/** Class1 */")
     }
-  }
 
-
-  @Test def overNL = {
+  @Test def overNL =
     val source =
       """
       |/** Class1 */
@@ -482,14 +470,12 @@ class DocstringTests extends DocstringTest {
       |class Class1
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case p @ PackageDef(_, Seq(c: TypeDef)) =>
-        checkDocString(c.rawComment.map(_.raw), "/** Class1 */")
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case p @ PackageDef(_, Seq(c: TypeDef)) =>
+      checkDocString(c.rawComment.map(_.raw), "/** Class1 */")
     }
-  }
 
-  @Test def overComment = {
+  @Test def overComment =
     val source =
       """
       |/** Class1 */
@@ -497,14 +483,12 @@ class DocstringTests extends DocstringTest {
       |class Class1
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case p @ PackageDef(_, Seq(c: TypeDef)) =>
-        checkDocString(c.rawComment.map(_.raw), "/** Class1 */")
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case p @ PackageDef(_, Seq(c: TypeDef)) =>
+      checkDocString(c.rawComment.map(_.raw), "/** Class1 */")
     }
-  }
 
-  @Test def withAnnotation = {
+  @Test def withAnnotation =
     val source =
       """
       |/** Class1 */
@@ -512,14 +496,12 @@ class DocstringTests extends DocstringTest {
       |class Class1
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case p @ PackageDef(_, Seq(c: TypeDef)) =>
-        checkDocString(c.rawComment.map(_.raw), "/** Class1 */")
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case p @ PackageDef(_, Seq(c: TypeDef)) =>
+      checkDocString(c.rawComment.map(_.raw), "/** Class1 */")
     }
-  }
 
-  @Test def withAnnotationOverComment = {
+  @Test def withAnnotationOverComment =
     val source =
       """
       |/** Class1 */
@@ -528,14 +510,12 @@ class DocstringTests extends DocstringTest {
       |class Class1
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case p @ PackageDef(_, Seq(c: TypeDef)) =>
-        checkDocString(c.rawComment.map(_.raw), "/** Class1 */")
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case p @ PackageDef(_, Seq(c: TypeDef)) =>
+      checkDocString(c.rawComment.map(_.raw), "/** Class1 */")
     }
-  }
 
-  @Test def nestedComment = {
+  @Test def nestedComment =
     val source =
       """
       |trait T {
@@ -544,24 +524,27 @@ class DocstringTests extends DocstringTest {
       |class C
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case p @ PackageDef(_, Seq(_, c: TypeDef)) =>
-        assert(c.rawComment == None, s"class C is not supposed to have a docstring (${c.rawComment.get}) in:$source")
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case p @ PackageDef(_, Seq(_, c: TypeDef)) =>
+      assert(
+        c.rawComment == None,
+        s"class C is not supposed to have a docstring (${c.rawComment.get}) in:$source"
+      )
     }
-  }
 
-  @Test def eofComment = {
+  @Test def eofComment =
     val source =
       """
       |class C
       |/** Cheeky comment */
       """.stripMargin
 
-    import dotty.tools.dotc.ast.untpd._
-    checkFrontend(source) {
-      case p @ PackageDef(_, Seq(c: TypeDef)) =>
-        assert(c.rawComment == None, s"class C is not supposed to have a docstring (${c.rawComment.get}) in:$source")
+    import dotty.tools.dotc.ast.untpd.*
+    checkFrontend(source) { case p @ PackageDef(_, Seq(c: TypeDef)) =>
+      assert(
+        c.rawComment == None,
+        s"class C is not supposed to have a docstring (${c.rawComment.get}) in:$source"
+      )
     }
-  }
-} /* End class */
+end DocstringTests
+/* End class */

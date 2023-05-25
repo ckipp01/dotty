@@ -3,12 +3,12 @@ package xsbt
 import xsbti.TestCallback.ExtractedClassDependencies
 
 import org.junit.Test
-import org.junit.Assert._
+import org.junit.Assert.*
 
-class DependencySpecification {
+class DependencySpecification:
 
   @Test
-  def extractedClassDependenciesFromPublicMembers = {
+  def extractedClassDependenciesFromPublicMembers =
     val classDependencies = extractClassDependenciesPublic
     val memberRef = classDependencies.memberRef
     val inheritance = classDependencies.inheritance
@@ -22,15 +22,17 @@ class DependencySpecification {
     assertEquals(Set.empty, inheritance("D"))
     assertEquals(Set.empty, memberRef("E"))
     assertEquals(Set.empty, inheritance("E"))
-    assertEquals(Set("A", "B", "D", "E", "G", "C"), memberRef("F")) // C is the underlying type of MyC
+    assertEquals(
+      Set("A", "B", "D", "E", "G", "C"),
+      memberRef("F")
+    ) // C is the underlying type of MyC
     assertEquals(Set("A", "E"), inheritance("F"))
     assertEquals(Set("B", "E", "G"), memberRef("H"))
     // aliases and applied type constructors are expanded so we have inheritance dependency on B
     assertEquals(Set("B", "E"), inheritance("H"))
-  }
 
   @Test
-  def extractedClassDependenciesFromLocalMembers = {
+  def extractedClassDependenciesFromLocalMembers =
     val classDependencies = extractClassDependenciesLocal
     val memberRef = classDependencies.memberRef
     val inheritance = classDependencies.inheritance
@@ -47,10 +49,9 @@ class DependencySpecification {
     assertEquals(Set("B"), memberRef("E"))
     assertEquals(Set.empty, inheritance("E"))
     assertEquals(Set("B"), localInheritance("E"))
-  }
 
   @Test
-  def extractedClassDependenciesWithTraitAsFirstParent = {
+  def extractedClassDependenciesWithTraitAsFirstParent =
     val classDependencies = extractClassDependenciesTraitAsFirstPatent
     val memberRef = classDependencies.memberRef
     val inheritance = classDependencies.inheritance
@@ -66,10 +67,9 @@ class DependencySpecification {
     // same as above but indirect (C -> B -> A), note that only A is visible here
     assertEquals(Set("A", "C"), memberRef("D"))
     assertEquals(Set("A", "C"), inheritance("D"))
-  }
 
   @Test
-  def extractedClassDependenciesFromARefinement = {
+  def extractedClassDependenciesFromARefinement =
     val srcFoo =
       "object Outer {\n  class Inner { type Xyz }\n\n  type TypeInner = Inner { type Xyz = Int }\n}"
     val srcBar = "object Bar {\n  def bar: Outer.TypeInner = null\n}"
@@ -84,10 +84,9 @@ class DependencySpecification {
     assertEquals(Set.empty, inheritance("Outer"))
     assertEquals(Set("Outer", "Outer$.Inner"), memberRef("Bar"))
     assertEquals(Set.empty, inheritance("Bar"))
-  }
 
   @Test
-  def extractedClassDependenciesOnAnObjectCorrectly = {
+  def extractedClassDependenciesOnAnObjectCorrectly =
     val srcA =
       """object A {
         |   def foo = { B; () }
@@ -104,10 +103,9 @@ class DependencySpecification {
     assertEquals(Set.empty, inheritance("A"))
     assertEquals(Set.empty, memberRef("B"))
     assertEquals(Set.empty, inheritance("B"))
-  }
 
   @Test
-  def extractedTopLevelImportDependencies = {
+  def extractedTopLevelImportDependencies =
     val srcA =
       """
         |package abc
@@ -132,7 +130,16 @@ class DependencySpecification {
 
     val compilerForTesting = new ScalaCompilerForUnitTesting
     val deps = compilerForTesting
-      .extractDependenciesFromSrcs(srcA, srcB, srcC, srcD, srcE, srcF, srcG, srcH)
+      .extractDependenciesFromSrcs(
+        srcA,
+        srcB,
+        srcC,
+        srcD,
+        srcE,
+        srcF,
+        srcG,
+        srcH
+      )
       .memberRef
 
     assertEquals(Set.empty, deps("A"))
@@ -143,10 +150,10 @@ class DependencySpecification {
     assertEquals(Set.empty, deps("F"))
     assertEquals(Set("abc.A"), deps("foo.bar.G"))
     assertEquals(Set("abc.A"), deps("H"))
-  }
+  end extractedTopLevelImportDependencies
 
   @Test
-  def extractedClassDependenciesOnPackageObject = {
+  def extractedClassDependenciesOnPackageObject =
     val srcA = "package object foo { def bar = 1 }"
     val srcB =
       """|package foo
@@ -162,9 +169,8 @@ class DependencySpecification {
 
     val memberRef = classDependencies.memberRef
     assertEquals(Set("foo.package"), memberRef("foo.Test"))
-  }
 
-  private def extractClassDependenciesPublic: ExtractedClassDependencies = {
+  private def extractClassDependenciesPublic: ExtractedClassDependencies =
     val srcA = "class A"
     val srcB = "class B extends D[A]"
     val srcC = """|class C {
@@ -181,11 +187,19 @@ class DependencySpecification {
 
     val compilerForTesting = new ScalaCompilerForUnitTesting
     val classDependencies =
-      compilerForTesting.extractDependenciesFromSrcs(srcA, srcB, srcC, srcD, srcE, srcF, srcG, srcH)
+      compilerForTesting.extractDependenciesFromSrcs(
+        srcA,
+        srcB,
+        srcC,
+        srcD,
+        srcE,
+        srcF,
+        srcG,
+        srcH
+      )
     classDependencies
-  }
 
-  private def extractClassDependenciesLocal: ExtractedClassDependencies = {
+  private def extractClassDependenciesLocal: ExtractedClassDependencies =
     val srcA = "class A"
     val srcB = "class B"
     val srcC = "class C { private class Inner1 extends A }"
@@ -194,11 +208,17 @@ class DependencySpecification {
 
     val compilerForTesting = new ScalaCompilerForUnitTesting
     val classDependencies =
-      compilerForTesting.extractDependenciesFromSrcs(srcA, srcB, srcC, srcD, srcE)
+      compilerForTesting.extractDependenciesFromSrcs(
+        srcA,
+        srcB,
+        srcC,
+        srcD,
+        srcE
+      )
     classDependencies
-  }
 
-  private def extractClassDependenciesTraitAsFirstPatent: ExtractedClassDependencies = {
+  private def extractClassDependenciesTraitAsFirstPatent
+      : ExtractedClassDependencies =
     val srcA = "class A"
     val srcB = "trait B extends A"
     val srcC = "trait C extends B"
@@ -208,5 +228,4 @@ class DependencySpecification {
     val classDependencies =
       compilerForTesting.extractDependenciesFromSrcs(srcA, srcB, srcC, srcD)
     classDependencies
-  }
-}
+end DependencySpecification

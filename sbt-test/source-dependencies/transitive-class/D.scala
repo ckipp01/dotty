@@ -1,4 +1,3 @@
 class D extends C
-object Hello extends App {
+object Hello extends App:
   new D
-}

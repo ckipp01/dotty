@@ -2,17 +2,17 @@ package dotty.tools
 package dotc
 package semanticdb
 
-import core._
-import Contexts._
-import Symbols._
-import Flags._
+import core.*
+import Contexts.*
+import Symbols.*
+import Flags.*
 import Names.Name
 
 import scala.annotation.tailrec
 import scala.collection.mutable
 
 class SemanticSymbolBuilder:
-  import Scala3.{_, given}
+  import Scala3.{*, given}
 
   private var nextLocalIdx: Int = 0
 
@@ -22,7 +22,6 @@ class SemanticSymbolBuilder:
   /** The local symbol(s) starting at given offset */
   private val symsAtOffset = new mutable.HashMap[Int, Set[Symbol]]():
     override def default(key: Int) = Set[Symbol]()
-
 
   def symbolName(sym: Symbol)(using Context): String =
     val b = StringBuilder(20)
@@ -55,8 +54,12 @@ class SemanticSymbolBuilder:
       val funSymbol = symbolName(sym)
       name => s"$funSymbol($name)"
     else
-      name => locals.keys.find(local => local.isTerm && local.owner == sym && local.name == name)
-                    .fold("<?>")(Symbols.LocalPrefix + locals(_))
+      name =>
+        locals.keys
+          .find(local =>
+            local.isTerm && local.owner == sym && local.name == name
+          )
+          .fold("<?>")(Symbols.LocalPrefix + locals(_))
 
   private def addName(b: StringBuilder, name: Name): Unit =
     val str = name.toString.unescapeUnicode
@@ -81,8 +84,7 @@ class SemanticSymbolBuilder:
         val decls0 = sym.owner.info.decls.lookupAll(sym.name)
         if sym.owner.isAllOf(JavaModule) then
           decls0 ++ sym.owner.companionClass.info.decls.lookupAll(sym.name)
-        else
-          decls0
+        else decls0
       end decls
       val alts = decls.filter(_.isOneOf(Method | Mutable)).toList.reverse
       def find(filter: Symbol => Boolean) = alts match
@@ -95,43 +97,41 @@ class SemanticSymbolBuilder:
       find(_.signature == sig)
 
     def addDescriptor(sym: Symbol): Unit =
-      if sym.is(ModuleClass) then
-        addDescriptor(sym.sourceModule)
+      if sym.is(ModuleClass) then addDescriptor(sym.sourceModule)
       else if sym.is(TypeParam) then
         b.append('['); addName(b, sym.name); b.append(']')
       else if sym.is(Param) then
         b.append('('); addName(b, sym.name); b.append(')')
-      else if sym.isRoot then
-        b.append(Symbols.RootPackage)
-      else if sym.isEmptyPackage then
-        b.append(Symbols.EmptyPackage)
-      else if (sym.isScala2PackageObject) then
+      else if sym.isRoot then b.append(Symbols.RootPackage)
+      else if sym.isEmptyPackage then b.append(Symbols.EmptyPackage)
+      else if sym.isScala2PackageObject then
         b.append(Symbols.PackageObjectDescriptor)
       else
         addName(b, sym.name)
         if sym.is(Package) then b.append('/')
         else if sym.isType || sym.isAllOf(JavaModule) then b.append('#')
         else if sym.isOneOf(Method | Mutable)
-        && (!sym.is(StableRealizable) || sym.isConstructor) then
+          && (!sym.is(StableRealizable) || sym.isConstructor)
+        then
           b.append('('); addOverloadIdx(sym); b.append(").")
         else b.append('.')
 
-    /** The index of local symbol `sym`. Symbols with the same name and
-     *  the same starting position have the same index.
-     */
+    /** The index of local symbol `sym`. Symbols with the same name and the same
+      * starting position have the same index.
+      */
     def localIdx(sym: Symbol)(using Context): Int =
       val startPos =
         // assert(sym.span.exists, s"$sym should have a span")
-        if (sym.span.exists) Some(sym.span.start) else None
+        if sym.span.exists then Some(sym.span.start) else None
       @tailrec
       def computeLocalIdx(sym: Symbol): Int = locals get sym match
         case Some(idx) => idx
         case None =>
-          (for {
+          (for
             pos <- startPos
             syms <- symsAtOffset.get(pos)
             found <- syms.find(_.name == sym.name)
-          } yield found) match
+          yield found) match
             case Some(other) => computeLocalIdx(other)
             case None =>
               val idx = nextLocalIdx
@@ -146,7 +146,7 @@ class SemanticSymbolBuilder:
     if sym.exists then
       if sym.isGlobal then
         addOwner(sym.owner); addDescriptor(sym)
-      else
-        b.append(Symbols.LocalPrefix).append(localIdx(sym))
+      else b.append(Symbols.LocalPrefix).append(localIdx(sym))
 
   end addSymName
+end SemanticSymbolBuilder

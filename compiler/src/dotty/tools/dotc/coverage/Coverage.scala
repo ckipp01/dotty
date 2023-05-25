@@ -11,7 +11,9 @@ class Coverage:
 
   def addStatement(stmt: Statement): Unit = statementsById(stmt.id) = stmt
 
-/** A statement that can be invoked, and thus counted as "covered" by code coverage tools. */
+/** A statement that can be invoked, and thus counted as "covered" by code
+  * coverage tools.
+  */
 case class Statement(
     location: Location,
     id: Int,

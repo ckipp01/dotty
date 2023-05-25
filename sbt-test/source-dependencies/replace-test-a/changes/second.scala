@@ -1,4 +1,2 @@
-object Second
-{
-	def main(args: Array[String]): Unit = ()
-}
+object Second:
+  def main(args: Array[String]): Unit = ()

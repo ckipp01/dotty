@@ -1,5 +1,4 @@
 package example
 
-object A {
-	val x: Int = green
-}
+object A:
+  val x: Int = green

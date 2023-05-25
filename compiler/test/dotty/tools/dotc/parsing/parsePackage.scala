@@ -2,21 +2,21 @@ package dotty.tools
 package dotc
 package parsing
 
-import dotty.tools.dotc._
-import core._, ast._
-import Trees._
+import dotty.tools.dotc.*
+import core.*, ast.*
+import Trees.*
 import Contexts.Context
 
-object parsePackage extends ParserTest {
+object parsePackage extends ParserTest:
 
-  import ast.untpd._
+  import ast.untpd.*
 
   var nodes = 0
 
-  val transformer = new UntypedTreeMap {
-    override def transform(tree: Tree)(using Context): Tree = {
+  val transformer = new UntypedTreeMap:
+    override def transform(tree: Tree)(using Context): Tree =
       nodes += 1
-      tree match {
+      tree match
         case Ident(name) =>
           Ident(name)
         case This(name) =>
@@ -57,24 +57,23 @@ object parsePackage extends ParserTest {
           ContextBounds(transformSub(bounds), cxBounds map transform)
         case _ =>
           super.transform(tree)
-      }
-    }
-  }
+      end match
+    end transform
 
-  def test() = {
+  def test() =
     reset()
     nodes = 0
     val start = System.nanoTime()
     parseDir("./src")
-    val ms1 = (System.nanoTime() - start)/1000000
+    val ms1 = (System.nanoTime() - start) / 1000000
     val buf = parsedTrees map transformer.transform
-    val ms2 = (System.nanoTime() - start)/1000000
-    println(s"$parsed files parsed in ${ms1}ms, $nodes nodes transformed in ${ms2-ms1}ms, total trees created = ${Trees.ntrees}")
+    val ms2 = (System.nanoTime() - start) / 1000000
+    println(
+      s"$parsed files parsed in ${ms1}ms, $nodes nodes transformed in ${ms2 - ms1}ms, total trees created = ${Trees.ntrees}"
+    )
     ctx.reporter.printSummary()
-  }
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
 //    parse("/Users/odersky/workspace/scala/src/compiler/scala/tools/nsc/doc/model/ModelFactoryTypeSupport.scala")
-    for (i <- 0 until 10) test()
-  }
-}
+    for i <- 0 until 10 do test()
+end parsePackage

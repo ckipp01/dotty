@@ -7,65 +7,57 @@
 \*                                                                      */
 package dotty.tools.dotc.core.classfile
 
-object ByteCodecs {
+object ByteCodecs:
 
-  def avoidZero(src: Array[Byte]): Array[Byte] = {
+  def avoidZero(src: Array[Byte]): Array[Byte] =
     var i = 0
     val srclen = src.length
     var count = 0
-    while (i < srclen) {
-      if (src(i) == 0x7f) count += 1
+    while i < srclen do
+      if src(i) == 0x7f then count += 1
       i += 1
-    }
     val dst = new Array[Byte](srclen + count)
     i = 0
     var j = 0
-    while (i < srclen) {
+    while i < srclen do
       val in = src(i)
-      if (in == 0x7f) {
+      if in == 0x7f then
         dst(j) = (0xc0).toByte
         dst(j + 1) = (0x80).toByte
         j += 2
-      }
       else {
         dst(j) = (in + 1).toByte
         j += 1
       }
       i += 1
-    }
     dst
-  }
 
-  def regenerateZero(src: Array[Byte]): Int = {
+  def regenerateZero(src: Array[Byte]): Int =
     var i = 0
     val srclen = src.length
     var j = 0
-    while (i < srclen) {
+    while i < srclen do
       val in: Int = src(i) & 0xff
-      if (in == 0xc0 && (src(i + 1) & 0xff) == 0x80) {
+      if in == 0xc0 && (src(i + 1) & 0xff) == 0x80 then
         src(j) = 0x7f
         i += 2
-      }
-      else if (in == 0) {
+      else if in == 0 then
         src(j) = 0x7f
         i += 1
-      }
       else {
         src(j) = (in - 1).toByte
         i += 1
       }
       j += 1
-    }
     j
-  }
 
-  def encode8to7(src: Array[Byte]): Array[Byte] = {
+  def encode8to7(src: Array[Byte]): Array[Byte] =
     val srclen = src.length
     val dstlen = (srclen * 8 + 6) / 7
     val dst = new Array[Byte](dstlen)
     var i = 0
     var j = 0
-    while (i + 6 < srclen) {
+    while i + 6 < srclen do
       var in: Int = src(i) & 0xff
       dst(j) = (in & 0x7f).toByte
       var out: Int = in >>> 7
@@ -90,46 +82,39 @@ object ByteCodecs {
       dst(j + 7) = out.toByte
       i += 7
       j += 8
-    }
-    if (i < srclen) {
+    if i < srclen then
       var in: Int = src(i) & 0xff
       dst(j) = (in & 0x7f).toByte; j += 1
       var out: Int = in >>> 7
-      if (i + 1 < srclen) {
+      if i + 1 < srclen then
         in = src(i + 1) & 0xff
         dst(j) = (out | (in << 1) & 0x7f).toByte; j += 1
         out = in >>> 6
-        if (i + 2 < srclen) {
+        if i + 2 < srclen then
           in = src(i + 2) & 0xff
           dst(j) = (out | (in << 2) & 0x7f).toByte; j += 1
           out = in >>> 5
-          if (i + 3 < srclen) {
+          if i + 3 < srclen then
             in = src(i + 3) & 0xff
             dst(j) = (out | (in << 3) & 0x7f).toByte; j += 1
             out = in >>> 4
-            if (i + 4 < srclen) {
+            if i + 4 < srclen then
               in = src(i + 4) & 0xff
               dst(j) = (out | (in << 4) & 0x7f).toByte; j += 1
               out = in >>> 3
-              if (i + 5 < srclen) {
+              if i + 5 < srclen then
                 in = src(i + 5) & 0xff
                 dst(j) = (out | (in << 5) & 0x7f).toByte; j += 1
                 out = in >>> 2
-              }
-            }
-          }
-        }
-      }
-      if (j < dstlen) dst(j) = out.toByte
-    }
+      if j < dstlen then dst(j) = out.toByte
     dst
-  }
+  end encode8to7
 
-  def decode7to8(src: Array[Byte], srclen: Int): Int = {
+  def decode7to8(src: Array[Byte], srclen: Int): Int =
     var i = 0
     var j = 0
     val dstlen = (srclen * 7 + 7) / 8
-    while (i + 7 < srclen) {
+    while i + 7 < srclen do
       var out: Int = src(i)
       var in: Byte = src(i + 1)
       src(j) = (out | (in & 0x01) << 7).toByte
@@ -153,72 +138,53 @@ object ByteCodecs {
       src(j + 6) = (out | in << 1).toByte
       i += 8
       j += 7
-    }
-    if (i < srclen) {
+    if i < srclen then
       var out: Int = src(i)
-      if (i + 1 < srclen) {
+      if i + 1 < srclen then
         var in: Byte = src(i + 1)
         src(j) = (out | (in & 0x01) << 7).toByte; j += 1
         out = in >>> 1
-        if (i + 2 < srclen) {
+        if i + 2 < srclen then
           in = src(i + 2)
           src(j) = (out | (in & 0x03) << 6).toByte; j += 1
           out = in >>> 2
-          if (i + 3 < srclen) {
+          if i + 3 < srclen then
             in = src(i + 3)
             src(j) = (out | (in & 0x07) << 5).toByte; j += 1
             out = in >>> 3
-            if (i + 4 < srclen) {
+            if i + 4 < srclen then
               in = src(i + 4)
               src(j) = (out | (in & 0x0f) << 4).toByte; j += 1
               out = in >>> 4
-              if (i + 5 < srclen) {
+              if i + 5 < srclen then
                 in = src(i + 5)
                 src(j) = (out | (in & 0x1f) << 3).toByte; j += 1
                 out = in >>> 5
-                if (i + 6 < srclen) {
+                if i + 6 < srclen then
                   in = src(i + 6)
                   src(j) = (out | (in & 0x3f) << 2).toByte; j += 1
                   out = in >>> 6
-                }
-              }
-            }
-          }
-        }
-      }
-      if (j < dstlen) src(j) = out.toByte
-    }
+      if j < dstlen then src(j) = out.toByte
     dstlen
-  }
+  end decode7to8
 
   def encode(xs: Array[Byte]): Array[Byte] = avoidZero(encode8to7(xs))
 
-  /**
-   * Destructively decodes array xs and returns the length of the decoded array.
-   *
-   * Sometimes returns (length + 1) of the decoded array. Example:
-   *
-   *   scala> val enc = reflect.generic.ByteCodecs.encode(Array(1,2,3))
-   *   enc: Array[Byte] = Array(2, 5, 13, 1)
-   *
-   *   scala> reflect.generic.ByteCodecs.decode(enc)
-   *   res43: Int = 4
-   *
-   *   scala> enc
-   *   res44: Array[Byte] = Array(1, 2, 3, 0)
-   *
-   * However, this does not always happen.
-   */
-  def decode(xs: Array[Byte]): Int = {
+  /** Destructively decodes array xs and returns the length of the decoded
+    * array.
+    *
+    * Sometimes returns (length + 1) of the decoded array. Example:
+    *
+    * scala> val enc = reflect.generic.ByteCodecs.encode(Array(1,2,3)) enc:
+    * Array[Byte] = Array(2, 5, 13, 1)
+    *
+    * scala> reflect.generic.ByteCodecs.decode(enc) res43: Int = 4
+    *
+    * scala> enc res44: Array[Byte] = Array(1, 2, 3, 0)
+    *
+    * However, this does not always happen.
+    */
+  def decode(xs: Array[Byte]): Int =
     val len = regenerateZero(xs)
     decode7to8(xs, len)
-  }
-}
-
-
-
-
-
-
-
-
+end ByteCodecs

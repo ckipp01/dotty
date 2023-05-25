@@ -4,37 +4,44 @@ package site
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.core.`type`.TypeReference;
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import java.util.Optional
-import scala.beans._
+import scala.beans.*
 
 enum Sidebar:
   case Category(
-    title: Option[String],
-    indexPath: Option[String],
-    nested: List[Sidebar],
-    directory: Option[String]
+      title: Option[String],
+      indexPath: Option[String],
+      nested: List[Sidebar],
+      directory: Option[String]
   )
   case Page(title: Option[String], pagePath: String, hidden: Boolean)
 
 object Sidebar:
   case class RawInput(
-    @BeanProperty var title: String,
-    @BeanProperty var page: String,
-    @BeanProperty var index: String,
-    @BeanProperty var subsection: JList[RawInput],
-    @BeanProperty var directory: String,
-    @BooleanBeanProperty var hidden: Boolean
+      @BeanProperty var title: String,
+      @BeanProperty var page: String,
+      @BeanProperty var index: String,
+      @BeanProperty var subsection: JList[RawInput],
+      @BeanProperty var directory: String,
+      @BooleanBeanProperty var hidden: Boolean
   ):
     def this() = this("", "", "", JList(), "", false)
 
   private object RawInputTypeRef extends TypeReference[RawInput]
 
   private def toSidebar(r: RawInput)(using CompilerContext): Sidebar = r match
-    case RawInput(title, page, index, subsection, dir, hidden) if page.nonEmpty && index.isEmpty && subsection.isEmpty() =>
+    case RawInput(title, page, index, subsection, dir, hidden)
+        if page.nonEmpty && index.isEmpty && subsection.isEmpty() =>
       Sidebar.Page(Option.when(title.nonEmpty)(title), page, hidden)
-    case RawInput(title, page, index, subsection, dir, hidden) if page.isEmpty && (!subsection.isEmpty() || !index.isEmpty()) =>
-      Sidebar.Category(Option.when(title.nonEmpty)(title), Option.when(index.nonEmpty)(index), subsection.asScala.map(toSidebar).toList, Option.when(dir.nonEmpty)(dir))
+    case RawInput(title, page, index, subsection, dir, hidden)
+        if page.isEmpty && (!subsection.isEmpty() || !index.isEmpty()) =>
+      Sidebar.Category(
+        Option.when(title.nonEmpty)(title),
+        Option.when(index.nonEmpty)(index),
+        subsection.asScala.map(toSidebar).toList,
+        Option.when(dir.nonEmpty)(dir)
+      )
     case RawInput(title, page, index, subsection, dir, hidden) =>
       report.error(s"Error parsing YAML configuration file.\n$schemaMessage")
       Sidebar.Page(None, page, hidden)
@@ -60,11 +67,13 @@ object Sidebar:
       |https://docs.scala-lang.org/scala3/guides/scaladoc/static-site.html
       |""".stripMargin
 
-  def load(content: String | java.io.File)(using CompilerContext): Sidebar.Category =
+  def load(content: String | java.io.File)(using
+      CompilerContext
+  ): Sidebar.Category =
     import scala.util.Try
     val mapper = ObjectMapper(YAMLFactory())
     def readValue = content match
-      case s: String => mapper.readValue(s, RawInputTypeRef)
+      case s: String       => mapper.readValue(s, RawInputTypeRef)
       case f: java.io.File => mapper.readValue(f, RawInputTypeRef)
 
     val root: RawInput = Try(readValue)
@@ -80,3 +89,4 @@ object Sidebar:
       case _ =>
         report.error(s"Root element is not a subsection.\n$schemaMessage")
         Sidebar.Category(None, None, List.empty, None)
+end Sidebar

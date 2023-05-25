@@ -3,7 +3,7 @@ package renderers
 
 import org.junit.{Test, Rule}
 import org.junit.Assert.{assertSame, assertTrue, assertEquals}
-import dotty.tools.scaladoc.util.HTML._
+import dotty.tools.scaladoc.util.HTML.*
 
 class LocationTests:
   given DocContext = testDocContext()
@@ -12,9 +12,15 @@ class LocationTests:
 
   @Test
   def testPathToRoot() =
-    assertEquals("../root.png", locations.resolveRoot(Seq("a", "b"), "root.png"))
+    assertEquals(
+      "../root.png",
+      locations.resolveRoot(Seq("a", "b"), "root.png")
+    )
     assertEquals("root.png", locations.resolveRoot(Seq("ala.html"), "root.png"))
-    assertEquals("c/root.png", locations.resolveRoot(Seq("a", "b", "index"), "a/b/c/root.png"))
+    assertEquals(
+      "c/root.png",
+      locations.resolveRoot(Seq("a", "b", "index"), "a/b/c/root.png")
+    )
 
   @Test
   def testLinks() =
@@ -25,17 +31,20 @@ class LocationTests:
 
     assertEquals(
       "../comments",
-      path("api/dotty/dokka/tasty/comments/wiki", "api/dotty/dokka/tasty/comments"),
+      path(
+        "api/dotty/dokka/tasty/comments/wiki",
+        "api/dotty/dokka/tasty/comments"
+      )
     )
 
     assertEquals(
       "../../../../index",
-      path("api/dotty/dokka/tasty/comments/wiki", "api/index"),
+      path("api/dotty/dokka/tasty/comments/wiki", "api/index")
     )
 
     assertEquals(
       "../../annotation",
-      path("api/scala/annotation/meta/beanGetter", "api/scala/annotation"),
+      path("api/scala/annotation/meta/beanGetter", "api/scala/annotation")
     )
 
   @Test
@@ -52,3 +61,4 @@ class LocationTests:
       "scala/collection/immutable/LazyList$$%23$.html#abcde",
       pathWithAnchor("scala.collection.immutable.LazyList$$#$", "abcde")
     )
+end LocationTests

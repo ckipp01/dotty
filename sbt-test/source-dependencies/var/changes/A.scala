@@ -1,4 +1,2 @@
-class A
-{
-	var x = 3
-}
+class A:
+  var x = 3

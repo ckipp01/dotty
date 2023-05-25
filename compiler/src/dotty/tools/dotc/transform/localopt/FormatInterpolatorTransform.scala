@@ -8,12 +8,15 @@ import dotty.tools.dotc.core.Contexts.*
 object FormatInterpolatorTransform:
 
   /** For f"${arg}%xpart", check format conversions and return (format, args)
-   *  suitable for String.format(format, args).
-   */
+    * suitable for String.format(format, args).
+    */
   def checked(fun: Tree, args0: Tree)(using Context): (Tree, Tree) =
     val (partsExpr, parts) = fun match
       case TypeApply(Select(Apply(_, (parts: SeqLiteral) :: Nil), _), _) =>
-        (parts.elems, parts.elems.map { case Literal(Constant(s: String)) => s })
+        (
+          parts.elems,
+          parts.elems.map { case Literal(Constant(s: String)) => s }
+        )
       case _ =>
         report.error("Expected statically known StringContext", fun.srcPos)
         (Nil, Nil)
@@ -27,7 +30,8 @@ object FormatInterpolatorTransform:
     if parts.lengthIs != args.length + 1 then
       val badParts =
         if parts.isEmpty then "there are no parts"
-        else s"too ${if parts.lengthIs > args.length + 1 then "few" else "many"} arguments for interpolated string"
+        else
+          s"too ${if parts.lengthIs > args.length + 1 then "few" else "many"} arguments for interpolated string"
       report.error(badParts, fun.srcPos)
       (literally(""), args0)
     else

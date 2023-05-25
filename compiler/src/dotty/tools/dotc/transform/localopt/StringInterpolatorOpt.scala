@@ -4,22 +4,23 @@ package transform.localopt
 import scala.language.unsafeNulls
 
 import dotty.tools.dotc.ast.tpd
-import dotty.tools.dotc.core.Decorators._
+import dotty.tools.dotc.core.Decorators.*
 import dotty.tools.dotc.core.Constants.Constant
-import dotty.tools.dotc.core.Contexts._
-import dotty.tools.dotc.core.StdNames._
-import dotty.tools.dotc.core.Symbols._
-import dotty.tools.dotc.core.Types._
+import dotty.tools.dotc.core.Contexts.*
+import dotty.tools.dotc.core.StdNames.*
+import dotty.tools.dotc.core.Symbols.*
+import dotty.tools.dotc.core.Types.*
 import dotty.tools.dotc.transform.MegaPhase.MiniPhase
 import dotty.tools.dotc.typer.ConstFold
 
-/** MiniPhase to transform s and raw string interpolators from using StringContext to string
- *  concatenation. Since string concatenation uses the Java String builder, we get a performance
- *  improvement in terms of these two interpolators.
- *
- *  More info here:
- *  https://medium.com/@dkomanov/scala-string-interpolation-performance-21dc85e83afd
- */
+/** MiniPhase to transform s and raw string interpolators from using
+  * StringContext to string concatenation. Since string concatenation uses the
+  * Java String builder, we get a performance improvement in terms of these two
+  * interpolators.
+  *
+  * More info here:
+  * https://medium.com/@dkomanov/scala-string-interpolation-performance-21dc85e83afd
+  */
 class StringInterpolatorOpt extends MiniPhase:
   import tpd.*
 
@@ -31,15 +32,18 @@ class StringInterpolatorOpt extends MiniPhase:
     tree match
       case tree: RefTree =>
         val sym = tree.symbol
-        assert(!StringInterpolatorOpt.isCompilerIntrinsic(sym),
-          i"$tree in ${ctx.owner.showLocated} should have been rewritten by phase $phaseName")
+        assert(
+          !StringInterpolatorOpt.isCompilerIntrinsic(sym),
+          i"$tree in ${ctx.owner.showLocated} should have been rewritten by phase $phaseName"
+        )
       case _ =>
 
   /** Matches a list of constant literals */
   private object Literals:
     def unapply(tree: SeqLiteral)(using Context): Option[List[Literal]] =
       tree.elems match
-        case literals if literals.forall(_.isInstanceOf[Literal]) => Some(literals.map(_.asInstanceOf[Literal]))
+        case literals if literals.forall(_.isInstanceOf[Literal]) =>
+          Some(literals.map(_.asInstanceOf[Literal]))
         case _ => None
 
   private object StringContextApply:
@@ -48,29 +52,38 @@ class StringInterpolatorOpt extends MiniPhase:
 
   /** Matches an s or raw string interpolator */
   private object SOrRawInterpolator:
-    def unapply(tree: Tree)(using Context): Option[(List[Literal], List[Tree])] =
+    def unapply(tree: Tree)(using
+        Context
+    ): Option[(List[Literal], List[Tree])] =
       tree match
-        case Apply(Select(Apply(StringContextApply(), List(Literals(strs))), _), List(SeqLiteral(elems, _)))
-        if elems.length == strs.length - 1 => Some(strs, elems)
+        case Apply(
+              Select(Apply(StringContextApply(), List(Literals(strs))), _),
+              List(SeqLiteral(elems, _))
+            ) if elems.length == strs.length - 1 =>
+          Some(strs, elems)
         case _ => None
 
-  //Extract the position from InvalidUnicodeEscapeException
-  //which due to bincompat reasons is unaccessible.
-  //TODO: remove once there is less restrictive bincompat
+  // Extract the position from InvalidUnicodeEscapeException
+  // which due to bincompat reasons is unaccessible.
+  // TODO: remove once there is less restrictive bincompat
   private object InvalidEscapePosition:
     def unapply(t: Throwable): Option[Int] = t match
       case iee: StringContext.InvalidEscapeException => Some(iee.index)
-      case iae: IllegalArgumentException => iae.getMessage() match
-        case s"""invalid unicode escape at index $index of $_""" => index.toIntOption
-        case _ => None
+      case iae: IllegalArgumentException =>
+        iae.getMessage() match
+          case s"""invalid unicode escape at index $index of $_""" =>
+            index.toIntOption
+          case _ => None
       case _ => None
 
-  /** Match trees that resemble s and raw string interpolations. In the case of the s
-   *  interpolator, escapes the string constants. Exposes the string constants as well as
-   *  the variable references.
-   */
+  /** Match trees that resemble s and raw string interpolations. In the case of
+    * the s interpolator, escapes the string constants. Exposes the string
+    * constants as well as the variable references.
+    */
   private object StringContextIntrinsic:
-    def unapply(tree: Apply)(using Context): Option[(List[Literal], List[Tree])] =
+    def unapply(tree: Apply)(using
+        Context
+    ): Option[(List[Literal], List[Tree])] =
       tree match
         case SOrRawInterpolator(strs, elems) =>
           if tree.symbol == defn.StringContext_raw then Some(strs, elems)
@@ -80,7 +93,8 @@ class StringInterpolatorOpt extends MiniPhase:
             try
               val escapedStrs = strs.map { str =>
                 stringPosition = str.sourcePos
-                val escaped = StringContext.processEscapes(str.const.stringValue)
+                val escaped =
+                  StringContext.processEscapes(str.const.stringValue)
                 cpy.Literal(str)(Constant(escaped))
               }
               Some(escapedStrs, elems)
@@ -98,7 +112,8 @@ class StringInterpolatorOpt extends MiniPhase:
       val elemi = elems.iterator
       var result: Tree = stri.next
       def concat(tree: Tree): Unit =
-        result = result.select(defn.String_+).appliedTo(tree).withSpan(tree.span)
+        result =
+          result.select(defn.String_+).appliedTo(tree).withSpan(tree.span)
       while elemi.hasNext
       do
         concat(elemi.next)
@@ -128,9 +143,14 @@ class StringInterpolatorOpt extends MiniPhase:
       val pre = fun match
         case Select(pre, _) => pre
         case intp: Ident    => tpd.desugarIdentPrefix(intp)
-      val stringToString = defn.StringContextModule_processEscapes.info.asInstanceOf[MethodType]
-      val process = tpd.Lambda(stringToString, args =>
-        if isRaw then args.head else ref(defn.StringContextModule_processEscapes).appliedToTermArgs(args)
+      val stringToString =
+        defn.StringContextModule_processEscapes.info.asInstanceOf[MethodType]
+      val process = tpd.Lambda(
+        stringToString,
+        args =>
+          if isRaw then args.head
+          else
+            ref(defn.StringContextModule_processEscapes).appliedToTermArgs(args)
       )
       evalOnce(pre) { sc =>
         val parts = sc.select(defn.StringContext_parts)
@@ -151,13 +171,17 @@ class StringInterpolatorOpt extends MiniPhase:
         case _: ConstantType => tree
         case _ =>
           ConstFold.Apply(tree).tpe match
-            case ConstantType(x) => Literal(x).withSpan(tree.span).ensureConforms(tree.tpe)
+            case ConstantType(x) =>
+              Literal(x).withSpan(tree.span).ensureConforms(tree.tpe)
             case _ => tree
+  end transformApply
 
   override def transformSelect(tree: Select)(using Context): Tree =
     ConstFold.Select(tree).tpe match
-      case ConstantType(x) => Literal(x).withSpan(tree.span).ensureConforms(tree.tpe)
+      case ConstantType(x) =>
+        Literal(x).withSpan(tree.span).ensureConforms(tree.tpe)
       case _ => tree
+end StringInterpolatorOpt
 
 object StringInterpolatorOpt:
   val name: String = "interpolators"
@@ -166,5 +190,5 @@ object StringInterpolatorOpt:
   /** Is this symbol one of the s, f or raw string interpolator? */
   def isCompilerIntrinsic(sym: Symbol)(using Context): Boolean =
     sym == defn.StringContext_s ||
-    sym == defn.StringContext_f ||
-    sym == defn.StringContext_raw
+      sym == defn.StringContext_f ||
+      sym == defn.StringContext_raw

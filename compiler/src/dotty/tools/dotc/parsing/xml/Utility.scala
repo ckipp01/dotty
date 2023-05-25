@@ -6,168 +6,174 @@ import scala.language.unsafeNulls
 
 import scala.collection.mutable
 
-/**
- * The `Utility` object provides utility functions for processing instances
- * of bound and not bound XML classes, as well as escaping text nodes.
- *
- * @author Burak Emir
- */
-object Utility {
+/** The `Utility` object provides utility functions for processing instances of
+  * bound and not bound XML classes, as well as escaping text nodes.
+  *
+  * @author
+  *   Burak Emir
+  */
+object Utility:
   import util.Chars.SU
 
   private val unescMap = Map(
-    "lt"    -> '<',
-    "gt"    -> '>',
-    "amp"   -> '&',
-    "quot"  -> '"',
-    "apos"  -> '\''
+    "lt" -> '<',
+    "gt" -> '>',
+    "amp" -> '&',
+    "quot" -> '"',
+    "apos" -> '\''
   )
 
-  /**
-   * Appends unescaped string to `s`, `amp` becomes `&amp;`,
-   * `lt` becomes `&lt;` etc..
-   *
-   * @return    `'''null'''` if `ref` was not a predefined entity.
-   */
+  /** Appends unescaped string to `s`, `amp` becomes `&amp;`, `lt` becomes
+    * `&lt;` etc..
+    *
+    * @return
+    *   `'''null'''` if `ref` was not a predefined entity.
+    */
   private final def unescape(ref: String, s: StringBuilder): StringBuilder =
     ((unescMap get ref) map (s append _)).orNull
 
-  def parseAttributeValue[T](value: String, text: String => T, entityRef: String => T): List[T] = {
-    val sb  = new StringBuilder
+  def parseAttributeValue[T](
+      value: String,
+      text: String => T,
+      entityRef: String => T
+  ): List[T] =
+    val sb = new StringBuilder
     var rfb: StringBuilder = null
     val nb = new mutable.ListBuffer[T]()
 
     val it = value.iterator
-    while (it.hasNext) {
+    while it.hasNext do
       var c = it.next()
       // entity! flush buffer into text node
-      if (c == '&') {
+      if c == '&' then
         c = it.next()
-        if (c == '#') {
+        if c == '#' then
           c = it.next()
-          val theChar = parseCharRef ({ ()=> c },{ () => c = it.next() },{s => throw new RuntimeException(s)}, {s => throw new RuntimeException(s)})
+          val theChar = parseCharRef(
+            { () => c },
+            { () => c = it.next() },
+            { s => throw new RuntimeException(s) },
+            { s => throw new RuntimeException(s) }
+          )
           sb.append(theChar)
-        }
         else {
-          if (rfb eq null) rfb = new StringBuilder()
+          if rfb eq null then rfb = new StringBuilder()
           rfb append c
           c = it.next()
-          while (c != ';') {
+          while c != ';' do
             rfb.append(c)
             c = it.next()
-          }
           val ref = rfb.toString()
           rfb.clear()
-          unescape(ref,sb) match {
+          unescape(ref, sb) match
             case null =>
-              if (!sb.isEmpty) {  // flush buffer
+              if !sb.isEmpty then // flush buffer
                 nb += text(sb.toString())
                 sb.clear()
-              }
               nb += entityRef(ref) // add entityref
             case _ =>
-          }
         }
-      }
       else sb append c
-    }
+    end while
 
-    if (!sb.isEmpty) // flush buffer
+    if !sb.isEmpty then // flush buffer
       nb += text(sb.toString())
 
     nb.toList
-  }
+  end parseAttributeValue
 
-  /**
-   * {{{
-   *   CharRef ::= "&amp;#" '0'..'9' {'0'..'9'} ";"
-   *             | "&amp;#x" '0'..'9'|'A'..'F'|'a'..'f' { hexdigit } ";"
-   * }}}
-   * See [66]
-   */
-  def parseCharRef(ch: () => Char, nextch: () => Unit, reportSyntaxError: String => Unit, reportTruncatedError: String => Unit): String = {
-    val hex  = ch() == 'x'
-    if (hex) nextch()
-    val base = if (hex) 16 else 10
+  /** {{{
+    *   CharRef ::= "&amp;#" '0'..'9' {'0'..'9'} ";"
+    *             | "&amp;#x" '0'..'9'|'A'..'F'|'a'..'f' { hexdigit } ";"
+    * }}}
+    * See [66]
+    */
+  def parseCharRef(
+      ch: () => Char,
+      nextch: () => Unit,
+      reportSyntaxError: String => Unit,
+      reportTruncatedError: String => Unit
+  ): String =
+    val hex = ch() == 'x'
+    if hex then nextch()
+    val base = if hex then 16 else 10
     var i = 0
-    while (ch() != ';') {
-      ch() match {
+    while ch() != ';' do
+      ch() match
         case '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' =>
           i = i * base + ch().asDigit
-        case 'a' | 'b' | 'c' | 'd' | 'e' | 'f'
-           | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' =>
-          if (! hex)
-            reportSyntaxError("hex char not allowed in decimal char ref\n" +
-                              "Did you mean to write &#x ?")
-          else
-            i = i * base + ch().asDigit
+        case 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'A' | 'B' | 'C' | 'D' | 'E' |
+            'F' =>
+          if !hex then
+            reportSyntaxError(
+              "hex char not allowed in decimal char ref\n" +
+                "Did you mean to write &#x ?"
+            )
+          else i = i * base + ch().asDigit
         case SU =>
           reportTruncatedError("")
         case _ =>
-          reportSyntaxError("character '" + ch() + "' not allowed in char ref\n")
-      }
+          reportSyntaxError(
+            "character '" + ch() + "' not allowed in char ref\n"
+          )
       nextch()
-    }
     new String(Array(i), 0, 1)
-  }
+  end parseCharRef
 
   /** {{{
-   *  (#x20 | #x9 | #xD | #xA)
-   *  }}} */
-  final def isSpace(ch: Char): Boolean = ch match {
+    *  (#x20 | #x9 | #xD | #xA)
+    * }}}
+    */
+  final def isSpace(ch: Char): Boolean = ch match
     case '\u0009' | '\u000A' | '\u000D' | '\u0020' => true
     case _                                         => false
-  }
+
   /** {{{
-   *  (#x20 | #x9 | #xD | #xA)+
-   *  }}} */
+    *  (#x20 | #x9 | #xD | #xA)+
+    * }}}
+    */
   final def isSpace(cs: Seq[Char]): Boolean = cs.nonEmpty && (cs forall isSpace)
 
   /** {{{
-   *  NameChar ::= Letter | Digit | '.' | '-' | '_' | ':'
-   *             | CombiningChar | Extender
-   *  }}}
-   *  See [4] and Appendix B of XML 1.0 specification.
-  */
-  def isNameChar(ch: Char): Boolean = {
-    import java.lang.Character._
+    *  NameChar ::= Letter | Digit | '.' | '-' | '_' | ':'
+    *             | CombiningChar | Extender
+    * }}}
+    * See [4] and Appendix B of XML 1.0 specification.
+    */
+  def isNameChar(ch: Char): Boolean =
+    import java.lang.Character.*
     // The constants represent groups Mc, Me, Mn, Lm, and Nd.
 
-    isNameStart(ch) || (getType(ch).toByte match {
-      case COMBINING_SPACING_MARK |
-              ENCLOSING_MARK | NON_SPACING_MARK |
-              MODIFIER_LETTER | DECIMAL_DIGIT_NUMBER => true
-      case _                                         => ".-:" contains ch
-    })
-  }
+    isNameStart(ch) || (getType(ch).toByte match
+      case COMBINING_SPACING_MARK | ENCLOSING_MARK | NON_SPACING_MARK |
+          MODIFIER_LETTER | DECIMAL_DIGIT_NUMBER =>
+        true
+      case _ => ".-:" contains ch
+    )
 
   /** {{{
-   *  NameStart ::= ( Letter | '_' )
-   *  }}}
-   *  where Letter means in one of the Unicode general
-   *  categories `{ Ll, Lu, Lo, Lt, Nl }`.
-   *
-   *  We do not allow a name to start with `:`.
-   *  See [3] and Appendix B of XML 1.0 specification
-   */
-  def isNameStart(ch: Char): Boolean = {
-    import java.lang.Character._
+    *  NameStart ::= ( Letter | '_' )
+    * }}}
+    * where Letter means in one of the Unicode general categories `{ Ll, Lu, Lo,
+    * Lt, Nl }`.
+    *
+    * We do not allow a name to start with `:`. See [3] and Appendix B of XML
+    * 1.0 specification
+    */
+  def isNameStart(ch: Char): Boolean =
+    import java.lang.Character.*
 
-    getType(ch).toByte match {
-      case LOWERCASE_LETTER |
-              UPPERCASE_LETTER | OTHER_LETTER |
-              TITLECASE_LETTER | LETTER_NUMBER => true
-      case _                                   => ch == '_'
-    }
-  }
+    getType(ch).toByte match
+      case LOWERCASE_LETTER | UPPERCASE_LETTER | OTHER_LETTER |
+          TITLECASE_LETTER | LETTER_NUMBER =>
+        true
+      case _ => ch == '_'
 
   /** {{{
-   *  Name ::= ( Letter | '_' ) (NameChar)*
-   *  }}}
-   *  See [5] of XML 1.0 specification.
-   */
+    *  Name ::= ( Letter | '_' ) (NameChar)*
+    * }}}
+    * See [5] of XML 1.0 specification.
+    */
   def isName(s: String): Boolean =
     s.nonEmpty && isNameStart(s.head) && (s.tail forall isNameChar)
-
-}
-
+end Utility

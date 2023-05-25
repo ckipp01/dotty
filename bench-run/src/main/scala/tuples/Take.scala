@@ -1,9 +1,9 @@
 package dotty.tools.benchmarks.tuples
 
-import org.openjdk.jmh.annotations._
+import org.openjdk.jmh.annotations.*
 
 @State(Scope.Thread)
-class Take {
+class Take:
   @Param(Array("0"))
   var size: Int = _
   var tuple: Tuple = _
@@ -11,23 +11,18 @@ class Take {
   var half: Int = _
 
   @Setup
-  def setup(): Unit = {
+  def setup(): Unit =
     tuple = Tuple()
     half = size / 2
 
-    for (i <- 1 to size)
-      tuple = "elem" *: tuple
+    for i <- 1 to size do tuple = "elem" *: tuple
 
     array = new Array[Object](size)
-  }
 
   @Benchmark
-  def tupleTake(): Tuple = {
+  def tupleTake(): Tuple =
     runtime.Tuples.take(tuple, half)
-  }
 
   @Benchmark
-  def arrayTake(): Array[Object] = {
+  def arrayTake(): Array[Object] =
     array.take(half)
-  }
-}

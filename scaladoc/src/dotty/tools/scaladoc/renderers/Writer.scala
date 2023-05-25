@@ -7,7 +7,7 @@ import java.nio.file.Path
 import java.nio.file.Files
 import java.io.File
 
-import util.HTML._
+import util.HTML.*
 
 // TODO be more clever about writting - make it much faster!
 trait Writer(using ctx: DocContext) extends Locations:
@@ -15,7 +15,8 @@ trait Writer(using ctx: DocContext) extends Locations:
 
   private def dest(path: String) =
     val absPath = args.output.toPath.resolve(path)
-    if !Files.exists(absPath.getParent) then Files.createDirectories(absPath.getParent)
+    if !Files.exists(absPath.getParent) then
+      Files.createDirectories(absPath.getParent)
     absPath
 
   def write(dri: DRI, content: AppliedTag, extension: String = "html"): String =

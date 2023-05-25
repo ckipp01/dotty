@@ -1,16 +1,16 @@
 package dotty.tools
 package dotc
 
-import core.Contexts._
+import core.Contexts.*
 import reporting.Reporter
 import io.AbstractFile
 
 import scala.annotation.internal.sharable
 
-/** A main class for running compiler benchmarks. Can instantiate a given
- *  number of compilers and run each (sequentially) a given number of times
- *  on the same sources.
- */
+/** A main class for running compiler benchmarks. Can instantiate a given number
+  * of compilers and run each (sequentially) a given number of times on the same
+  * sources.
+  */
 object Bench extends Driver:
 
   @sharable private var numRuns = 1
@@ -19,7 +19,9 @@ object Bench extends Driver:
   @sharable private var curCompiler = 0
   @sharable private var times: Array[Int] = _
 
-  override def doCompile(compiler: Compiler, files: List[AbstractFile])(using Context): Reporter =
+  override def doCompile(compiler: Compiler, files: List[AbstractFile])(using
+      Context
+  ): Reporter =
     var reporter: Reporter = emptyReporter
     for i <- 0 until numRuns do
       val curRun = curCompiler * numRuns + i
@@ -32,11 +34,14 @@ object Bench extends Driver:
         System.in.nn.read()
     reporter
 
-  def extractNumArg(args: Array[String], name: String, default: Int = 1): (Int, Array[String]) = {
+  def extractNumArg(
+      args: Array[String],
+      name: String,
+      default: Int = 1
+  ): (Int, Array[String]) =
     val pos = args indexOf name
-    if (pos < 0) (default, args)
+    if pos < 0 then (default, args)
     else (args(pos + 1).toInt, (args take pos) ++ (args drop (pos + 2)))
-  }
 
   def reportTimes() =
     val best = times.sorted
@@ -64,5 +69,3 @@ object Bench extends Driver:
     reporter
 
 end Bench
-
-

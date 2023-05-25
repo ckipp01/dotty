@@ -1,14 +1,14 @@
 package dotty.tools.dotc
 package transform
 
-import core._
-import Flags._
-import Contexts._
-import Symbols._
-import SymUtils._
+import core.*
+import Flags.*
+import Contexts.*
+import Symbols.*
+import SymUtils.*
 import dotty.tools.dotc.ast.tpd
-import dotty.tools.dotc.ast.Trees._
-import dotty.tools.dotc.quoted._
+import dotty.tools.dotc.ast.Trees.*
+import dotty.tools.dotc.quoted.*
 import dotty.tools.dotc.inlines.Inlines
 import dotty.tools.dotc.ast.TreeMapWithImplicits
 import dotty.tools.dotc.core.DenotTransformers.IdentityDenotTransformer
@@ -16,10 +16,12 @@ import dotty.tools.dotc.staging.StagingLevel
 
 import scala.collection.mutable.ListBuffer
 
-/** Inlines all calls to inline methods that are not in an inline method or a quote */
-class Inlining extends MacroTransform {
+/** Inlines all calls to inline methods that are not in an inline method or a
+  * quote
+  */
+class Inlining extends MacroTransform:
 
-  import tpd._
+  import tpd.*
 
   override def phaseName: String = Inlining.name
 
@@ -30,48 +32,50 @@ class Inlining extends MacroTransform {
   override def changesMembers: Boolean = true
 
   override def run(using Context): Unit =
-    if ctx.compilationUnit.needsInlining || ctx.compilationUnit.hasMacroAnnotations then
+    if ctx.compilationUnit.needsInlining || ctx.compilationUnit.hasMacroAnnotations
+    then
       try super.run
       catch case _: CompilationUnit.SuspendException => ()
 
-  override def runOn(units: List[CompilationUnit])(using Context): List[CompilationUnit] =
+  override def runOn(units: List[CompilationUnit])(using
+      Context
+  ): List[CompilationUnit] =
     val newUnits = super.runOn(units).filterNot(_.suspended)
     ctx.run.nn.checkSuspendedUnits(newUnits)
     newUnits
 
   override def checkPostCondition(tree: Tree)(using Context): Unit =
-    tree match {
+    tree match
       case PackageDef(pid, _) if tree.symbol.owner == defn.RootClass =>
-        new TreeTraverser {
+        new TreeTraverser:
           def traverse(tree: Tree)(using Context): Unit =
             tree match
-              case tree: RefTree if !Inlines.inInlineMethod && StagingLevel.level == 0 =>
+              case tree: RefTree
+                  if !Inlines.inInlineMethod && StagingLevel.level == 0 =>
                 assert(!tree.symbol.isInlineMethod, tree.show)
               case _ =>
                 traverseChildren(tree)
-        }.traverse(tree)
+          .traverse(tree)
       case _ =>
-    }
 
-  def newTransformer(using Context): Transformer = new Transformer {
+  def newTransformer(using Context): Transformer = new Transformer:
     override def transform(tree: tpd.Tree)(using Context): tpd.Tree =
       new InliningTreeMap().transform(tree)
-  }
 
-  private class InliningTreeMap extends TreeMapWithImplicits {
+  private class InliningTreeMap extends TreeMapWithImplicits:
 
     /** List of top level classes added by macro annotation in a package object.
-     *  These are added to the PackageDef that owns this particular package object.
-     */
+      * These are added to the PackageDef that owns this particular package
+      * object.
+      */
     private val newTopClasses = MutableSymbolMap[ListBuffer[Tree]]()
 
-    override def transform(tree: Tree)(using Context): Tree = {
+    override def transform(tree: Tree)(using Context): Tree =
       tree match
         case tree: MemberDef =>
           if tree.symbol.is(Inline) then tree
           else if tree.symbol.is(Param) then super.transform(tree)
-          else if
-            !tree.symbol.isPrimaryConstructor
+          else if !tree.symbol.isPrimaryConstructor
             && StagingLevel.level == 0
             && MacroAnnotations.hasMacroAnnotation(tree.symbol)
           then
@@ -80,10 +84,14 @@ class Inlining extends MacroTransform {
 
             // Find classes added to the top level from a package object
             val (topClasses, trees2) =
-              if ctx.owner.isPackageObject then trees1.partition(_.symbol.owner == ctx.owner.owner)
+              if ctx.owner.isPackageObject then
+                trees1.partition(_.symbol.owner == ctx.owner.owner)
               else (Nil, trees1)
             if topClasses.nonEmpty then
-              newTopClasses.getOrElseUpdate(ctx.owner.owner, new ListBuffer) ++= topClasses
+              newTopClasses.getOrElseUpdate(
+                ctx.owner.owner,
+                new ListBuffer
+              ) ++= topClasses
 
             flatTree(trees2)
           else super.transform(tree)
@@ -95,7 +103,7 @@ class Inlining extends MacroTransform {
           else Inlines.inlineCall(tree1)
         case _: PackageDef =>
           super.transform(tree) match
-            case tree1: PackageDef  =>
+            case tree1: PackageDef =>
               newTopClasses.get(tree.symbol.moduleClass) match
                 case Some(topClasses) =>
                   newTopClasses.remove(tree.symbol.moduleClass)
@@ -106,9 +114,8 @@ class Inlining extends MacroTransform {
         case _ =>
           if tree.isType then tree
           else super.transform(tree)
-    }
-  }
-}
+  end InliningTreeMap
+end Inlining
 
 object Inlining:
   val name: String = "inlining"

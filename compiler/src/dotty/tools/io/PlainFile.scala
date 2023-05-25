@@ -11,48 +11,65 @@ import scala.language.unsafeNulls
 import java.io.{InputStream, OutputStream}
 import java.nio.file.{InvalidPathException, Paths}
 
-/** ''Note:  This library is considered experimental and should not be used unless you know what you are doing.'' */
-class PlainDirectory(givenPath: Directory) extends PlainFile(givenPath) {
+/** ''Note: This library is considered experimental and should not be used
+  * unless you know what you are doing.''
+  */
+class PlainDirectory(givenPath: Directory) extends PlainFile(givenPath):
   override def isDirectory: Boolean = true
-  override def iterator(): Iterator[PlainFile] = givenPath.list.filter(_.exists).map(new PlainFile(_))
+  override def iterator(): Iterator[PlainFile] =
+    givenPath.list.filter(_.exists).map(new PlainFile(_))
   override def delete(): Unit = givenPath.deleteRecursively()
-}
 
 /** This class implements an abstract file backed by a File.
- *
- * ''Note:  This library is considered experimental and should not be used unless you know what you are doing.''
- */
-class PlainFile(val givenPath: Path) extends AbstractFile {
+  *
+  * ''Note: This library is considered experimental and should not be used
+  * unless you know what you are doing.''
+  */
+class PlainFile(val givenPath: Path) extends AbstractFile:
   assert(path ne null)
 
   dotc.util.Stats.record("new PlainFile")
 
   def jpath: JPath = givenPath.jpath
 
-  override def underlyingSource  = {
+  override def underlyingSource =
     val fileSystem = jpath.getFileSystem
-    fileSystem.provider().getScheme match {
+    fileSystem.provider().getScheme match
       case "jar" =>
         val fileStores = fileSystem.getFileStores.iterator()
-        if (fileStores.hasNext) {
+        if fileStores.hasNext then
           val jarPath = fileStores.next().name
-          try {
-            Some(new PlainFile(new Path(Paths.get(jarPath.stripSuffix(fileSystem.getSeparator)))))
-          } catch {
+          try
+            Some(
+              new PlainFile(
+                new Path(
+                  Paths.get(jarPath.stripSuffix(fileSystem.getSeparator))
+                )
+              )
+            )
+          catch
             case _: InvalidPathException =>
               None
-          }
-        } else None
+        else None
       case "jrt" =>
-        if (jpath.getNameCount > 2 && jpath.startsWith("/modules")) {
+        if jpath.getNameCount > 2 && jpath.startsWith("/modules") then
           // TODO limit this to OpenJDK based JVMs?
           val moduleName = jpath.getName(1)
-          Some(new PlainFile(new Path(Paths.get(System.getProperty("java.home"), "jmods", moduleName.toString + ".jmod"))))
-        } else None
+          Some(
+            new PlainFile(
+              new Path(
+                Paths.get(
+                  System.getProperty("java.home"),
+                  "jmods",
+                  moduleName.toString + ".jmod"
+                )
+              )
+            )
+          )
+        else None
       case _ => None
-    }
-  }
-
+    end match
+  end underlyingSource
 
   /** Returns the name of this abstract file. */
   def name: String = givenPath.name
@@ -72,10 +89,9 @@ class PlainFile(val givenPath: Path) extends AbstractFile {
   override def sizeOption: Option[Int] = Some(givenPath.length.toInt)
 
   override def hashCode(): Int = System.identityHashCode(absolutePath)
-  override def equals(that: Any): Boolean = that match {
+  override def equals(that: Any): Boolean = that match
     case x: PlainFile => absolutePath `eq` x.absolutePath
     case _            => false
-  }
 
   /** Is this abstract file a directory? */
   def isDirectory: Boolean = givenPath.isDirectory
@@ -84,44 +100,38 @@ class PlainFile(val givenPath: Path) extends AbstractFile {
   def lastModified: Long = givenPath.lastModified.toMillis
 
   /** Returns all abstract subfiles of this abstract directory. */
-  def iterator: Iterator[AbstractFile] = {
+  def iterator: Iterator[AbstractFile] =
     // Optimization: Assume that the file was not deleted and did not have permissions changed
     // between the call to `list` and the iteration. This saves a call to `exists`.
-    def existsFast(path: Path) = path match {
+    def existsFast(path: Path) = path match
       case (_: Directory | _: File) => true
-      case _ => path.exists
-    }
+      case _                        => path.exists
     givenPath.toDirectory.list.filter(existsFast).map(new PlainFile(_))
-  }
 
-  /**
-   * Returns the abstract file in this abstract directory with the
-   * specified name. If there is no such file, returns null. The
-   * argument "directory" tells whether to look for a directory or
-   * or a regular file.
-   */
-  def lookupName(name: String, directory: Boolean): AbstractFile = {
+  /** Returns the abstract file in this abstract directory with the specified
+    * name. If there is no such file, returns null. The argument "directory"
+    * tells whether to look for a directory or or a regular file.
+    */
+  def lookupName(name: String, directory: Boolean): AbstractFile =
     val child = givenPath / name
-    if ((child.isDirectory && directory) || (child.isFile && !directory)) new PlainFile(child)
+    if (child.isDirectory && directory) || (child.isFile && !directory) then
+      new PlainFile(child)
     else null
-  }
 
   /** Does this abstract file denote an existing file? */
-  def create(): Unit = if (!exists) givenPath.createFile()
+  def create(): Unit = if !exists then givenPath.createFile()
 
   /** Delete the underlying file or directory (recursively). */
   def delete(): Unit =
-    if (givenPath.isFile) givenPath.delete()
-    else if (givenPath.isDirectory) givenPath.toDirectory.deleteRecursively()
+    if givenPath.isFile then givenPath.delete()
+    else if givenPath.isDirectory then givenPath.toDirectory.deleteRecursively()
 
-  /** Returns a plain file with the given name. It does not
-   *  check that it exists.
-   */
+  /** Returns a plain file with the given name. It does not check that it
+    * exists.
+    */
   def lookupNameUnchecked(name: String, directory: Boolean): AbstractFile =
     new PlainFile(givenPath / name)
-}
+end PlainFile
 
-object PlainFile {
-  extension (jPath: JPath)
-    def toPlainFile = new PlainFile(new Path(jPath))
-}
+object PlainFile:
+  extension (jPath: JPath) def toPlainFile = new PlainFile(new Path(jPath))

@@ -8,16 +8,15 @@
 
 package scala.annotation
 
-import scala.annotation.meta._
+import scala.annotation.meta.*
 
-/** An annotation that goes on parameters of classes or traits. It asserts
- *  that the parameter is used only for initialization and is not kept in
- *  the class as a field. Violations of this assertion are flagged as
- *  compile errors. The annotation is particularly useful for implicit
- *  parameters since for these a textual scan is not sufficient to know
- *  where they are used.
- *  Note: the annotation is copied from constructor parameters to corresponding
- *  class fields. But it is checked that the field is eliminated before code
- *  is generated.
- */
+/** An annotation that goes on parameters of classes or traits. It asserts that
+  * the parameter is used only for initialization and is not kept in the class
+  * as a field. Violations of this assertion are flagged as compile errors. The
+  * annotation is particularly useful for implicit parameters since for these a
+  * textual scan is not sufficient to know where they are used. Note: the
+  * annotation is copied from constructor parameters to corresponding class
+  * fields. But it is checked that the field is eliminated before code is
+  * generated.
+  */
 @param @field class constructorOnly extends scala.annotation.StaticAnnotation

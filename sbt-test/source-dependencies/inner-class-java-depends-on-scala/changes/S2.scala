@@ -1,3 +1,2 @@
-abstract class S {
-	def foo2(s:String): Unit
-}
+abstract class S:
+  def foo2(s: String): Unit

@@ -3,10 +3,10 @@ package dotc
 package reporting
 
 import dotty.tools.dotc.core.Contexts.Context
-import org.junit.Assert._
+import org.junit.Assert.*
 import org.junit.Test
 
-class UserDefinedErrorMessages extends ErrorMessagesTest {
+class UserDefinedErrorMessages extends ErrorMessagesTest:
   @Test def userDefinedImplicitAmbiguous1 =
     checkMessagesAfter("typer") {
       """
@@ -123,4 +123,4 @@ class UserDefinedErrorMessages extends ErrorMessagesTest {
 
       assertEquals(m.message, "msg A=Any")
     }
-}
+end UserDefinedErrorMessages

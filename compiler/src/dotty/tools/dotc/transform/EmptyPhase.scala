@@ -5,9 +5,9 @@ import core.*
 import Contexts.Context
 import Phases.Phase
 
-/** A phase that can be inserted directly after a phase that cannot
- *  be checked, to enable a -Ycheck as soon as possible afterwards
- */
+/** A phase that can be inserted directly after a phase that cannot be checked,
+  * to enable a -Ycheck as soon as possible afterwards
+  */
 class EmptyPhase extends Phase:
 
   def phaseName: String = "dummy"

@@ -1,19 +1,19 @@
 package dotty.tools.dotc.util
 
 /** A specialized implementation of GenericHashMap with identity hash and `eq`
- *  as comparison.
- */
-class EqHashMap[Key, Value]
-    (initialCapacity: Int = 8, capacityMultiple: Int = 2)
-extends GenericHashMap[Key, Value](initialCapacity, capacityMultiple):
+  * as comparison.
+  */
+class EqHashMap[Key, Value](initialCapacity: Int = 8, capacityMultiple: Int = 2)
+    extends GenericHashMap[Key, Value](initialCapacity, capacityMultiple):
 
   /** Hashcode is identityHashCode left-shifted by 1, so lowest bit is not lost
-   *  when taking the index.
-   */
+    * when taking the index.
+    */
   final def hash(x: Key): Int = System.identityHashCode(x) << 1
 
   /** Equality, by default `eq`,  but can be overridden */
-  final def isEqual(x: Key, y: Key): Boolean = x.asInstanceOf[AnyRef] eq y.asInstanceOf[AnyRef]
+  final def isEqual(x: Key, y: Key): Boolean =
+    x.asInstanceOf[AnyRef] eq y.asInstanceOf[AnyRef]
 
   // The following methods are duplicated from GenericHashMap
   // to avoid polymorphic dispatches.
@@ -31,7 +31,8 @@ extends GenericHashMap[Key, Value](initialCapacity, capacityMultiple):
   private def valueAt(idx: Int): Value = table(idx + 1).asInstanceOf[Value]
 
   private def setKey(idx: Int, key: Key) = table(idx) = key.asInstanceOf[AnyRef]
-  private def setValue(idx: Int, value: Value) = table(idx + 1) = value.asInstanceOf[AnyRef]
+  private def setValue(idx: Int, value: Value) = table(idx + 1) =
+    value.asInstanceOf[AnyRef]
 
   override def lookup(key: Key): Value | Null =
     Stats.record(statsItem("lookup"))
@@ -69,8 +70,7 @@ extends GenericHashMap[Key, Value](initialCapacity, capacityMultiple):
     setValue(idx, value)
 
   override def copyFrom(oldTable: Array[AnyRef | Null]): Unit =
-    if isDense then
-      Array.copy(oldTable, 0, table, 0, oldTable.length)
+    if isDense then Array.copy(oldTable, 0, table, 0, oldTable.length)
     else
       var idx = 0
       while idx < oldTable.length do

@@ -1,10 +1,11 @@
 package dotty.tools.scaladoc
 package renderers
 
-import util.HTML._
+import util.HTML.*
 
-class MarkdownRenderer(rootPackage: Member, members: Map[DRI, Member])(using ctx: DocContext)
-  extends Renderer(rootPackage, members, extension = "md"):
+class MarkdownRenderer(rootPackage: Member, members: Map[DRI, Member])(using
+    ctx: DocContext
+) extends Renderer(rootPackage, members, extension = "md"):
 
   override def render(): Unit =
     renderResources()

@@ -1,46 +1,45 @@
 package dotty.tools.dotc.transform
 
 import dotty.tools.dotc.ast.tpd
-import dotty.tools.dotc.core.Contexts._
-import dotty.tools.dotc.core.Flags._
+import dotty.tools.dotc.core.Contexts.*
+import dotty.tools.dotc.core.Flags.*
 import dotty.tools.dotc.core.Symbols.Symbol
 import dotty.tools.dotc.transform.MegaPhase.MiniPhase
-import dotty.tools.dotc.transform.SymUtils._
+import dotty.tools.dotc.transform.SymUtils.*
 
 import scala.collection.mutable
 
 import java.util.IdentityHashMap
 
-object CollectNullableFields {
+object CollectNullableFields:
   val name: String = "collectNullableFields"
-  val description: String = "collect fields that can be nulled out after use in lazy initialization"
-}
+  val description: String =
+    "collect fields that can be nulled out after use in lazy initialization"
 
 /** Collect fields that can be nulled out after use in lazy initialization.
- *
- *  This information is used during lazy val transformation to assign null to private
- *  fields that are only used within a lazy val initializer. This is not just an optimization,
- *  but is needed for correctness to prevent memory leaks. E.g.
- *
- *  ```scala
- *  class TestByNameLazy(byNameMsg: => String) {
- *    lazy val byLazyValMsg = byNameMsg
- *  }
- *  ```
- *
- *  Here `byNameMsg` should be null out once `byLazyValMsg` is
- *  initialised.
- *
- *  A field is nullable if all the conditions below hold:
- *    - belongs to a non trait-class
- *    - is private[this]
- *    - is not lazy
- *    - its type is nullable after erasure
- *    - is only used in a lazy val initializer
- *    - defined in the same class as the lazy val
- */
-class CollectNullableFields extends MiniPhase {
-  import tpd._
+  *
+  * This information is used during lazy val transformation to assign null to
+  * private fields that are only used within a lazy val initializer. This is not
+  * just an optimization, but is needed for correctness to prevent memory leaks.
+  * E.g.
+  *
+  * ```scala
+  * class TestByNameLazy(byNameMsg: => String):
+  *   lazy val byLazyValMsg = byNameMsg
+  * ```
+  *
+  * Here `byNameMsg` should be null out once `byLazyValMsg` is initialised.
+  *
+  * A field is nullable if all the conditions below hold:
+  *   - belongs to a non trait-class
+  *   - is private[this]
+  *   - is not lazy
+  *   - its type is nullable after erasure
+  *   - is only used in a lazy val initializer
+  *   - defined in the same class as the lazy val
+  */
+class CollectNullableFields extends MiniPhase:
+  import tpd.*
 
   override def phaseName: String = CollectNullableFields.name
 
@@ -56,37 +55,39 @@ class CollectNullableFields extends MiniPhase {
   /** Whether or not a field is nullable */
   private val nullability = new mutable.LinkedHashMap[Symbol, FieldInfo]
 
-  private def recordUse(tree: Tree)(using Context): Tree = {
+  private def recordUse(tree: Tree)(using Context): Tree =
     val sym = tree.symbol
     val isNullablePrivateField =
       sym.isField &&
-      !sym.is(Lazy) &&
-      !sym.owner.is(Trait) &&
-      sym.initial.isAllOf(PrivateLocal) &&
-      // We need `isNullableClassAfterErasure` and not `isNullable` because
-      // we care about the values as present in the JVM.
-      sym.info.widenDealias.typeSymbol.isNullableClassAfterErasure
+        !sym.is(Lazy) &&
+        !sym.owner.is(Trait) &&
+        sym.initial.isAllOf(PrivateLocal) &&
+        // We need `isNullableClassAfterErasure` and not `isNullable` because
+        // we care about the values as present in the JVM.
+        sym.info.widenDealias.typeSymbol.isNullableClassAfterErasure
 
-    if (isNullablePrivateField)
-      nullability.get(sym) match {
-        case Some(Nullable(from)) if from != ctx.owner => // used in multiple lazy val initializers
+    if isNullablePrivateField then
+      nullability.get(sym) match
+        case Some(Nullable(from))
+            if from != ctx.owner => // used in multiple lazy val initializers
           nullability.put(sym, NotNullable)
         case None => // not in the map
           val from = ctx.owner
           val isNullable =
             from.is(Lazy, butNot = Module) && // is lazy val
-            from.owner.isClass &&             // is field
-            from.owner.eq(sym.owner)          // is lazy val and field defined in the same class
-          val info = if (isNullable) Nullable(from) else NotNullable
+              from.owner.isClass && // is field
+              from.owner.eq(
+                sym.owner
+              ) // is lazy val and field defined in the same class
+          val info = if isNullable then Nullable(from) else NotNullable
           nullability.put(sym, info)
         case _ =>
-          // Do nothing for:
-          //  - NotNullable
-          //  - Nullable(ctx.owner)
-      }
+        // Do nothing for:
+        //  - NotNullable
+        //  - Nullable(ctx.owner)
 
     tree
-  }
+  end recordUse
 
   override def transformIdent(tree: Ident)(using Context): Tree =
     recordUse(tree)
@@ -95,7 +96,9 @@ class CollectNullableFields extends MiniPhase {
     recordUse(tree)
 
   /** Map lazy values to the fields they should null after initialization. */
-  def lazyValNullables(using Context): IdentityHashMap[Symbol, mutable.ListBuffer[Symbol]] = {
+  def lazyValNullables(using
+      Context
+  ): IdentityHashMap[Symbol, mutable.ListBuffer[Symbol]] =
     val result = new IdentityHashMap[Symbol, mutable.ListBuffer[Symbol]]
 
     nullability.foreach {
@@ -106,5 +109,4 @@ class CollectNullableFields extends MiniPhase {
     }
 
     result
-  }
-}
+end CollectNullableFields

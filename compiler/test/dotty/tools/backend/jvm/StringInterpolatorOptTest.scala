@@ -1,12 +1,12 @@
 package dotty.tools.backend.jvm
 
-import org.junit.Assert._
+import org.junit.Assert.*
 import org.junit.Test
 
-class StringInterpolatorOptTest extends DottyBytecodeTest {
-  import ASMConverters._
+class StringInterpolatorOptTest extends DottyBytecodeTest:
+  import ASMConverters.*
 
-  @Test def testRawInterpolator = {
+  @Test def testRawInterpolator =
     val source =
       """
         |class Foo {
@@ -20,21 +20,22 @@ class StringInterpolatorOptTest extends DottyBytecodeTest {
       """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn   = dir.lookupName("Foo.class", directory = false).input
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
       val clsNode = loadClassNode(clsIn)
-      val meth1   = getMethod(clsNode, "meth1")
-      val meth2   = getMethod(clsNode, "meth2")
+      val meth1 = getMethod(clsNode, "meth1")
+      val meth2 = getMethod(clsNode, "meth2")
 
       val instructions1 = instructionsFromMethod(meth1)
       val instructions2 = instructionsFromMethod(meth2)
 
-      assert(instructions1 == instructions2,
+      assert(
+        instructions1 == instructions2,
         "the `` string interpolator incorrectly converts to string concatenation\n" +
-          diffInstructions(instructions1, instructions2))
+          diffInstructions(instructions1, instructions2)
+      )
     }
-  }
 
-  @Test def testSInterpolator = {
+  @Test def testSInterpolator =
     val source =
       """
          |class Foo {
@@ -48,17 +49,18 @@ class StringInterpolatorOptTest extends DottyBytecodeTest {
       """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn   = dir.lookupName("Foo.class", directory = false).input
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
       val clsNode = loadClassNode(clsIn)
-      val meth1   = getMethod(clsNode, "meth1")
-      val meth2   = getMethod(clsNode, "meth2")
+      val meth1 = getMethod(clsNode, "meth1")
+      val meth2 = getMethod(clsNode, "meth2")
 
       val instructions1 = instructionsFromMethod(meth1)
       val instructions2 = instructionsFromMethod(meth2)
 
-      assert(instructions1 == instructions2,
+      assert(
+        instructions1 == instructions2,
         "the `s` string interpolator incorrectly converts to string concatenation\n" +
-          diffInstructions(instructions1, instructions2))
+          diffInstructions(instructions1, instructions2)
+      )
     }
-  }
-}
+end StringInterpolatorOptTest

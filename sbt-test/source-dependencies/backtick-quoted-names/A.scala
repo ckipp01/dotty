@@ -1,3 +1,2 @@
-object A {
-   def `=` = 3
-}
+object A:
+  def `=` = 3

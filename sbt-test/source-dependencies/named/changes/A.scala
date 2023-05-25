@@ -1,3 +1,2 @@
-object A {
-	def x(yy: Int, zz: Int) = yy - zz
-}
+object A:
+  def x(yy: Int, zz: Int) = yy - zz

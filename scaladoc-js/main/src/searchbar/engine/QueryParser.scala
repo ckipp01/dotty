@@ -1,7 +1,7 @@
 package dotty.tools.scaladoc
 
-import scala.util.matching.Regex._
-import scala.util.matching._
+import scala.util.matching.Regex.*
+import scala.util.matching.*
 
 class QueryParser:
   val kinds = Seq(
@@ -16,20 +16,17 @@ class QueryParser:
     "given",
     "type"
   )
-  val kindRegex = ("(?i)" + kinds.mkString("(","|",")") + " (.*)").r
+  val kindRegex = ("(?i)" + kinds.mkString("(", "|", ")") + " (.*)").r
   val nameRegex = raw"(.*)".r
   val escapedRegex = raw"`(.*)`".r
   val signatureRegex = raw"(.*=>.*)".r
 
-  def parseMatchers(query: String): EngineQuery = query match {
-    case escapedRegex(rest) => NameAndKindQuery(Some(rest), None)
+  def parseMatchers(query: String): EngineQuery = query match
+    case escapedRegex(rest)    => NameAndKindQuery(Some(rest), None)
     case kindRegex(kind, rest) => NameAndKindQuery(Some(rest), Some(kind))
-    case nameRegex(name) => NameAndKindQuery(Some(name), None)
-    case _ => NameAndKindQuery(None, None)
-  }
+    case nameRegex(name)       => NameAndKindQuery(Some(name), None)
+    case _                     => NameAndKindQuery(None, None)
 
-  def parse(query: String): EngineQuery = query match {
+  def parse(query: String): EngineQuery = query match
     case signatureRegex(signature) => SignatureQuery(signature)
-    case other => parseMatchers(other)
-  }
-  
+    case other                     => parseMatchers(other)

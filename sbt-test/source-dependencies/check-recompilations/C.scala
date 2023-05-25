@@ -1,3 +1,2 @@
-object C {
+object C:
   def baz = A.foo
-}

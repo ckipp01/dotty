@@ -1,11 +1,8 @@
-import scala.quoted._
+import scala.quoted.*
 
-object MacroRuntime {
+object MacroRuntime:
 
-   def impl()(using q: Quotes): Expr[Unit] = {
-      import quotes.reflect._
-      report.error("some error", Position.ofMacroExpansion)
-      '{ println("Implementation in MacroCompileError") }
-   }
-
-}
+  def impl()(using q: Quotes): Expr[Unit] =
+    import quotes.reflect.*
+    report.error("some error", Position.ofMacroExpansion)
+    '{ println("Implementation in MacroCompileError") }

@@ -4,45 +4,62 @@ package dotc
 
 import scala.language.unsafeNulls
 
-import org.junit.{ Test, BeforeClass, AfterClass }
-import org.junit.Assert._
-import org.junit.Assume._
+import org.junit.{Test, BeforeClass, AfterClass}
+import org.junit.Assert.*
+import org.junit.Assume.*
 import org.junit.experimental.categories.Category
 
-import scala.concurrent.duration._
+import scala.concurrent.duration.*
 import reporting.TestReporter
-import vulpix._
+import vulpix.*
 
-import java.nio.file._
+import java.nio.file.*
 
 @Category(Array(classOf[BootstrappedOnlyTests]))
-class BootstrappedOnlyCompilationTests {
-  import ParallelTesting._
-  import TestConfiguration._
-  import BootstrappedOnlyCompilationTests._
+class BootstrappedOnlyCompilationTests:
+  import ParallelTesting.*
+  import TestConfiguration.*
+  import BootstrappedOnlyCompilationTests.*
   import CompilationTest.aggregateTests
 
   // Positive tests ------------------------------------------------------------
 
-  @Test def posMacros: Unit = {
+  @Test def posMacros: Unit =
     implicit val testGroup: TestGroup = TestGroup("compilePosMacros")
     aggregateTests(
-      compileFilesInDir("tests/bench", defaultOptions.without("-Yno-deep-subtypes")),
-      compileFilesInDir("tests/pos-macros", defaultOptions.and("-Xcheck-macros")),
-      compileFilesInDir("tests/pos-custom-args/semanticdb", defaultOptions.and("-Xsemanticdb")),
-      compileDir("tests/pos-special/i7592", defaultOptions.and("-Yretain-trees")),
+      compileFilesInDir(
+        "tests/bench",
+        defaultOptions.without("-Yno-deep-subtypes")
+      ),
+      compileFilesInDir(
+        "tests/pos-macros",
+        defaultOptions.and("-Xcheck-macros")
+      ),
+      compileFilesInDir(
+        "tests/pos-custom-args/semanticdb",
+        defaultOptions.and("-Xsemanticdb")
+      ),
+      compileDir(
+        "tests/pos-special/i7592",
+        defaultOptions.and("-Yretain-trees")
+      ),
       compileDir("tests/pos-special/i11331.1", defaultOptions),
-      compileDir("tests/pos-custom-args/i13405", defaultOptions.and("-Xfatal-warnings")),
+      compileDir(
+        "tests/pos-custom-args/i13405",
+        defaultOptions.and("-Xfatal-warnings")
+      )
     ).checkCompile()
-  }
 
   @Test def posWithCompilerCC: Unit =
     implicit val testGroup: TestGroup = TestGroup("compilePosWithCompilerCC")
     aggregateTests(
-      compileDir("tests/pos-with-compiler-cc/dotc", withCompilerOptions.and("-language:experimental.captureChecking"))
+      compileDir(
+        "tests/pos-with-compiler-cc/dotc",
+        withCompilerOptions.and("-language:experimental.captureChecking")
+      )
     ).checkCompile()
 
-  @Test def posWithCompiler: Unit = {
+  @Test def posWithCompiler: Unit =
     implicit val testGroup: TestGroup = TestGroup("compilePosWithCompiler")
     aggregateTests(
       compileFilesInDir("tests/pos-with-compiler", withCompilerOptions),
@@ -50,10 +67,16 @@ class BootstrappedOnlyCompilationTests {
       compileDir("compiler/src/dotty/tools/dotc/ast", withCompilerOptions),
       compileDir("compiler/src/dotty/tools/dotc/config", withCompilerOptions),
       compileDir("compiler/src/dotty/tools/dotc/core", withCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/transform", withCompilerOptions),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/transform",
+        withCompilerOptions
+      ),
       compileDir("compiler/src/dotty/tools/dotc/parsing", withCompilerOptions),
       compileDir("compiler/src/dotty/tools/dotc/printing", withCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/reporting", withCompilerOptions),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/reporting",
+        withCompilerOptions
+      ),
       compileDir("compiler/src/dotty/tools/dotc/typer", withCompilerOptions),
       compileDir("compiler/src/dotty/tools/dotc/util", withCompilerOptions),
       compileDir("compiler/src/dotty/tools/io", withCompilerOptions),
@@ -74,15 +97,18 @@ class BootstrappedOnlyCompilationTests {
           "compiler/src/dotty/tools/dotc/core/Types.scala"
         ),
         withCompilerOptions
-      ),
+      )
     ).checkCompile()
-  }
+  end posWithCompiler
 
-  @Test def posTwiceWithCompiler: Unit = {
+  @Test def posTwiceWithCompiler: Unit =
     implicit val testGroup: TestGroup = TestGroup("posTwiceWithCompiler")
     aggregateTests(
       compileFile("tests/pos-with-compiler/Labels.scala", withCompilerOptions),
-      compileFile("tests/pos-with-compiler/Patterns.scala", withCompilerOptions),
+      compileFile(
+        "tests/pos-with-compiler/Patterns.scala",
+        withCompilerOptions
+      ),
       compileList(
         "testNonCyclic",
         List(
@@ -101,122 +127,220 @@ class BootstrappedOnlyCompilationTests {
         withCompilerOptions
       )
     ).times(2).checkCompile()
-  }
 
   // Negative tests ------------------------------------------------------------
 
-  @Test def negMacros: Unit = {
+  @Test def negMacros: Unit =
     implicit val testGroup: TestGroup = TestGroup("compileNegWithCompiler")
     aggregateTests(
-      compileFilesInDir("tests/neg-macros", defaultOptions.and("-Xcheck-macros")),
-      compileFile("tests/pos-macros/i9570.scala", defaultOptions.and("-Xfatal-warnings")),
-      compileFile("tests/pos-macros/macro-deprecation.scala", defaultOptions.and("-Xfatal-warnings", "-deprecation")),
-      compileFile("tests/pos-macros/macro-experimental.scala", defaultOptions.and("-Yno-experimental")),
+      compileFilesInDir(
+        "tests/neg-macros",
+        defaultOptions.and("-Xcheck-macros")
+      ),
+      compileFile(
+        "tests/pos-macros/i9570.scala",
+        defaultOptions.and("-Xfatal-warnings")
+      ),
+      compileFile(
+        "tests/pos-macros/macro-deprecation.scala",
+        defaultOptions.and("-Xfatal-warnings", "-deprecation")
+      ),
+      compileFile(
+        "tests/pos-macros/macro-experimental.scala",
+        defaultOptions.and("-Yno-experimental")
+      )
     ).checkExpectedErrors()
-  }
 
-  @Test def negWithCompiler: Unit = {
+  @Test def negWithCompiler: Unit =
     implicit val testGroup: TestGroup = TestGroup("compileNegWithCompiler")
     aggregateTests(
       compileFilesInDir("tests/neg-with-compiler", withCompilerOptions),
-      compileFilesInDir("tests/neg-staging", withStagingOptions),
+      compileFilesInDir("tests/neg-staging", withStagingOptions)
     ).checkExpectedErrors()
-  }
 
   // Run tests -----------------------------------------------------------------
 
   @Test def runMacros: Unit = {
     implicit val testGroup: TestGroup = TestGroup("runMacros")
     aggregateTests(
-      compileFilesInDir("tests/run-macros", defaultOptions.and("-Xcheck-macros")),
-      compileFilesInDir("tests/run-custom-args/Yretain-trees", defaultOptions and "-Yretain-trees"),
-      compileFilesInDir("tests/run-custom-args/Yread-comments", defaultOptions and "-Yread-docs"),
-      compileFilesInDir("tests/run-custom-args/run-macros-erased", defaultOptions.and("-language:experimental.erasedDefinitions").and("-Xcheck-macros")),
-      compileDir("tests/run-custom-args/Xmacro-settings/simple", defaultOptions.and("-Xmacro-settings:one,two,three")),
-      compileDir("tests/run-custom-args/Xmacro-settings/compileTimeEnv", defaultOptions.and("-Xmacro-settings:a,b=1,c.b.a=x.y.z=1,myLogger.level=INFO")),
+      compileFilesInDir(
+        "tests/run-macros",
+        defaultOptions.and("-Xcheck-macros")
+      ),
+      compileFilesInDir(
+        "tests/run-custom-args/Yretain-trees",
+        defaultOptions and "-Yretain-trees"
+      ),
+      compileFilesInDir(
+        "tests/run-custom-args/Yread-comments",
+        defaultOptions and "-Yread-docs"
+      ),
+      compileFilesInDir(
+        "tests/run-custom-args/run-macros-erased",
+        defaultOptions
+          .and("-language:experimental.erasedDefinitions")
+          .and("-Xcheck-macros")
+      ),
+      compileDir(
+        "tests/run-custom-args/Xmacro-settings/simple",
+        defaultOptions.and("-Xmacro-settings:one,two,three")
+      ),
+      compileDir(
+        "tests/run-custom-args/Xmacro-settings/compileTimeEnv",
+        defaultOptions.and(
+          "-Xmacro-settings:a,b=1,c.b.a=x.y.z=1,myLogger.level=INFO"
+        )
+      )
     )
   }.checkRuns()
 
-  @Test def runWithCompiler: Unit = {
+  @Test def runWithCompiler: Unit =
     implicit val testGroup: TestGroup = TestGroup("runWithCompiler")
     val basicTests = List(
       compileFilesInDir("tests/run-with-compiler", withCompilerOptions),
       compileFilesInDir("tests/run-staging", withStagingOptions),
-      compileFilesInDir("tests/run-custom-args/tasty-inspector", withTastyInspectorOptions)
+      compileFilesInDir(
+        "tests/run-custom-args/tasty-inspector",
+        withTastyInspectorOptions
+      )
     )
     val tests =
       if scala.util.Properties.isWin then basicTests
-      else compileDir("tests/run-custom-args/tasty-interpreter", withTastyInspectorOptions) :: basicTests
+      else
+        compileDir(
+          "tests/run-custom-args/tasty-interpreter",
+          withTastyInspectorOptions
+        ) :: basicTests
 
-    aggregateTests(tests: _*).checkRuns()
-  }
+    aggregateTests(tests*).checkRuns()
 
-  @Test def runBootstrappedOnly: Unit = {
+  @Test def runBootstrappedOnly: Unit =
     implicit val testGroup: TestGroup = TestGroup("runBootstrappedOnly")
     aggregateTests(
-      compileFilesInDir("tests/run-bootstrapped", withCompilerOptions),
+      compileFilesInDir("tests/run-bootstrapped", withCompilerOptions)
     ).checkRuns()
-  }
 
   // Pickling Tests ------------------------------------------------------------
   //
   // Pickling tests are very memory intensive and as such need to be run with a
   // lower level of concurrency as to not kill their running VMs
 
-  @Test def picklingWithCompiler: Unit = {
+  @Test def picklingWithCompiler: Unit =
     implicit val testGroup: TestGroup = TestGroup("testPicklingWithCompiler")
     aggregateTests(
-      compileDir("compiler/src/dotty/tools", picklingWithCompilerOptions, recursive = false),
-      compileDir("compiler/src/dotty/tools/dotc", picklingWithCompilerOptions, recursive = false),
-      compileDir("library/src/scala/runtime/function", picklingWithCompilerOptions),
-      compileFilesInDir("library/src/scala/runtime", picklingWithCompilerOptions),
-      compileFilesInDir("compiler/src/dotty/tools/backend/jvm", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/ast", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/core", picklingWithCompilerOptions, recursive = false),
-      compileDir("compiler/src/dotty/tools/dotc/config", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/parsing", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/printing", picklingWithCompilerOptions),
+      compileDir(
+        "compiler/src/dotty/tools",
+        picklingWithCompilerOptions,
+        recursive = false
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc",
+        picklingWithCompilerOptions,
+        recursive = false
+      ),
+      compileDir(
+        "library/src/scala/runtime/function",
+        picklingWithCompilerOptions
+      ),
+      compileFilesInDir(
+        "library/src/scala/runtime",
+        picklingWithCompilerOptions
+      ),
+      compileFilesInDir(
+        "compiler/src/dotty/tools/backend/jvm",
+        picklingWithCompilerOptions
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/ast",
+        picklingWithCompilerOptions
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/core",
+        picklingWithCompilerOptions,
+        recursive = false
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/config",
+        picklingWithCompilerOptions
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/parsing",
+        picklingWithCompilerOptions
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/printing",
+        picklingWithCompilerOptions
+      ),
       compileDir("compiler/src/dotty/tools/repl", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/rewrites", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/transform", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/typer", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/util", picklingWithCompilerOptions),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/rewrites",
+        picklingWithCompilerOptions
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/transform",
+        picklingWithCompilerOptions
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/typer",
+        picklingWithCompilerOptions
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/util",
+        picklingWithCompilerOptions
+      ),
       compileDir("compiler/src/dotty/tools/io", picklingWithCompilerOptions),
       compileFile("tests/pos/pickleinf.scala", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/core/classfile", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/core/tasty", picklingWithCompilerOptions),
-      compileDir("compiler/src/dotty/tools/dotc/core/unpickleScala2", picklingWithCompilerOptions),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/core/classfile",
+        picklingWithCompilerOptions
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/core/tasty",
+        picklingWithCompilerOptions
+      ),
+      compileDir(
+        "compiler/src/dotty/tools/dotc/core/unpickleScala2",
+        picklingWithCompilerOptions
+      ),
       compileDir("tasty/src/dotty/tools/tasty", picklingWithCompilerOptions)
     ).limitThreads(4).checkCompile()
-  }
+  end picklingWithCompiler
 
-  @Test def testPlugins: Unit = {
+  @Test def testPlugins: Unit =
     implicit val testGroup: TestGroup = TestGroup("testPlugins")
     val pluginFile = "plugin.properties"
 
     // 1. hack with absolute path for -Xplugin
     // 2. copy `pluginFile` to destination
-    def compileFilesInDir(dir: String): CompilationTest = {
+    def compileFilesInDir(dir: String): CompilationTest =
       val outDir = defaultOutputDir + "testPlugins/"
       val sourceDir = new java.io.File(dir)
 
       val dirs = sourceDir.listFiles.toList.filter(_.isDirectory)
       val targets = dirs.map { dir =>
         val compileDir = createOutputDirsForDir(dir, sourceDir, outDir)
-        Files.copy(dir.toPath.resolve(pluginFile), compileDir.toPath.resolve(pluginFile), StandardCopyOption.REPLACE_EXISTING)
-        val flags = TestFlags(withCompilerClasspath, noCheckOptions).and("-Xplugin:" + compileDir.getAbsolutePath)
+        Files.copy(
+          dir.toPath.resolve(pluginFile),
+          compileDir.toPath.resolve(pluginFile),
+          StandardCopyOption.REPLACE_EXISTING
+        )
+        val flags = TestFlags(withCompilerClasspath, noCheckOptions).and(
+          "-Xplugin:" + compileDir.getAbsolutePath
+        )
         SeparateCompilationSource("testPlugins", dir, flags, compileDir)
       }
 
       new CompilationTest(targets)
-    }
 
     compileFilesInDir("tests/plugins/neg").checkExpectedErrors()
-    compileDir("tests/plugins/custom/analyzer", withCompilerOptions.and("-Yretain-trees")).checkCompile()
-  }
-}
+    compileDir(
+      "tests/plugins/custom/analyzer",
+      withCompilerOptions.and("-Yretain-trees")
+    ).checkCompile()
+  end testPlugins
+end BootstrappedOnlyCompilationTests
 
-object BootstrappedOnlyCompilationTests extends ParallelTesting {
+object BootstrappedOnlyCompilationTests extends ParallelTesting:
   // Test suite configuration --------------------------------------------------
 
   def maxDuration = 60.seconds
@@ -228,8 +352,6 @@ object BootstrappedOnlyCompilationTests extends ParallelTesting {
   def failedTests = TestReporter.lastRunFailedTests
 
   implicit val summaryReport: SummaryReporting = new SummaryReport
-  @AfterClass def tearDown(): Unit = {
+  @AfterClass def tearDown(): Unit =
     super.cleanup()
     summaryReport.echoSummary()
-  }
-}

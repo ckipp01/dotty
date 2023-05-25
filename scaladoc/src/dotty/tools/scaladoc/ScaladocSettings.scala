@@ -1,70 +1,146 @@
 package dotty.tools.scaladoc
 
-import dotty.tools.dotc.config.Settings._
+import dotty.tools.dotc.config.Settings.*
 import dotty.tools.dotc.config.AllScalaSettings
 
 class ScaladocSettings extends SettingGroup with AllScalaSettings:
   val unsupportedSettings = Seq(
     // Needed for plugin architecture
-    plugin, disable, require, pluginsDir, pluginOptions,
+    plugin,
+    disable,
+    require,
+    pluginsDir,
+    pluginOptions
   )
 
-
   val projectName: Setting[String] =
-    StringSetting("-project", "project title", "The name of the project.", "", aliases = List("-doc-title"))
+    StringSetting(
+      "-project",
+      "project title",
+      "The name of the project.",
+      "",
+      aliases = List("-doc-title")
+    )
 
   val projectVersion: Setting[String] =
-    StringSetting("-project-version", "project version", "The current version of your project.", "", aliases = List("-doc-version"))
+    StringSetting(
+      "-project-version",
+      "project version",
+      "The current version of your project.",
+      "",
+      aliases = List("-doc-version")
+    )
 
   val projectLogo: Setting[String] =
-    StringSetting("-project-logo", "project logo filename", "Path to the file that contains the project's logo. Provided path can be absolute or relative to the project root directory.", "", aliases = List("-doc-logo"))
+    StringSetting(
+      "-project-logo",
+      "project logo filename",
+      "Path to the file that contains the project's logo. Provided path can be absolute or relative to the project root directory.",
+      "",
+      aliases = List("-doc-logo")
+    )
 
-  val projectFooter: Setting[String] = StringSetting("-project-footer", "project footer", "A footer on every Scaladoc page.", "", aliases = List("-doc-footer"))
+  val projectFooter: Setting[String] = StringSetting(
+    "-project-footer",
+    "project footer",
+    "A footer on every Scaladoc page.",
+    "",
+    aliases = List("-doc-footer")
+  )
 
   val sourceLinks: Setting[List[String]] =
     MultiStringSetting("-source-links", "sources", SourceLinks.usage)
 
   val legacySourceLink: Setting[String] =
-    StringSetting("-doc-source-url", "sources", "Legacy option from Scala 2. Use -source-links instead.", "")
+    StringSetting(
+      "-doc-source-url",
+      "sources",
+      "Legacy option from Scala 2. Use -source-links instead.",
+      ""
+    )
 
   val syntax: Setting[List[String]] =
-    MultiStringSetting("-comment-syntax", "syntax", tasty.comments.CommentSyntaxArgs.usage)
+    MultiStringSetting(
+      "-comment-syntax",
+      "syntax",
+      tasty.comments.CommentSyntaxArgs.usage
+    )
 
   val revision: Setting[String] =
-    StringSetting("-revision", "revision", "Revision (branch or ref) used to build project project", "")
+    StringSetting(
+      "-revision",
+      "revision",
+      "Revision (branch or ref) used to build project project",
+      ""
+    )
 
   val externalDocumentationMappings: Setting[List[String]] =
-    MultiStringSetting("-external-mappings", "external-mappings",
+    MultiStringSetting(
+      "-external-mappings",
+      "external-mappings",
       "Mapping between regexes matching classpath entries and external documentation. " +
-        "'regex::[scaladoc|scaladoc|javadoc]::path' syntax is used")
+        "'regex::[scaladoc|scaladoc|javadoc]::path' syntax is used"
+    )
 
   val legacyExternalDocumentationMappings: Setting[List[String]] =
-    MultiStringSetting("-doc-external-doc", "legacy-external-mappings", "Legacy option from Scala 2. Mapping betweeen path and external documentation. Use -external-mappings instead.")
+    MultiStringSetting(
+      "-doc-external-doc",
+      "legacy-external-mappings",
+      "Legacy option from Scala 2. Mapping betweeen path and external documentation. Use -external-mappings instead."
+    )
 
   val socialLinks: Setting[List[String]] =
-    MultiStringSetting("-social-links", "social-links",
-      "Links to social sites. '[github|twitter|gitter|discord]::link' syntax is used.")
+    MultiStringSetting(
+      "-social-links",
+      "social-links",
+      "Links to social sites. '[github|twitter|gitter|discord]::link' syntax is used."
+    )
 
   val deprecatedSkipPackages: Setting[List[String]] =
-    MultiStringSetting("-skip-packages", "packages", "Deprecated, please use `-skip-by-id` or `-skip-by-regex`")
+    MultiStringSetting(
+      "-skip-packages",
+      "packages",
+      "Deprecated, please use `-skip-by-id` or `-skip-by-regex`"
+    )
 
   val skipById: Setting[List[String]] =
-    MultiStringSetting("-skip-by-id", "package or class identifier", "Identifiers of packages or top-level classes to skip when generating documentation")
+    MultiStringSetting(
+      "-skip-by-id",
+      "package or class identifier",
+      "Identifiers of packages or top-level classes to skip when generating documentation"
+    )
 
   val skipByRegex: Setting[List[String]] =
-    MultiStringSetting("-skip-by-regex", "regex", "Regexes that match fully qualified names of packages or top-level classes to skip when generating documentation")
+    MultiStringSetting(
+      "-skip-by-regex",
+      "regex",
+      "Regexes that match fully qualified names of packages or top-level classes to skip when generating documentation"
+    )
 
   val docRootContent: Setting[String] =
-    StringSetting("-doc-root-content", "path", "The file from which the root package documentation should be imported.", "")
+    StringSetting(
+      "-doc-root-content",
+      "path",
+      "The file from which the root package documentation should be imported.",
+      ""
+    )
 
   val author: Setting[Boolean] =
     BooleanSetting("-author", "Include authors.", false)
 
   val groups: Setting[Boolean] =
-    BooleanSetting("-groups", "Group similar functions together (based on the @group annotation)", false)
+    BooleanSetting(
+      "-groups",
+      "Group similar functions together (based on the @group annotation)",
+      false
+    )
 
   val visibilityPrivate: Setting[Boolean] =
-    BooleanSetting("-private", "Show all types and members. Unless specified, show only public and protected types and members.", false)
+    BooleanSetting(
+      "-private",
+      "Show all types and members. Unless specified, show only public and protected types and members.",
+      false
+    )
 
   val docCanonicalBaseUrl: Setting[String] =
     StringSetting(
@@ -97,19 +173,40 @@ class ScaladocSettings extends SettingGroup with AllScalaSettings:
   )
 
   val YdocumentSyntheticTypes: Setting[Boolean] =
-    BooleanSetting("-Ydocument-synthetic-types", "Attach pages with documentation of the intrinsic types e. g. Any, Nothing to the docs. Setting is useful only for stdlib.", false)
+    BooleanSetting(
+      "-Ydocument-synthetic-types",
+      "Attach pages with documentation of the intrinsic types e. g. Any, Nothing to the docs. Setting is useful only for stdlib.",
+      false
+    )
 
   val snippetCompiler: Setting[List[String]] =
-    MultiStringSetting("-snippet-compiler", "snippet-compiler", snippets.SnippetCompilerArgs.usage)
+    MultiStringSetting(
+      "-snippet-compiler",
+      "snippet-compiler",
+      snippets.SnippetCompilerArgs.usage
+    )
 
   val generateInkuire: Setting[Boolean] =
-    BooleanSetting("-Ygenerate-inkuire", "Generates InkuireDB and enables Hoogle-like searches", false)
+    BooleanSetting(
+      "-Ygenerate-inkuire",
+      "Generates InkuireDB and enables Hoogle-like searches",
+      false
+    )
 
   val apiSubdirectory: Setting[Boolean] =
-    BooleanSetting("-Yapi-subdirectory", "Put the API documentation pages inside a directory `api/`", false)
+    BooleanSetting(
+      "-Yapi-subdirectory",
+      "Put the API documentation pages inside a directory `api/`",
+      false
+    )
 
   val scastieConfiguration: Setting[String] =
-    StringSetting("-scastie-configuration", "Scastie configuration", "Additional configuration passed to Scastie in code snippets", "")
+    StringSetting(
+      "-scastie-configuration",
+      "Scastie configuration",
+      "Additional configuration passed to Scastie in code snippets",
+      ""
+    )
 
   val defaultTemplate: Setting[String] =
     StringSetting(
@@ -127,5 +224,22 @@ class ScaladocSettings extends SettingGroup with AllScalaSettings:
       "List of quick links that is displayed in the header of documentation."
     )
 
-  def scaladocSpecificSettings: Set[Setting[_]] =
-    Set(sourceLinks, legacySourceLink, syntax, revision, externalDocumentationMappings, socialLinks, skipById, skipByRegex, deprecatedSkipPackages, docRootContent, snippetCompiler, generateInkuire, defaultTemplate, scastieConfiguration, quickLinks)
+  def scaladocSpecificSettings: Set[Setting[?]] =
+    Set(
+      sourceLinks,
+      legacySourceLink,
+      syntax,
+      revision,
+      externalDocumentationMappings,
+      socialLinks,
+      skipById,
+      skipByRegex,
+      deprecatedSkipPackages,
+      docRootContent,
+      snippetCompiler,
+      generateInkuire,
+      defaultTemplate,
+      scastieConfiguration,
+      quickLinks
+    )
+end ScaladocSettings

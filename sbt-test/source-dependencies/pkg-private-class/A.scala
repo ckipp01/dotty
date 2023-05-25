@@ -1,4 +1,3 @@
 package pkg1
-private class A {
+private class A:
   def foo: Int = 1
-}

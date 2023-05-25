@@ -1,7 +1,7 @@
 package dotty.tools.dotc
 package coverage
 
-import ast.tpd._
+import ast.tpd.*
 import dotty.tools.dotc.core.Contexts.Context
 import dotty.tools.dotc.core.Flags.*
 import java.nio.file.Path
@@ -9,12 +9,18 @@ import dotty.tools.dotc.util.SourceFile
 
 /** Information about the location of a coverable piece of code.
   *
-  * @param packageName    name of the enclosing package
-  * @param className      name of the closest enclosing class
-  * @param fullClassName  fully qualified name of the closest enclosing class
-  * @param classType      "type" of the closest enclosing class: Class, Trait or Object
-  * @param methodName     name of the closest enclosing method
-  * @param sourcePath     absolute path of the source file
+  * @param packageName
+  *   name of the enclosing package
+  * @param className
+  *   name of the closest enclosing class
+  * @param fullClassName
+  *   fully qualified name of the closest enclosing class
+  * @param classType
+  *   "type" of the closest enclosing class: Class, Trait or Object
+  * @param methodName
+  *   name of the closest enclosing method
+  * @param sourcePath
+  *   absolute path of the source file
   */
 final case class Location(
     packageName: String,
@@ -31,7 +37,8 @@ object Location:
 
     val ownerDenot = ctx.owner.denot
     val enclosingClass = ownerDenot.enclosingClass
-    val packageName = ownerDenot.enclosingPackageClass.fullName.toSimpleName.toString
+    val packageName =
+      ownerDenot.enclosingPackageClass.fullName.toSimpleName.toString
     val className = enclosingClass.name.toSimpleName.toString
     val methodName = ownerDenot.enclosingMethod.name.toSimpleName.toString
 

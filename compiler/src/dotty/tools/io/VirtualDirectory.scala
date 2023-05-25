@@ -8,20 +8,23 @@ import scala.language.unsafeNulls
 
 import scala.collection.mutable
 import java.io.{InputStream, OutputStream}
-/**
- * An in-memory directory.
- *
- * @author Lex Spoon
- *
- * ''Note:  This library is considered experimental and should not be used unless you know what you are doing.''
- */
-class VirtualDirectory(val name: String, maybeContainer: Option[VirtualDirectory] = None)
-extends AbstractFile {
+
+/** An in-memory directory.
+  *
+  * @author
+  *   Lex Spoon
+  *
+  * ''Note: This library is considered experimental and should not be used
+  * unless you know what you are doing.''
+  */
+class VirtualDirectory(
+    val name: String,
+    maybeContainer: Option[VirtualDirectory] = None
+) extends AbstractFile:
   def path: String =
-    maybeContainer match {
-      case None => name
+    maybeContainer match
+      case None         => name
       case Some(parent) => parent.path + '/' + name
-    }
 
   def absolute: AbstractFile = this
 
@@ -35,15 +38,16 @@ extends AbstractFile {
   override def output: OutputStream = sys.error("directories cannot be written")
 
   /** Does this abstract file denote an existing file? */
-  def create(): Unit = { unsupported() }
+  def create(): Unit = unsupported()
 
   /** Delete the underlying file or directory (recursively). */
-  def delete(): Unit = { unsupported() }
+  def delete(): Unit = unsupported()
 
-  /** Returns an abstract file with the given name. It does not
-   *  check that it exists.
-   */
-  def lookupNameUnchecked(name: String, directory: Boolean): AbstractFile = unsupported()
+  /** Returns an abstract file with the given name. It does not check that it
+    * exists.
+    */
+  def lookupNameUnchecked(name: String, directory: Boolean): AbstractFile =
+    unsupported()
 
   private val files = mutable.Map.empty[String, AbstractFile]
 
@@ -68,7 +72,6 @@ extends AbstractFile {
       dir
     }
 
-  def clear(): Unit = {
+  def clear(): Unit =
     files.clear()
-  }
-}
+end VirtualDirectory

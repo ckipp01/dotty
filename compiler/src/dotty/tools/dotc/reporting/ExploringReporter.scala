@@ -6,7 +6,7 @@ import scala.language.unsafeNulls
 
 import collection.mutable
 import core.Contexts.Context
-import Diagnostic._
+import Diagnostic.*
 
 /** A re-usable Reporter used in Contexts#test */
 class ExploringReporter extends StoreReporter(null, fromTyperState = false):
@@ -16,7 +16,8 @@ class ExploringReporter extends StoreReporter(null, fromTyperState = false):
     infos.exists(_.isInstanceOf[Error])
 
   override def removeBufferedMessages(using Context): List[Diagnostic] =
-    try infos.toList finally reset()
+    try infos.toList
+    finally reset()
 
   def reset(): Unit = infos.clear()
 

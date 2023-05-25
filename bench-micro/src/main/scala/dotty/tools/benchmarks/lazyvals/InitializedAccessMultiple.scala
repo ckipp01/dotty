@@ -1,6 +1,6 @@
 package dotty.tools.benchmarks.lazyvals
 
-import org.openjdk.jmh.annotations._
+import org.openjdk.jmh.annotations.*
 import LazyVals.LazyHolder
 import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
@@ -12,23 +12,19 @@ import java.util.concurrent.TimeUnit
 @Measurement(iterations = 5)
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
-class InitializedAccessMultiple {
+class InitializedAccessMultiple:
 
   var holders: Array[LazyHolder] = _
 
   @Setup
-  def prepare: Unit = {
-    holders = Array.fill(100){ new LazyHolder }
-  }
+  def prepare: Unit =
+    holders = Array.fill(100) { new LazyHolder }
 
   @Benchmark
-  def measureInitialized(bh: Blackhole) = {
+  def measureInitialized(bh: Blackhole) =
     var i = 0
-    while(i < 100) {
+    while i < 100 do
       val currentHolder = holders(i)
       bh.consume(currentHolder)
       bh.consume(currentHolder.value)
       i = i + 1
-    }
-  }
-}

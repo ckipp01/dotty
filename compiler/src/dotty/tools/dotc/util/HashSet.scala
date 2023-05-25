@@ -4,9 +4,9 @@ import dotty.tools.uncheckedNN
 
 object HashSet:
 
-  /** The number of elements up to which dense packing is used.
-   *  If the number of elements reaches `DenseLimit` a hash table is used instead
-   */
+  /** The number of elements up to which dense packing is used. If the number of
+    * elements reaches `DenseLimit` a hash table is used instead
+    */
   inline val DenseLimit = 8
 
   def from[T](xs: IterableOnce[T]): HashSet[T] =
@@ -15,18 +15,20 @@ object HashSet:
     set
 
 /** A hash set that allows some privileged protected access to its internals
- *  @param  initialCapacity  Indicates the initial number of slots in the hash table.
- *                           The actual number of slots is always a power of 2, so the
- *                           initial size of the table will be the smallest power of two
- *                           that is equal or greater than the given `initialCapacity`.
- *                           Minimum value is 4.
-*  @param  capacityMultiple The minimum multiple of capacity relative to used elements.
- *                           The hash table will be re-sized once the number of elements
- *                           multiplied by capacityMultiple exceeds the current size of the hash table.
- *                           However, a table of size up to DenseLimit will be re-sized only
- *                           once the number of elements reaches the table's size.
- */
-class HashSet[T](initialCapacity: Int = 8, capacityMultiple: Int = 2) extends MutableSet[T] {
+  * @param initialCapacity
+  *   Indicates the initial number of slots in the hash table. The actual number
+  *   of slots is always a power of 2, so the initial size of the table will be
+  *   the smallest power of two that is equal or greater than the given
+  *   `initialCapacity`. Minimum value is 4.
+  * @param capacityMultiple
+  *   The minimum multiple of capacity relative to used elements. The hash table
+  *   will be re-sized once the number of elements multiplied by
+  *   capacityMultiple exceeds the current size of the hash table. However, a
+  *   table of size up to DenseLimit will be re-sized only once the number of
+  *   elements reaches the table's size.
+  */
+class HashSet[T](initialCapacity: Int = 8, capacityMultiple: Int = 2)
+    extends MutableSet[T]:
   import HashSet.DenseLimit
 
   private var used: Int = _
@@ -37,7 +39,9 @@ class HashSet[T](initialCapacity: Int = 8, capacityMultiple: Int = 2) extends Mu
 
   private def allocate(capacity: Int) =
     table = new Array[AnyRef | Null](capacity)
-    limit = if capacity <= DenseLimit then capacity - 1 else capacity / capacityMultiple
+    limit =
+      if capacity <= DenseLimit then capacity - 1
+      else capacity / capacityMultiple
 
   private def roundToPower(n: Int) =
     if n < 4 then 4
@@ -58,9 +62,9 @@ class HashSet[T](initialCapacity: Int = 8, capacityMultiple: Int = 2) extends Mu
   protected def hash(key: T): Int =
     val h = key.hashCode
     // Part of the MurmurHash3 32 bit finalizer
-    val i = (h ^ (h >>> 16)) * 0x85EBCA6B
-    val j = (i ^ (i >>> 13)) & 0x7FFFFFFF
-    if j==0 then 0x41081989 else j
+    val i = (h ^ (h >>> 16)) * 0x85ebca6b
+    val j = (i ^ (i >>> 13)) & 0x7fffffff
+    if j == 0 then 0x41081989 else j
 
   /** Hashcode, by default `equals`, can be overridden */
   protected def isEqual(x: T, y: T): Boolean = x.equals(y)
@@ -76,7 +80,8 @@ class HashSet[T](initialCapacity: Int = 8, capacityMultiple: Int = 2) extends Mu
     index(idx + 1)
 
   protected def entryAt(idx: Int): T | Null = table(idx).asInstanceOf[T | Null]
-  protected def setEntry(idx: Int, x: T) = table(idx) = x.asInstanceOf[AnyRef | Null]
+  protected def setEntry(idx: Int, x: T) = table(idx) =
+    x.asInstanceOf[AnyRef | Null]
 
   def lookup(x: T): T | Null =
     Stats.record(statsItem("lookup"))
@@ -124,8 +129,8 @@ class HashSet[T](initialCapacity: Int = 8, capacityMultiple: Int = 2) extends Mu
           val eidx = index(hash(e.uncheckedNN))
           if isDense
             || index(eidx - (hole + 1)) > index(idx - (hole + 1))
-               // entry `e` at `idx` can move unless `index(hash(e))` is in
-               // the (ring-)interval [hole + 1 .. idx]
+            // entry `e` at `idx` can move unless `index(hash(e))` is in
+            // the (ring-)interval [hole + 1 .. idx]
           then
             setEntry(hole, e.uncheckedNN)
             hole = idx
@@ -149,8 +154,7 @@ class HashSet[T](initialCapacity: Int = 8, capacityMultiple: Int = 2) extends Mu
     setEntry(idx, x)
 
   def copyFrom(oldTable: Array[AnyRef | Null]): Unit =
-    if isDense then
-      Array.copy(oldTable, 0, table, 0, oldTable.length)
+    if isDense then Array.copy(oldTable, 0, table, 0, oldTable.length)
     else
       var idx = 0
       while idx < oldTable.length do
@@ -161,7 +165,8 @@ class HashSet[T](initialCapacity: Int = 8, capacityMultiple: Int = 2) extends Mu
   protected def growTable(): Unit =
     val oldTable = table
     val newLength =
-      if oldTable.length == DenseLimit then DenseLimit * 2 * roundToPower(capacityMultiple)
+      if oldTable.length == DenseLimit then
+        DenseLimit * 2 * roundToPower(capacityMultiple)
       else table.length * 2
     allocate(newLength)
     copyFrom(oldTable)
@@ -174,7 +179,8 @@ class HashSet[T](initialCapacity: Int = 8, capacityMultiple: Int = 2) extends Mu
       idx < table.length
     def next() =
       require(hasNext)
-      try entry(idx).uncheckedNN finally idx += 1
+      try entry(idx).uncheckedNN
+      finally idx += 1
 
   def iterator: Iterator[T] = new EntryIterator():
     def entry(idx: Int) = entryAt(idx)
@@ -186,4 +192,4 @@ class HashSet[T](initialCapacity: Int = 8, capacityMultiple: Int = 2) extends Mu
     val prefix = if isDense then "HashSet(dense)." else "HashSet."
     val suffix = getClass.getSimpleName
     s"$prefix$op $suffix"
-}
+end HashSet

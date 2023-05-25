@@ -1,3 +1,2 @@
-object E extends App {
-	assert(D.x == "3")
-}
+object E extends App:
+  assert(D.x == "3")

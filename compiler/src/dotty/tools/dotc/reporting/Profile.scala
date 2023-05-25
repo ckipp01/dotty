@@ -37,7 +37,7 @@ object Profile:
     var lineCount: Int = 0
     var tokenCount: Int = 0
     var tastySize: Int = 0
-    def complexity: Float = chunks(tastySize).toFloat/lineCount
+    def complexity: Float = chunks(tastySize).toFloat / lineCount
     val leading: Array[MethodInfo] = Array.fill[MethodInfo](details)(NoInfo)
 
     def recordMethodSize(meth: Symbol, size: Int, span: Span): Unit =
@@ -45,8 +45,7 @@ object Profile:
       while i > 0 && leading(i - 1).size < size do
         if i < leading.length then leading(i) = leading(i - 1)
         i -= 1
-      if i < leading.length then
-        leading(i) = MethodInfo(meth, size, span)
+      if i < leading.length then leading(i) = MethodInfo(meth, size, span)
   end Info
 end Profile
 
@@ -58,7 +57,8 @@ class ActiveProfile(details: Int) extends Profile:
 
   private def curInfo(using Context): Profile.Info =
     val unit: CompilationUnit | Null = ctx.compilationUnit
-    if unit == null || unit.source.file.isVirtual then junkInfo else unitProfile(unit)
+    if unit == null || unit.source.file.isVirtual then junkInfo
+    else unitProfile(unit)
 
   def unitProfile(unit: CompilationUnit): Profile.Info =
     pinfo.getOrElseUpdate(unit, new Profile.Info(details))
@@ -69,7 +69,9 @@ class ActiveProfile(details: Int) extends Profile:
     curInfo.tokenCount += 1
   def recordTasty(size: Int)(using Context): Unit =
     curInfo.tastySize += size
-  def recordMethodSize(meth: Symbol, size: Int, span: Span)(using Context): Unit =
+  def recordMethodSize(meth: Symbol, size: Int, span: Span)(using
+      Context
+  ): Unit =
     curInfo.recordMethodSize(meth, size, span)
 
   def printSummary()(using Context): Unit =
@@ -86,24 +88,50 @@ class ActiveProfile(details: Int) extends Profile:
     def printHeader(sourceNameWidth: Int, methNameWidth: Int = 0): String =
       val prefix =
         if methNameWidth > 0
-        then s"%-${sourceNameWidth}s %-${methNameWidth}s".format("Sourcefile", "Method")
+        then
+          s"%-${sourceNameWidth}s %-${methNameWidth}s".format(
+            "Sourcefile",
+            "Method"
+          )
         else s"%-${sourceNameWidth}s".format("Sourcefile")
       val layout = s"%-${prefix.length}s %6s %8s %7s %s    %s"
-      report.echo(layout.format(prefix, "Lines", "Tokens", "Tasty", " Complexity/Line", "Directory"))
+      report.echo(
+        layout.format(
+          prefix,
+          "Lines",
+          "Tokens",
+          "Tasty",
+          " Complexity/Line",
+          "Directory"
+        )
+      )
       layout
 
-    def printInfo(layout: String, name: String, info: Profile.Info, path: String) =
+    def printInfo(
+        layout: String,
+        name: String,
+        info: Profile.Info,
+        path: String
+    ) =
       val complexity = info.complexity
       val explanation =
-        if complexity < 1       then "low     "
-        else if complexity < 5  then "moderate"
+        if complexity < 1 then "low     "
+        else if complexity < 5 then "moderate"
         else if complexity < 25 then "high    "
-        else                         "extreme "
-      report.echo(layout.format(
-        name, info.lineCount, info.tokenCount, Profile.chunks(info.tastySize),
-        s"${"%6.2f".format(complexity)}  $explanation", path))
+        else "extreme "
+      report.echo(
+        layout.format(
+          name,
+          info.lineCount,
+          info.tokenCount,
+          Profile.chunks(info.tastySize),
+          s"${"%6.2f".format(complexity)}  $explanation",
+          path
+        )
+      )
 
-    def safeMax(xs: Array[Int]) = if xs.isEmpty then 10 else xs.max.max(10).min(50)
+    def safeMax(xs: Array[Int]) =
+      if xs.isEmpty then 10 else xs.max.max(10).min(50)
 
     def printAndAggregateSourceInfos(): Profile.Info =
       val sourceNameWidth = safeMax(units.map(_.source.file.name.length))
@@ -119,7 +147,9 @@ class ActiveProfile(details: Int) extends Profile:
         for Profile.MethodInfo(meth, size, span) <- info.leading do
           agg.recordMethodSize(meth, size, span)
       if units.length > 1 then
-        report.echo(s"${"-" * sourceNameWidth}------------------------------------------")
+        report.echo(
+          s"${"-" * sourceNameWidth}------------------------------------------"
+        )
         printInfo(layout, "Total", agg, "")
       agg
 
@@ -140,7 +170,10 @@ class ActiveProfile(details: Int) extends Profile:
         info.lineCount += 1
         info.tastySize = size
         val file = meth.source.file
-        val header = s"%-${sourceNameWidth}s %-${methNameWidth}s".format(file.name, meth.name)
+        val header = s"%-${sourceNameWidth}s %-${methNameWidth}s".format(
+          file.name,
+          meth.name
+        )
         printInfo(layout, header, info, file.container.path)
 
     val agg = printAndAggregateSourceInfos()
@@ -153,5 +186,7 @@ object NoProfile extends Profile:
   def recordNewLine()(using Context): Unit = ()
   def recordNewToken()(using Context): Unit = ()
   def recordTasty(size: Int)(using Context): Unit = ()
-  def recordMethodSize(meth: Symbol, size: Int, span: Span)(using Context): Unit = ()
+  def recordMethodSize(meth: Symbol, size: Int, span: Span)(using
+      Context
+  ): Unit = ()
   def printSummary()(using Context): Unit = ()

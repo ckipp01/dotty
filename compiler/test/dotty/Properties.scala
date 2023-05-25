@@ -2,16 +2,15 @@ package dotty
 
 import scala.language.unsafeNulls
 
-import java.nio.file._
+import java.nio.file.*
 
 /** Runtime properties from defines or environmnent */
-object Properties {
+object Properties:
 
   /** If property is unset or "TRUE" we consider it `true` */
-  private def propIsNullOrTrue(name: String): Boolean = {
+  private def propIsNullOrTrue(name: String): Boolean =
     val prop = System.getProperty(name)
     prop == null || prop == "TRUE"
-  }
 
   /** If property is unset or FALSE we consider it `false` */
   private def propIsTrue(name: String): Boolean =
@@ -19,7 +18,7 @@ object Properties {
 
   /** Are we running on the CI? */
   val isRunByCI: Boolean = sys.env.isDefinedAt("DOTTY_CI_RUN")
-  || sys.env.isDefinedAt("DRONE")  // TODO remove this when we drop Drone
+    || sys.env.isDefinedAt("DRONE") // TODO remove this when we drop Drone
 
   val testCache: Path =
     sys.env.get("DOTTY_TEST_CACHE").map(Paths.get(_)).getOrElse {
@@ -30,9 +29,10 @@ object Properties {
   val testsInteractive: Boolean = propIsNullOrTrue("dotty.tests.interactive")
 
   /** Filter out tests not matching the regex supplied by "dotty.tests.filter"
-   *  define
-   */
-  val testsFilter: List[String] = sys.props.get("dotty.tests.filter").fold(Nil)(_.split(',').toList)
+    * define
+    */
+  val testsFilter: List[String] =
+    sys.props.get("dotty.tests.filter").fold(Nil)(_.split(',').toList)
 
   /** Run only failed tests */
   val rerunFailed: Boolean = propIsTrue("dotty.tests.rerunFailed")
@@ -41,19 +41,20 @@ object Properties {
   val testsUpdateCheckfile: Boolean = propIsTrue("dotty.tests.updateCheckfiles")
 
   /** When set, the run tests are only compiled - not run, a warning will be
-   *  issued
-   */
+    * issued
+    */
   val testsNoRun: Boolean = sys.props.get("dotty.tests.norun").isDefined
 
   /** Should Unit tests run in safe mode?
-   *
-   *  For run tests this means that we respawn child JVM processes after each
-   *  test, so that they are never reused.
-   */
+    *
+    * For run tests this means that we respawn child JVM processes after each
+    * test, so that they are never reused.
+    */
   val testsSafeMode: Boolean = sys.props.isDefinedAt("dotty.tests.safemode")
 
   /** Extra directory containing sources for the compiler */
-  def dottyCompilerManagedSources: Path = Paths.get(sys.props("dotty.tests.dottyCompilerManagedSources"))
+  def dottyCompilerManagedSources: Path =
+    Paths.get(sys.props("dotty.tests.dottyCompilerManagedSources"))
 
   /** dotty-interfaces jar */
   def dottyInterfaces: String = sys.props("dotty.tests.classes.dottyInterfaces")
@@ -71,13 +72,15 @@ object Properties {
   def dottyStaging: String = sys.props("dotty.tests.classes.dottyStaging")
 
   /** dotty-tasty-inspector jar */
-  def dottyTastyInspector: String = sys.props("dotty.tests.classes.dottyTastyInspector")
+  def dottyTastyInspector: String =
+    sys.props("dotty.tests.classes.dottyTastyInspector")
 
   /** tasty-core jar */
   def tastyCore: String = sys.props("dotty.tests.classes.tastyCore")
 
   /** compiler-interface jar */
-  def compilerInterface: String = sys.props("dotty.tests.classes.compilerInterface")
+  def compilerInterface: String =
+    sys.props("dotty.tests.classes.compilerInterface")
 
   /** scala-library jar */
   def scalaLibrary: String = sys.props("dotty.tests.classes.scalaLibrary")
@@ -96,4 +99,4 @@ object Properties {
 
   /** scalajs-library jar */
   def scalaJSLibrary: String = sys.props("dotty.tests.classes.scalaJSLibrary")
-}
+end Properties

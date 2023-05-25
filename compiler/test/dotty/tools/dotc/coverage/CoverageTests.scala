@@ -33,40 +33,58 @@ class CoverageTests:
     checkCoverageIn(rootSrc.resolve("run"), true)
 
   def checkCoverageIn(dir: Path, run: Boolean)(using TestGroup): Unit =
-    /** Converts \\ (escaped \) to / on windows, to make the tests pass without changing the serialization. */
+    /** Converts \\ (escaped \) to / on windows, to make the tests pass without
+      * changing the serialization.
+      */
     def fixWindowsPaths(lines: Buffer[String]): Buffer[String] =
       val separator = java.io.File.separatorChar
       if separator == '\\' then
         val escapedSep = "\\\\"
         lines.map(_.replace(escapedSep, "/"))
-      else
-        lines
+      else lines
     end fixWindowsPaths
 
     def runOnFile(p: Path): Boolean =
       scalaFile.matches(p) &&
-      (Properties.testsFilter.isEmpty || Properties.testsFilter.exists(p.toString.contains))
+        (Properties.testsFilter.isEmpty || Properties.testsFilter.exists(
+          p.toString.contains
+        ))
 
-    Files.walk(dir).filter(runOnFile).forEach(path => {
-      val fileName = path.getFileName.toString.stripSuffix(".scala")
-      val targetDir = computeCoverageInTmp(path, dir, run)
-      val targetFile = targetDir.resolve(s"scoverage.coverage")
-      val expectFile = path.resolveSibling(s"$fileName.scoverage.check")
-      if updateCheckFiles then
-        Files.copy(targetFile, expectFile, StandardCopyOption.REPLACE_EXISTING)
-      else
-        val expected = fixWindowsPaths(Files.readAllLines(expectFile).asScala)
-        val obtained = fixWindowsPaths(Files.readAllLines(targetFile).asScala)
-        if expected != obtained then
-          val instructions = FileDiff.diffMessage(expectFile.toString, targetFile.toString)
-          fail(s"Coverage report differs from expected data.\n$instructions")
+    Files
+      .walk(dir)
+      .filter(runOnFile)
+      .forEach(path =>
+        val fileName = path.getFileName.toString.stripSuffix(".scala")
+        val targetDir = computeCoverageInTmp(path, dir, run)
+        val targetFile = targetDir.resolve(s"scoverage.coverage")
+        val expectFile = path.resolveSibling(s"$fileName.scoverage.check")
+        if updateCheckFiles then
+          Files
+            .copy(targetFile, expectFile, StandardCopyOption.REPLACE_EXISTING)
+        else
+          val expected = fixWindowsPaths(Files.readAllLines(expectFile).asScala)
+          val obtained = fixWindowsPaths(Files.readAllLines(targetFile).asScala)
+          if expected != obtained then
+            val instructions =
+              FileDiff.diffMessage(expectFile.toString, targetFile.toString)
+            fail(s"Coverage report differs from expected data.\n$instructions")
+      )
+  end checkCoverageIn
 
-    })
-
-  /** Generates the coverage report for the given input file, in a temporary directory. */
-  def computeCoverageInTmp(inputFile: Path, sourceRoot: Path, run: Boolean)(using TestGroup): Path =
+  /** Generates the coverage report for the given input file, in a temporary
+    * directory.
+    */
+  def computeCoverageInTmp(inputFile: Path, sourceRoot: Path, run: Boolean)(
+      using TestGroup
+  ): Path =
     val target = Files.createTempDirectory("coverage")
-    val options = defaultOptions.and("-Ycheck:instrumentCoverage", "-coverage-out", target.toString, "-sourceroot", sourceRoot.toString)
+    val options = defaultOptions.and(
+      "-Ycheck:instrumentCoverage",
+      "-coverage-out",
+      target.toString,
+      "-sourceroot",
+      sourceRoot.toString
+    )
     if run then
       val test = compileDir(inputFile.getParent.toString, options)
       test.checkRuns()
@@ -74,6 +92,7 @@ class CoverageTests:
       val test = compileFile(inputFile.toString, options)
       test.checkCompile()
     target
+end CoverageTests
 
 object CoverageTests extends ParallelTesting:
   import scala.concurrent.duration.*

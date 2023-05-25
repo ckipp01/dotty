@@ -1,5 +1,3 @@
 package example.level2
 
-class SameLevelTypeLinking {
-
-}
+class SameLevelTypeLinking {}

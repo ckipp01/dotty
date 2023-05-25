@@ -1,5 +1,3 @@
-object A {
-  object InnerObject {
+object A:
+  object InnerObject:
     def bla: String = "bla"
-  }
-}

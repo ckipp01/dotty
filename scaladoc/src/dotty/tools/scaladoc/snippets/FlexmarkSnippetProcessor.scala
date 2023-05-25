@@ -1,31 +1,40 @@
 package dotty.tools.scaladoc
 package snippets
 
-import com.vladsch.flexmark.util.{ast => mdu, sequence}
-import com.vladsch.flexmark.{ast => mda}
+import com.vladsch.flexmark.util.{ast as mdu, sequence}
+import com.vladsch.flexmark.{ast as mda}
 import com.vladsch.flexmark.formatter.Formatter
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 import dotty.tools.scaladoc.tasty.comments.markdown.ExtendedFencedCodeBlock
 import dotty.tools.scaladoc.tasty.comments.PreparsedComment
 
 object FlexmarkSnippetProcessor:
-  def processSnippets[T <: mdu.Node](root: T, preparsed: Option[PreparsedComment], checkingFunc: => SnippetChecker.SnippetCheckingFunc)(using CompilerContext): T = {
+  def processSnippets[T <: mdu.Node](
+      root: T,
+      preparsed: Option[PreparsedComment],
+      checkingFunc: => SnippetChecker.SnippetCheckingFunc
+  )(using CompilerContext): T =
     lazy val cf: SnippetChecker.SnippetCheckingFunc = checkingFunc
 
-    val nodes = root.getDescendants().asScala.collect {
-      case fcb: mda.FencedCodeBlock => fcb
-    }.toList
+    val nodes = root
+      .getDescendants()
+      .asScala
+      .collect { case fcb: mda.FencedCodeBlock =>
+        fcb
+      }
+      .toList
 
     nodes.foldLeft[Map[String, String]](Map()) { (snippetMap, node) =>
-      val lineOffset = node.getStartLineNumber + preparsed.fold(0)(_.strippedLinesBeforeNo)
+      val lineOffset =
+        node.getStartLineNumber + preparsed.fold(0)(_.strippedLinesBeforeNo)
       val info = node.getInfo.toString.split(" ")
-      if info.contains("scala") then {
+      if info.contains("scala") then
         val argOverride = info
           .find(_.startsWith("sc:"))
           .map(_.stripPrefix("sc:"))
           .map(SCFlagsParser.parse)
-          .flatMap(_ match {
+          .flatMap(_ match
             case Right(flags) => Some(flags)
             case Left(error) =>
               report.warning(
@@ -33,7 +42,7 @@ object FlexmarkSnippetProcessor:
                     |$error""".stripMargin
               )
               None
-          })
+          )
         val id = info
           .find(_.startsWith("sc-name:"))
           .map(_.stripPrefix("sc-name:"))
@@ -52,13 +61,15 @@ object FlexmarkSnippetProcessor:
                     |Remember that you cannot use forward reference to snippets""".stripMargin
               )
             snippet
-          }.mkString("\n")
+          }
+          .mkString("\n")
 
         val snippet = node.getContentChars.toString
 
         extension (n: mdu.Node)
           def setContentString(str: String): Unit =
-            val s = sequence.BasedSequence.EmptyBasedSequence()
+            val s = sequence.BasedSequence
+              .EmptyBasedSequence()
               .append(str)
               .append(sequence.BasedSequence.EOL)
             val content = mdu.BlockContent()
@@ -66,16 +77,20 @@ object FlexmarkSnippetProcessor:
             node.setContent(content)
 
         val fullSnippet = Seq(snippetImports, snippet).mkString("\n").trim
-        val snippetCompilationResult = cf(fullSnippet, lineOffset, argOverride) match {
-          case Some(result @ SnippetCompilationResult(wrapped, _, _, messages)) =>
-            node.setContentString(fullSnippet)
-            Some(result)
-          case result =>
-            node.setContentString(fullSnippet)
-            result
-        }
+        val snippetCompilationResult =
+          cf(fullSnippet, lineOffset, argOverride) match
+            case Some(
+                  result @ SnippetCompilationResult(wrapped, _, _, messages)
+                ) =>
+              node.setContentString(fullSnippet)
+              Some(result)
+            case result =>
+              node.setContentString(fullSnippet)
+              result
 
-        node.insertBefore(ExtendedFencedCodeBlock(id, node, snippetCompilationResult))
+        node.insertBefore(
+          ExtendedFencedCodeBlock(id, node, snippetCompilationResult)
+        )
         node.unlink()
         id.fold(snippetMap)(id =>
           val snippetAsImport = s"""|//{i:$id
@@ -84,8 +99,10 @@ object FlexmarkSnippetProcessor:
           val entry = (id, Seq(snippetImports, snippetAsImport).mkString("\n"))
           snippetMap + entry
         )
-      } else snippetMap
+      else snippetMap
+      end if
     }
 
     root
-  }
+  end processSnippets
+end FlexmarkSnippetProcessor

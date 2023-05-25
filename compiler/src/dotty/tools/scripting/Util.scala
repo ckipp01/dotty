@@ -2,10 +2,10 @@ package dotty.tools.scripting
 
 import scala.language.unsafeNulls
 
-import java.nio.file.{ Path }
+import java.nio.file.{Path}
 import java.io.File
-import java.net.{ URLClassLoader }
-import java.lang.reflect.{ Modifier, Method }
+import java.net.{URLClassLoader}
+import java.lang.reflect.{Modifier, Method}
 
 object Util:
   def deleteFile(target: File): Unit =
@@ -16,9 +16,9 @@ object Util:
   end deleteFile
 
   def detectMainClassAndMethod(
-    outDir: Path,
-    classpathEntries: Seq[Path],
-    srcFile: String
+      outDir: Path,
+      classpathEntries: Seq[Path],
+      srcFile: String
   ): Either[Throwable, (String, Method)] =
     val classpathUrls = (classpathEntries :+ outDir).map { _.toUri.toURL }
     val cl = URLClassLoader(classpathUrls.toArray)
@@ -38,9 +38,10 @@ object Util:
         val cls = cl.loadClass(targetPath)
         try
           val method = cls.getMethod("main", classOf[Array[String]])
-          if Modifier.isStatic(method.getModifiers) then List((cls.getName, method)) else Nil
-        catch
-          case _: java.lang.NoSuchMethodException => Nil
+          if Modifier.isStatic(method.getModifiers) then
+            List((cls.getName, method))
+          else Nil
+        catch case _: java.lang.NoSuchMethodException => Nil
       else Nil
     end collectMainMethods
 
@@ -51,9 +52,15 @@ object Util:
 
     mains match
       case Nil =>
-        Left(StringDriverException(s"No main methods detected for [${srcFile}]"))
+        Left(
+          StringDriverException(s"No main methods detected for [${srcFile}]")
+        )
       case _ :: _ :: _ =>
-        Left(StringDriverException(s"Internal error: Detected the following main methods:\n${mains.mkString("\n")}"))
+        Left(
+          StringDriverException(
+            s"Internal error: Detected the following main methods:\n${mains.mkString("\n")}"
+          )
+        )
       case mainMethod :: Nil => Right(mainMethod)
     end match
   end detectMainClassAndMethod
@@ -61,4 +68,3 @@ object Util:
   def pathsep = sys.props("path.separator")
 
 end Util
-

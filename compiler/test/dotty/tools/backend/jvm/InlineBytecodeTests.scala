@@ -2,16 +2,16 @@ package dotty.tools.backend.jvm
 
 import scala.language.unsafeNulls
 
-import org.junit.Assert._
+import org.junit.Assert.*
 import org.junit.Test
 
-import scala.tools.asm.Opcodes._
+import scala.tools.asm.Opcodes.*
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
-class InlineBytecodeTests extends DottyBytecodeTest {
-  import ASMConverters._
-  @Test def inlineUnit = {
+class InlineBytecodeTests extends DottyBytecodeTest:
+  import ASMConverters.*
+  @Test def inlineUnit =
     val source = """
                  |class Foo {
                  |  inline def foo: Int = 1
@@ -24,27 +24,31 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
-      val meth1      = getMethod(clsNode, "meth1")
-      val meth2      = getMethod(clsNode, "meth2")
-      val meth3      = getMethod(clsNode, "meth3")
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
+      val meth1 = getMethod(clsNode, "meth1")
+      val meth2 = getMethod(clsNode, "meth2")
+      val meth3 = getMethod(clsNode, "meth3")
 
       val instructions1 = instructionsFromMethod(meth1)
       val instructions2 = instructionsFromMethod(meth2)
       val instructions3 = instructionsFromMethod(meth3)
 
-      assert(instructions1 == instructions3,
+      assert(
+        instructions1 == instructions3,
         "`foo` was not properly inlined in `meth1`\n" +
-        diffInstructions(instructions1, instructions3))
+          diffInstructions(instructions1, instructions3)
+      )
 
-      assert(instructions2 == instructions3,
+      assert(
+        instructions2 == instructions3,
         "`bar` was not properly inlined in `meth2`\n" +
-        diffInstructions(instructions2, instructions3))
+          diffInstructions(instructions2, instructions3)
+      )
     }
-  }
+  end inlineUnit
 
-  @Test def inlineAssert = {
+  @Test def inlineAssert =
     def mkSource(original: String, expected: String) =
       s"""
          |class Foo {
@@ -58,57 +62,51 @@ class InlineBytecodeTests extends DottyBytecodeTest {
       mkSource("assert(true, ???)", "()"),
       mkSource("assert(false)", "scala.runtime.Scala3RunTime.assertFailed()")
     )
-    for (source <- sources)
+    for source <- sources do
       checkBCode(source) { dir =>
-        val clsIn      = dir.lookupName("Foo.class", directory = false).input
-        val clsNode    = loadClassNode(clsIn)
-        val meth1      = getMethod(clsNode, "meth1")
-        val meth2      = getMethod(clsNode, "meth2")
+        val clsIn = dir.lookupName("Foo.class", directory = false).input
+        val clsNode = loadClassNode(clsIn)
+        val meth1 = getMethod(clsNode, "meth1")
+        val meth2 = getMethod(clsNode, "meth2")
 
         val instructions1 = instructionsFromMethod(meth1)
         val instructions2 = instructionsFromMethod(meth2)
 
-        assert(instructions1 == instructions2,
+        assert(
+          instructions1 == instructions2,
           "`assert` was not properly inlined in `meth1`\n" +
-          diffInstructions(instructions1, instructions2))
+            diffInstructions(instructions1, instructions2)
+        )
 
       }
-  }
+  end inlineAssert
 
   /** Disabled since locally comes from Predef now
-  @Test
-  def inlineLocally = {
-    val source =
-         """
-         |class Foo {
-         |  def meth1: Unit = locally {
-         |    val a = 5
-         |    a
-         |  }
-         |
-         |  def meth2: Unit = {
-         |    val a = 5
-         |    a
-         |  }
-         |}
-         """.stripMargin
-
-    checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
-      val meth1      = getMethod(clsNode, "meth1")
-      val meth2      = getMethod(clsNode, "meth2")
-
-      val instructions1 = instructionsFromMethod(meth1)
-      val instructions2 = instructionsFromMethod(meth2)
-
-      assert(instructions1 == instructions2,
-        "`locally` was not properly inlined in `meth1`\n" +
-        diffInstructions(instructions1, instructions2))
-    }
-  }
-  */
-/*
+    * @Test
+    *   def inlineLocally = { val source = """
+    * \|class Foo {
+    * \| def meth1: Unit = locally {
+    * \| val a = 5
+    * \| a
+    * \| }
+    * \|
+    * \| def meth2: Unit = {
+    * \| val a = 5
+    * \| a
+    * \| }
+    * \|} """.stripMargin
+    *
+    * checkBCode(source) { dir => val clsIn = dir.lookupName("Foo.class",
+    * directory = false).input val clsNode = loadClassNode(clsIn) val meth1 =
+    * getMethod(clsNode, "meth1") val meth2 = getMethod(clsNode, "meth2")
+    *
+    * val instructions1 = instructionsFromMethod(meth1) val instructions2 =
+    * instructionsFromMethod(meth2)
+    *
+    * assert(instructions1 == instructions2, "`locally` was not properly inlined
+    * in `meth1`\n" + diffInstructions(instructions1, instructions2)) } }
+    */
+  /*
   @Test def inlineNn = {
     val source =
       s"""
@@ -132,8 +130,8 @@ class InlineBytecodeTests extends DottyBytecodeTest {
         diffInstructions(instructions1, instructions2))
     }
   }
-*/
-  @Test def i4947 = {
+   */
+  @Test def i4947 =
     val source = """class Foo {
                    |  transparent inline def track[T](inline f: T): T = {
                    |    foo("tracking") // line 3
@@ -152,8 +150,8 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn, skipDebugInfo = false)
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
+      val clsNode = loadClassNode(clsIn, skipDebugInfo = false)
 
       val track = clsNode.methods.asScala.find(_.name == "track")
       assert(track.isEmpty, "method `track` should have been erased")
@@ -185,13 +183,18 @@ class InlineBytecodeTests extends DottyBytecodeTest {
           Op(RETURN),
           Label(21)
         )
-      assert(instructions == expected,
-        "`track` was not properly inlined in `main`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`track` was not properly inlined in `main`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end i4947
 
-  @Test def i4947b = {
+  @Test def i4947b =
     val source = """class Foo {
                    |  transparent inline def track2[T](inline f: T): T = {
                    |    foo("tracking2") // line 3
@@ -213,8 +216,8 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn, skipDebugInfo = false)
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
+      val clsNode = loadClassNode(clsIn, skipDebugInfo = false)
 
       val track = clsNode.methods.asScala.find(_.name == "track")
       assert(track.isEmpty, "method `track` should have been erased")
@@ -244,13 +247,18 @@ class InlineBytecodeTests extends DottyBytecodeTest {
           Op(RETURN),
           Label(16)
         )
-      assert(instructions == expected,
-        "`track` was not properly inlined in `main`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`track` was not properly inlined in `main`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end i4947b
 
-  @Test def i4947c = {
+  @Test def i4947c =
     val source = """class Foo {
                    |  transparent inline def track2[T](inline f: T): T = {
                    |    foo("tracking2") // line 3
@@ -272,8 +280,8 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn, skipDebugInfo = false)
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
+      val clsNode = loadClassNode(clsIn, skipDebugInfo = false)
 
       val track = clsNode.methods.asScala.find(_.name == "track")
       assert(track.isEmpty, "method `track` should have been erased")
@@ -303,13 +311,18 @@ class InlineBytecodeTests extends DottyBytecodeTest {
           Op(RETURN),
           Label(16)
         )
-      assert(instructions == expected,
-        "`track` was not properly inlined in `main`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`track` was not properly inlined in `main`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end i4947c
 
-  @Test def i4947d = {
+  @Test def i4947d =
     val source = """class Foo {
                    |  transparent inline def track2[T](inline f: T): T = {
                    |    foo("tracking2") // line 3
@@ -332,8 +345,8 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn, skipDebugInfo = false)
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
+      val clsNode = loadClassNode(clsIn, skipDebugInfo = false)
 
       val track = clsNode.methods.asScala.find(_.name == "track")
       assert(track.isEmpty, "method `track` should have been erased")
@@ -363,14 +376,19 @@ class InlineBytecodeTests extends DottyBytecodeTest {
           Op(RETURN),
           Label(16)
         )
-      assert(instructions == expected,
-        "`track` was not properly inlined in `main`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`track` was not properly inlined in `main`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end i4947d
 
-    // Testing that a is not boxed
-  @Test def i4522 = {
+  // Testing that a is not boxed
+  @Test def i4522 =
     val source = """class Foo {
                    |  def test: Int = {
                    |    var a = 10
@@ -386,8 +404,8 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
@@ -397,15 +415,20 @@ class InlineBytecodeTests extends DottyBytecodeTest {
           VarOp(ISTORE, 1),
           Incr(IINC, 1, 1),
           VarOp(ILOAD, 1),
-          Op(IRETURN),
+          Op(IRETURN)
         )
-      assert(instructions == expected,
-        "`f` was not properly inlined in `fun`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`f` was not properly inlined in `fun`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end i4522
 
-  @Test def i6375 = {
+  @Test def i6375 =
     val source = """class Test:
                    |  given Int = 0
                    |  def f(): Int ?=> Boolean = true : (Int ?=> Boolean)
@@ -414,8 +437,8 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Test.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Test.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
@@ -428,32 +451,44 @@ class InlineBytecodeTests extends DottyBytecodeTest {
           Op(IRETURN)
         )
 
-      assert(instructions == expected,
-        "`fg was not properly inlined in `test`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`fg was not properly inlined in `test`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end i6375
 
-  @Test def i6800a = {
+  @Test def i6800a =
     val source = """class Foo:
                    |  inline def inlined(f: => Unit): Unit = f
                    |  def test: Unit = inlined { println("") }
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
-      val expected = List(Invoke(INVOKESTATIC, "Foo", "f$proxy1$1", "()V", false), Op(RETURN))
-      assert(instructions == expected,
-        "`inlined` was not properly inlined in `test`\n" + diffInstructions(instructions, expected))
+      val expected = List(
+        Invoke(INVOKESTATIC, "Foo", "f$proxy1$1", "()V", false),
+        Op(RETURN)
+      )
+      assert(
+        instructions == expected,
+        "`inlined` was not properly inlined in `test`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
 
-  @Test def i6800b = {
+  @Test def i6800b =
     val source = """class Foo:
                    |  inline def printIfZero(x: Int): Unit = inline x match
                    |    case 0 => println("zero")
@@ -462,24 +497,34 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
       val expected = List(
         Field(GETSTATIC, "scala/Predef$", "MODULE$", "Lscala/Predef$;"),
         Ldc(LDC, "zero"),
-        Invoke(INVOKEVIRTUAL, "scala/Predef$", "println", "(Ljava/lang/Object;)V", false),
+        Invoke(
+          INVOKEVIRTUAL,
+          "scala/Predef$",
+          "println",
+          "(Ljava/lang/Object;)V",
+          false
+        ),
         Op(RETURN)
       )
-      assert(instructions == expected,
-        "`printIfZero` was not properly inlined in `test`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`printIfZero` was not properly inlined in `test`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
     }
-  }
+  end i6800b
 
-
-  @Test def i9246 = {
+  @Test def i9246 =
     val source = """class Foo:
                    |  inline def check(v:Double): Unit = if(v==0) throw new Exception()
                    |  inline def divide(v: Double, d: Double): Double = { check(d); v / d }
@@ -487,18 +532,22 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
       val expected = List(Ldc(LDC, 5.0), Op(DRETURN))
-      assert(instructions == expected,
-        "`divide` was not properly inlined in `test`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`divide` was not properly inlined in `test`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
     }
-  }
 
-  @Test def finalVals = {
+  @Test def finalVals =
     val source = """class Test:
                    |  final val a = 1 // should be inlined but not erased
                    |  inline val b = 2 // should be inlined and erased
@@ -506,22 +555,28 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Test.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Test.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
       val expected = List(Op(ICONST_3), Op(IRETURN))
-      assert(instructions == expected,
-        "`a and b were not properly inlined in `test`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`a and b were not properly inlined in `test`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
       val methods = clsNode.methods.asScala.toList.map(_.name)
-      assert(methods == List("<init>", "a", "test"), clsNode.methods.asScala.toList.map(_.name))
+      assert(
+        methods == List("<init>", "a", "test"),
+        clsNode.methods.asScala.toList.map(_.name)
+      )
     }
-  }
 
-
-  @Test def i9466 = {
+  @Test def i9466 =
     val source = """class Test:
                    |  inline def i(inline f: Int => Boolean): String =
                    |   if f(34) then "a"
@@ -530,8 +585,8 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Test.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Test.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
@@ -541,13 +596,18 @@ class InlineBytecodeTests extends DottyBytecodeTest {
           Op(ARETURN)
         )
 
-      assert(instructions == expected,
-        "`i was not properly inlined in `test`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`i was not properly inlined in `test`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end i9466
 
-  @Test def beta_reduce_under_block = {
+  @Test def beta_reduce_under_block =
     val source = """class Test:
                    |  def test =
                    |    {
@@ -557,8 +617,8 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Test.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Test.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
@@ -569,24 +629,29 @@ class InlineBytecodeTests extends DottyBytecodeTest {
           Op(ICONST_2),
           VarOp(ILOAD, 1),
           Op(IADD),
-          Op(IRETURN),
+          Op(IRETURN)
         )
 
-      assert(instructions == expected,
-        "`i was not properly beta-reduced in `test`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`i was not properly beta-reduced in `test`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end beta_reduce_under_block
 
-  @Test def beta_reduce_polymorphic_function = {
+  @Test def beta_reduce_polymorphic_function =
     val source = """class Test:
                    |  def test =
                    |    ([Z] => (arg: Z) => { val a: Z = arg; a }).apply[Int](2)
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Test.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Test.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
@@ -598,13 +663,18 @@ class InlineBytecodeTests extends DottyBytecodeTest {
           Op(IRETURN)
         )
 
-      assert(instructions == expected,
-        "`i was not properly beta-reduced in `test`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`i was not properly beta-reduced in `test`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end beta_reduce_polymorphic_function
 
-  @Test def beta_reduce_function_of_opaque_types = {
+  @Test def beta_reduce_function_of_opaque_types =
     val source = """object foo:
                    |  opaque type T = Int
                    |  inline def apply(inline op: T => T): T = op(2)
@@ -614,8 +684,8 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Test.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Test.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
@@ -626,16 +696,21 @@ class InlineBytecodeTests extends DottyBytecodeTest {
           VarOp(ALOAD, 1),
           VarOp(ASTORE, 2),
           Op(ICONST_2),
-          Op(IRETURN),
+          Op(IRETURN)
         )
 
-      assert(instructions == expected,
-        "`i was not properly beta-reduced in `test`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`i was not properly beta-reduced in `test`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end beta_reduce_function_of_opaque_types
 
-  @Test def i9456 = {
+  @Test def i9456 =
     val source = """class Foo {
                    |  def test: Int = inline2(inline1(2.+))
                    |
@@ -646,23 +721,28 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Foo.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Foo.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
       val fun = getMethod(clsNode, "test")
       val instructions = instructionsFromMethod(fun)
       val expected = // TODO room for constant folding
         List(
           IntOp(BIPUSH, 6),
-          Op(IRETURN),
+          Op(IRETURN)
         )
-      assert(instructions == expected,
-        "`f` was not properly inlined in `fun`\n" + diffInstructions(instructions, expected))
+      assert(
+        instructions == expected,
+        "`f` was not properly inlined in `fun`\n" + diffInstructions(
+          instructions,
+          expected
+        )
+      )
 
     }
-  }
+  end i9456
 
-  @Test def any_eq_specialization = {
+  @Test def any_eq_specialization =
     val source = """class Test:
                    |  inline def eql(x: Any, y: Any) = x == y
                    |
@@ -698,23 +778,36 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Test.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Test.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
-      for cls <- List("Boolean", "Byte", "Short", "Int", "Long", "Float", "Double", "Char", "Unit") do
-        val meth1      = getMethod(clsNode, s"test$cls")
-        val meth2      = getMethod(clsNode, s"test${cls}Expected")
+      for cls <- List(
+          "Boolean",
+          "Byte",
+          "Short",
+          "Int",
+          "Long",
+          "Float",
+          "Double",
+          "Char",
+          "Unit"
+        )
+      do
+        val meth1 = getMethod(clsNode, s"test$cls")
+        val meth2 = getMethod(clsNode, s"test${cls}Expected")
 
         val instructions1 = instructionsFromMethod(meth1)
         val instructions2 = instructionsFromMethod(meth2)
 
-        assert(instructions1 == instructions2,
+        assert(
+          instructions1 == instructions2,
           s"`==` was not properly specialized when inlined in `test$cls`\n" +
-          diffInstructions(instructions1, instructions2))
+            diffInstructions(instructions1, instructions2)
+        )
     }
-  }
+  end any_eq_specialization
 
-  @Test def any_neq_specialization = {
+  @Test def any_neq_specialization =
     val source = """class Test:
                    |  inline def neql(x: Any, y: Any) = x != y
                    |
@@ -750,19 +843,32 @@ class InlineBytecodeTests extends DottyBytecodeTest {
                  """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn      = dir.lookupName("Test.class", directory = false).input
-      val clsNode    = loadClassNode(clsIn)
+      val clsIn = dir.lookupName("Test.class", directory = false).input
+      val clsNode = loadClassNode(clsIn)
 
-      for cls <- List("Boolean", "Byte", "Short", "Int", "Long", "Float", "Double", "Char", "Unit") do
-        val meth1      = getMethod(clsNode, s"test$cls")
-        val meth2      = getMethod(clsNode, s"test${cls}Expected")
+      for cls <- List(
+          "Boolean",
+          "Byte",
+          "Short",
+          "Int",
+          "Long",
+          "Float",
+          "Double",
+          "Char",
+          "Unit"
+        )
+      do
+        val meth1 = getMethod(clsNode, s"test$cls")
+        val meth2 = getMethod(clsNode, s"test${cls}Expected")
 
         val instructions1 = instructionsFromMethod(meth1)
         val instructions2 = instructionsFromMethod(meth2)
 
-        assert(instructions1 == instructions2,
+        assert(
+          instructions1 == instructions2,
           s"`!=` was not properly specialized when inlined in `test$cls`\n" +
-          diffInstructions(instructions1, instructions2))
+            diffInstructions(instructions1, instructions2)
+        )
     }
-  }
-}
+  end any_neq_specialization
+end InlineBytecodeTests

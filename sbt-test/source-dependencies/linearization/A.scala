@@ -1,3 +1,2 @@
-trait A {
-	def x = 3
-}
+trait A:
+  def x = 3

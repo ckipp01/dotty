@@ -11,16 +11,21 @@ import config.Printers.capt
 import printing.Printer
 import printing.Texts.Text
 
-/** An annotation representing a capture set and whether it is boxed.
- *  It simulates a normal @retains annotation except that it is more efficient,
- *  supports variables as capture sets, and adds a `boxed` flag.
- *  These annotations are created during capture checking. Before that
- *  there are only regular @retains and @retainsByName annotations.
- *  @param refs    the capture set
- *  @param boxed   whether the type carrying the annotation is boxed
- *  @param cls     the underlying class (either annotation.retains or annotation.retainsByName)
- */
-case class CaptureAnnotation(refs: CaptureSet, boxed: Boolean)(cls: Symbol) extends Annotation:
+/** An annotation representing a capture set and whether it is boxed. It
+  * simulates a normal @retains annotation except that it is more efficient,
+  * supports variables as capture sets, and adds a `boxed` flag. These
+  * annotations are created during capture checking. Before that there are only
+  * regular @retains and @retainsByName annotations.
+  * @param refs
+  *   the capture set
+  * @param boxed
+  *   whether the type carrying the annotation is boxed
+  * @param cls
+  *   the underlying class (either annotation.retains or
+  *   annotation.retainsByName)
+  */
+case class CaptureAnnotation(refs: CaptureSet, boxed: Boolean)(cls: Symbol)
+    extends Annotation:
   import CaptureAnnotation.*
   import tpd.*
 
@@ -30,9 +35,9 @@ case class CaptureAnnotation(refs: CaptureSet, boxed: Boolean)(cls: Symbol) exte
   /** Reconstitute annotation tree from capture set */
   override def tree(using Context) =
     val elems = refs.elems.toList.map {
-      case cr: TermRef => ref(cr)
+      case cr: TermRef      => ref(cr)
       case cr: TermParamRef => untpd.Ident(cr.paramName).withType(cr)
-      case cr: ThisType => This(cr.cls)
+      case cr: ThisType     => This(cr.cls)
     }
     val arg = repeated(elems, TypeTree(defn.AnyType))
     New(symbol.typeRef, arg :: Nil)
@@ -41,27 +46,34 @@ case class CaptureAnnotation(refs: CaptureSet, boxed: Boolean)(cls: Symbol) exte
 
   override def derivedAnnotation(tree: Tree)(using Context): Annotation = this
 
-  def derivedAnnotation(refs: CaptureSet, boxed: Boolean)(using Context): Annotation =
+  def derivedAnnotation(refs: CaptureSet, boxed: Boolean)(using
+      Context
+  ): Annotation =
     if (this.refs eq refs) && (this.boxed == boxed) then this
     else CaptureAnnotation(refs, boxed)(cls)
 
-  override def sameAnnotation(that: Annotation)(using Context): Boolean = that match
-    case CaptureAnnotation(refs, boxed) =>
-      this.refs == refs && this.boxed == boxed && this.symbol == that.symbol
-    case _ => false
+  override def sameAnnotation(that: Annotation)(using Context): Boolean =
+    that match
+      case CaptureAnnotation(refs, boxed) =>
+        this.refs == refs && this.boxed == boxed && this.symbol == that.symbol
+      case _ => false
 
   override def mapWith(tm: TypeMap)(using Context) =
     val elems = refs.elems.toList
     val elems1 = elems.mapConserve(tm)
     if elems1 eq elems then this
     else if elems1.forall(_.isInstanceOf[CaptureRef])
-    then derivedAnnotation(CaptureSet(elems1.asInstanceOf[List[CaptureRef]]*), boxed)
+    then
+      derivedAnnotation(
+        CaptureSet(elems1.asInstanceOf[List[CaptureRef]]*),
+        boxed
+      )
     else EmptyAnnotation
 
   override def refersToParamOf(tl: TermLambda)(using Context): Boolean =
     refs.elems.exists {
       case TermParamRef(tl1, _) => tl eq tl1
-      case _ => false
+      case _                    => false
     }
 
   override def toText(printer: Printer): Text = refs.toText(printer)
@@ -70,7 +82,8 @@ case class CaptureAnnotation(refs: CaptureSet, boxed: Boolean)(cls: Symbol) exte
     (refs.hashCode << 1) | (if boxed then 1 else 0)
 
   override def eql(that: Annotation) = that match
-    case that: CaptureAnnotation => (this.refs eq that.refs) && (this.boxed == that.boxed)
+    case that: CaptureAnnotation =>
+      (this.refs eq that.refs) && (this.boxed == that.boxed)
     case _ => false
 
 end CaptureAnnotation

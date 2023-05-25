@@ -9,53 +9,53 @@ import java.util.regex.Pattern
 import org.junit.{Test, BeforeClass, AfterClass}
 import org.junit.Assert.assertEquals
 
-class LoadTests extends ReplTest {
-  import LoadTests._, ReplCompilerTests._
+class LoadTests extends ReplTest:
+  import LoadTests.*, ReplCompilerTests.*
 
   @Test def helloworld = loadTest(
-    file    = """|def helloWorld = "Hello, World!"
+    file = """|def helloWorld = "Hello, World!"
                  |println(helloWorld)
                  |""".stripMargin,
-    defs    = """|Hello, World!
+    defs = """|Hello, World!
                  |def helloWorld: String
                  |""".stripMargin,
     runCode = "helloWorld",
-    output  = """|val res0: String = Hello, World!
+    output = """|val res0: String = Hello, World!
                  |""".stripMargin
   )
 
   @Test def maindef = loadTest(
-    file    = """|@main def helloWorld = println("Hello, World!")
+    file = """|@main def helloWorld = println("Hello, World!")
                  |""".stripMargin,
-    defs    = """|def helloWorld: Unit
+    defs = """|def helloWorld: Unit
                  |""".stripMargin,
     runCode = "helloWorld",
-    output  = """|Hello, World!
+    output = """|Hello, World!
                  |""".stripMargin
   )
 
   @Test def maindefs = loadTest(
-    file    = """|@main def helloWorld = println("Hello, World!")
+    file = """|@main def helloWorld = println("Hello, World!")
                  |@main def helloTo(name: String) = println(s"Hello, $name!")
                  |""".stripMargin,
-    defs    = """|def helloWorld: Unit
+    defs = """|def helloWorld: Unit
                  |def helloTo(name: String): Unit
                  |""".stripMargin,
     runCode = """helloWorld; helloTo("Scala")""",
-    output  = """|Hello, World!
+    output = """|Hello, World!
                  |Hello, Scala!
                  |""".stripMargin
   )
 
   @Test def truncated = loadTest(
-    file    = """|def f: Unit =
+    file = """|def f: Unit =
                  |  for i <- 1 to 2
                  |  do
                  |    println(i)""".stripMargin, // was: unindent expected, but eof found
-    defs    = """|def f: Unit
+    defs = """|def f: Unit
                  |""".stripMargin,
     runCode = """f""",
-    output  = """|1
+    output = """|1
                  |2
                  |""".stripMargin
   )
@@ -68,9 +68,9 @@ class LoadTests extends ReplTest {
     }
 
   private def eval(code: String): State = initially(run(code))
-}
+end LoadTests
 
-object LoadTests {
+object LoadTests:
 
   private var dir: Path = null
 
@@ -81,10 +81,7 @@ object LoadTests {
     Files.walk(dir).sorted(Comparator.reverseOrder).forEach(Files.delete)
     dir = null
 
-  private def writeFile(contents: String): Path = {
+  private def writeFile(contents: String): Path =
     val file = Files.createTempFile(dir, "repl_test", ".scala")
     Files.write(file, contents.getBytes)
     file
-  }
-
-}

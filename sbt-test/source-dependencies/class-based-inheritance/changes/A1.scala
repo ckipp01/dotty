@@ -1,5 +1,4 @@
-class A {
+class A:
   class AA
-}
 
 class A2

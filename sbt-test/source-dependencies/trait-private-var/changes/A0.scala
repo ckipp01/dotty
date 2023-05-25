@@ -1,3 +1,2 @@
-trait A {
-	def bar: Int = 0
-}
+trait A:
+  def bar: Int = 0

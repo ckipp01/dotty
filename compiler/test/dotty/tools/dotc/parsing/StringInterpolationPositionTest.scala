@@ -2,10 +2,10 @@ package dotty.tools
 package dotc
 package parsing
 
-import ast.untpd._
+import ast.untpd.*
 import org.junit.Test
 
-class StringInterpolationPositionTest extends ParserTest {
+class StringInterpolationPositionTest extends ParserTest:
 
   val tq = "\"\"\""
   val program = s"""
@@ -20,24 +20,22 @@ class StringInterpolationPositionTest extends ParserTest {
     |}""".stripMargin
 
   @Test
-  def interpolationLiteralPosition: Unit = {
+  def interpolationLiteralPosition: Unit =
     val t = parseText(program)
-    t match {
-      case PackageDef(_, List(TypeDef(_, tpl: Template))) => {
-        val interpolations = tpl.body.collect{ case ValDef(_, _, InterpolatedString(_, int)) => int }
+    t match
+      case PackageDef(_, List(TypeDef(_, tpl: Template))) =>
+        val interpolations = tpl.body.collect {
+          case ValDef(_, _, InterpolatedString(_, int)) => int
+        }
         val lits = interpolations.flatten.flatMap {
           case l @ Literal(_) => List(l)
           case Thicket(trees) => trees.collect { case l @ Literal(_) => l }
         }
-        for {
+        for
           lit <- lits
           Literal(c) = lit
-          str <- List(c.value).collect { case str: String => str}
-        } {
+          str <- List(c.value).collect { case str: String => str }
+        do
           val fromPos = program.substring(lit.span.start, lit.span.end)
           assert(fromPos == str, s"$fromPos == $str")
-        }
-      }
-    }
-  }
-}
+end StringInterpolationPositionTest

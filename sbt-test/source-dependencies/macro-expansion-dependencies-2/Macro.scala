@@ -1,11 +1,8 @@
-import scala.quoted._
+import scala.quoted.*
 
-object Macro {
+object Macro:
 
-   inline def f(): Unit = ${ macroImplementation }
+  inline def f(): Unit = ${ macroImplementation }
 
-   def macroImplementation(using Quotes): Expr[Unit] =
-      MacroRuntime.impl()
-
-
-}
+  def macroImplementation(using Quotes): Expr[Unit] =
+    MacroRuntime.impl()

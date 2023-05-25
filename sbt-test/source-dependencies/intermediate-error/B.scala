@@ -1,4 +1,2 @@
-object B
-{
-	val y: Int = A.x
-}
+object B:
+  val y: Int = A.x

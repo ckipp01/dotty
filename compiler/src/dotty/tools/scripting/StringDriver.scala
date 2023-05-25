@@ -2,15 +2,16 @@ package dotty.tools.scripting
 
 import scala.language.unsafeNulls
 
-import java.nio.file.{ Files, Paths, Path }
+import java.nio.file.{Files, Paths, Path}
 
 import dotty.tools.dotc.Driver
-import dotty.tools.dotc.core.Contexts, Contexts.{ Context, ctx }
-import dotty.tools.io.{ PlainDirectory, Directory, ClassPath }
+import dotty.tools.dotc.core.Contexts, Contexts.{Context, ctx}
+import dotty.tools.io.{PlainDirectory, Directory, ClassPath}
 import Util.*
 import dotty.tools.dotc.util.SourceFile
 
-class StringDriver(compilerArgs: Array[String], scalaSource: String) extends Driver:
+class StringDriver(compilerArgs: Array[String], scalaSource: String)
+    extends Driver:
   override def sourcesRequired: Boolean = false
 
   def compileAndRun(classpath: List[String] = Nil): Option[Throwable] =
@@ -19,7 +20,10 @@ class StringDriver(compilerArgs: Array[String], scalaSource: String) extends Dri
 
     setup(compilerArgs, initCtx.fresh) match
       case Some((toCompile, rootCtx)) =>
-        given Context = rootCtx.fresh.setSetting(rootCtx.settings.outputDir, new PlainDirectory(Directory(outDir)))
+        given Context = rootCtx.fresh.setSetting(
+          rootCtx.settings.outputDir,
+          new PlainDirectory(Directory(outDir))
+        )
 
         val compiler = newCompiler
 
@@ -31,10 +35,19 @@ class StringDriver(compilerArgs: Array[String], scalaSource: String) extends Dri
           Some(StringDriverException("Errors encountered during compilation"))
         else
           try
-            val classpath = s"${ctx.settings.classpath.value}${pathsep}${sys.props("java.class.path")}"
-            val classpathEntries: Seq[Path] = ClassPath.expandPath(classpath, expandStar=true).map { Paths.get(_) }
-            sys.props("java.class.path") = classpathEntries.map(_.toString).mkString(pathsep)
-            detectMainClassAndMethod(outDir, classpathEntries, scalaSource) match
+            val classpath =
+              s"${ctx.settings.classpath.value}${pathsep}${sys.props("java.class.path")}"
+            val classpathEntries: Seq[Path] =
+              ClassPath.expandPath(classpath, expandStar = true).map {
+                Paths.get(_)
+              }
+            sys.props("java.class.path") =
+              classpathEntries.map(_.toString).mkString(pathsep)
+            detectMainClassAndMethod(
+              outDir,
+              classpathEntries,
+              scalaSource
+            ) match
               case Right((mainClass, mainMethod)) =>
                 mainMethod.invoke(null, Array.empty[String])
                 None
@@ -42,9 +55,9 @@ class StringDriver(compilerArgs: Array[String], scalaSource: String) extends Dri
           catch
             case e: java.lang.reflect.InvocationTargetException =>
               Some(e.getCause)
-          finally
-            deleteFile(outDir.toFile)
+          finally deleteFile(outDir.toFile)
       case None => None
+    end match
   end compileAndRun
 
 end StringDriver

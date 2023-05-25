@@ -3,11 +3,11 @@ package dotc
 package transform
 package init
 
-import ast.tpd._
-import core._
+import ast.tpd.*
+import core.*
 import util.Property
 import util.SourcePosition
-import Types._, Symbols._, Contexts._
+import Types.*, Symbols.*, Contexts.*
 
 import Trace.Trace
 
@@ -18,7 +18,8 @@ object Errors:
     def trace: Trace
     def show(using Context): String
 
-    def pos(using Context): SourcePosition = Trace.position(using trace).sourcePos
+    def pos(using Context): SourcePosition =
+      Trace.position(using trace).sourcePos
 
     def stacktrace(using Context): String =
       val preamble: String =
@@ -47,7 +48,7 @@ object Errors:
 
   case class AccessCold(field: Symbol)(val trace: Trace) extends Error:
     def show(using Context): String =
-      "Access field " + field.show +  " on an uninitialized (Cold) object." + stacktrace
+      "Access field " + field.show + " on an uninitialized (Cold) object." + stacktrace
 
   case class CallCold(meth: Symbol)(val trace: Trace) extends Error:
     def show(using Context): String =
@@ -55,11 +56,14 @@ object Errors:
 
   case class CallUnknown(meth: Symbol)(val trace: Trace) extends Error:
     def show(using Context): String =
-      val prefix = if meth.is(Flags.Method) then "Calling the external method " else "Accessing the external field"
+      val prefix =
+        if meth.is(Flags.Method) then "Calling the external method "
+        else "Accessing the external field"
       prefix + meth.show + " may cause initialization errors." + stacktrace
 
   /** Promote a value under initialization to fully-initialized */
-  case class UnsafePromotion(msg: String, error: Error)(val trace: Trace) extends Error:
+  case class UnsafePromotion(msg: String, error: Error)(val trace: Trace)
+      extends Error:
     def show(using Context): String =
       msg + stacktrace + "\n" +
         "Promoting the value to transitively initialized (Hot) failed due to the following problem:\n" + {
@@ -68,10 +72,15 @@ object Errors:
         }
 
   /** Unsafe leaking a non-hot value as constructor arguments
-   *
-   *  Invariant: argsIndices.nonEmpty
-   */
-  case class UnsafeLeaking(error: Error, nonHotOuterClass: Symbol, argsIndices: List[Int])(val trace: Trace) extends Error:
+    *
+    * Invariant: argsIndices.nonEmpty
+    */
+  case class UnsafeLeaking(
+      error: Error,
+      nonHotOuterClass: Symbol,
+      argsIndices: List[Int]
+  )(val trace: Trace)
+      extends Error:
     def show(using Context): String =
       "Problematic object instantiation: " + argumentInfo() + stacktrace + "\n" +
         "It leads to the following error during object initialization:\n" +
@@ -86,7 +95,8 @@ object Errors:
       val multiple = argsIndices.size > 1 || nonHotOuterClass.exists
       val init =
         if nonHotOuterClass.exists
-        then  "the outer " + nonHotOuterClass.name.show + ".this" + punctuation(-1)
+        then
+          "the outer " + nonHotOuterClass.name.show + ".this" + punctuation(-1)
         else ""
 
       val subject =
@@ -98,3 +108,5 @@ object Errors:
       val verb = if multiple then " are " else " is "
       val adjective = "not transitively initialized (Hot)."
       subject + verb + adjective
+  end UnsafeLeaking
+end Errors

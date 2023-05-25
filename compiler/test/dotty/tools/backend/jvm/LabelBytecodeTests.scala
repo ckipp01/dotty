@@ -2,21 +2,21 @@ package dotty.tools.backend.jvm
 
 import scala.language.unsafeNulls
 
-import org.junit.Assert._
+import org.junit.Assert.*
 import org.junit.Test
 
 import scala.tools.asm
-import asm._
-import asm.tree._
+import asm.*
+import asm.tree.*
 
 import scala.tools.asm.Opcodes
-import scala.jdk.CollectionConverters._
-import Opcodes._
+import scala.jdk.CollectionConverters.*
+import Opcodes.*
 
-class LabelBytecodeTests extends DottyBytecodeTest {
-  import ASMConverters._
+class LabelBytecodeTests extends DottyBytecodeTest:
+  import ASMConverters.*
 
-   @Test def localLabelBreak = {
+  @Test def localLabelBreak =
     testLabelBytecodeEquals(
       """val local = boundary.Label[Long]()
         |try break(5L)(using local)
@@ -28,9 +28,8 @@ class LabelBytecodeTests extends DottyBytecodeTest {
       Ldc(LDC, 5),
       Op(LRETURN)
     )
-  }
 
-  @Test def simpleBoundaryBreak = {
+  @Test def simpleBoundaryBreak =
     testLabelBytecodeEquals(
       """boundary: l ?=>
         |  break(2)(using l)
@@ -56,9 +55,8 @@ class LabelBytecodeTests extends DottyBytecodeTest {
       "Unit",
       Op(RETURN)
     )
-  }
 
-  @Test def labelExtraction = {
+  @Test def labelExtraction =
     // Test extra Inlined around the label
     testLabelBytecodeEquals(
       """boundary:
@@ -78,9 +76,8 @@ class LabelBytecodeTests extends DottyBytecodeTest {
       Op(ICONST_2),
       Op(IRETURN)
     )
-  }
 
-  @Test def boundaryLocalBreak = {
+  @Test def boundaryLocalBreak =
     testLabelBytecodeExpect(
       """val x: Boolean = true
         |boundary[Unit]:
@@ -92,9 +89,8 @@ class LabelBytecodeTests extends DottyBytecodeTest {
       "Unit",
       !throws(_)
     )
-  }
 
-  @Test def boundaryNonLocalBreak = {
+  @Test def boundaryNonLocalBreak =
     testLabelBytecodeExpect(
       """boundary[Unit]:
         |  nonLocalBreak()
@@ -111,9 +107,8 @@ class LabelBytecodeTests extends DottyBytecodeTest {
       "Unit",
       throws
     )
-  }
 
-  @Test def boundaryLocalAndNonLocalBreak = {
+  @Test def boundaryLocalAndNonLocalBreak =
     testLabelBytecodeExpect(
       """boundary[Unit]: l ?=>
         |  break()
@@ -122,28 +117,44 @@ class LabelBytecodeTests extends DottyBytecodeTest {
       "Unit",
       throws
     )
-  }
 
   private def throws(instructions: List[Instruction]): Boolean =
     instructions.exists {
       case Op(ATHROW) => true
-      case _ => false
+      case _          => false
     }
 
-  private def testLabelBytecodeEquals(code: String, tpe: String, expected: Instruction*): Unit =
+  private def testLabelBytecodeEquals(
+      code: String,
+      tpe: String,
+      expected: Instruction*
+  ): Unit =
     checkLabelBytecodeInstructions(code, tpe) { instructions =>
       val expectedList = expected.toList
-      assert(instructions == expectedList,
-        "`test` was not properly generated\n" + diffInstructions(instructions, expectedList))
+      assert(
+        instructions == expectedList,
+        "`test` was not properly generated\n" + diffInstructions(
+          instructions,
+          expectedList
+        )
+      )
     }
 
-  private def testLabelBytecodeExpect(code: String, tpe: String, expected: List[Instruction] => Boolean): Unit =
+  private def testLabelBytecodeExpect(
+      code: String,
+      tpe: String,
+      expected: List[Instruction] => Boolean
+  ): Unit =
     checkLabelBytecodeInstructions(code, tpe) { instructions =>
-      assert(expected(instructions),
-        "`test` was not properly generated\n" + instructions)
+      assert(
+        expected(instructions),
+        "`test` was not properly generated\n" + instructions
+      )
     }
 
-   private def checkLabelBytecodeInstructions(code: String, tpe: String)(checkOutput: List[Instruction] => Unit): Unit = {
+  private def checkLabelBytecodeInstructions(code: String, tpe: String)(
+      checkOutput: List[Instruction] => Unit
+  ): Unit =
     val source =
       s"""import scala.util.boundary, boundary.break
          |class Test:
@@ -155,12 +166,10 @@ class LabelBytecodeTests extends DottyBytecodeTest {
       """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn   = dir.lookupName("Test.class", directory = false).input
+      val clsIn = dir.lookupName("Test.class", directory = false).input
       val clsNode = loadClassNode(clsIn)
-      val method  = getMethod(clsNode, "test")
+      val method = getMethod(clsNode, "test")
 
       checkOutput(instructionsFromMethod(method))
     }
-  }
-
-}
+end LabelBytecodeTests

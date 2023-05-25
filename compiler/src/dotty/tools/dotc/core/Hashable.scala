@@ -1,46 +1,47 @@
 package dotty.tools.dotc
 package core
 
-import Types._
-import scala.util.hashing.{ MurmurHash3 => hashing }
+import Types.*
+import scala.util.hashing.{MurmurHash3 as hashing}
 import annotation.tailrec
 
-object Hashable {
+object Hashable:
 
-  /** A null terminated list of BindingTypes. We use `null` here for efficiency */
+  /** A null terminated list of BindingTypes. We use `null` here for efficiency
+    */
   class SomeBinders(val tp: BindingType, val next: Binders)
 
   type Binders = SomeBinders | Null
 
-  /** A null terminated list of pairs of BindingTypes. Used for isomorphism tests. */
-  class SomeBinderPairs(tp1: BindingType, tp2: BindingType, next: BinderPairs) {
+  /** A null terminated list of pairs of BindingTypes. Used for isomorphism
+    * tests.
+    */
+  class SomeBinderPairs(tp1: BindingType, tp2: BindingType, next: BinderPairs):
     @tailrec final def matches(t1: Type, t2: Type): Boolean =
       (t1 `eq` tp1) && (t2 `eq` tp2) || next != null && next.matches(t1, t2)
-  }
 
   type BinderPairs = SomeBinderPairs | Null
 
-  /** A hash value indicating that the underlying type is not
-   *  cached in uniques.
-   */
+  /** A hash value indicating that the underlying type is not cached in uniques.
+    */
   inline val NotCached = 0
 
-  /** An alternative value returned from `hash` if the
-   *  computed hashCode would be `NotCached`.
-   */
+  /** An alternative value returned from `hash` if the computed hashCode would
+    * be `NotCached`.
+    */
   private[core] inline val NotCachedAlt = Int.MinValue
 
   /** A value that indicates that the hash code is unknown
-   */
+    */
   private[core] inline val HashUnknown = 1234
 
   /** An alternative value if computeHash would otherwise yield HashUnknown
-   */
+    */
   private[core] inline val HashUnknownAlt = 4321
-}
+end Hashable
 
-trait Hashable {
-  import Hashable._
+trait Hashable:
+  import Hashable.*
 
   protected def hashSeed: Int = getClass.hashCode
 
@@ -48,42 +49,55 @@ trait Hashable {
     avoidSpecialHashes(hashing.finalizeHash(hashCode, arity))
 
   final def typeHash(bs: Binders, tp: Type): Int =
-    if (bs == null || tp.hashIsStable) tp.hash else tp.computeHash(bs)
+    if bs == null || tp.hashIsStable then tp.hash else tp.computeHash(bs)
 
-  def identityHash(bs: Binders): Int = avoidSpecialHashes(System.identityHashCode(this))
+  def identityHash(bs: Binders): Int = avoidSpecialHashes(
+    System.identityHashCode(this)
+  )
 
-  protected def finishHash(bs: Binders, seed: Int, arity: Int, tp: Type): Int = {
+  protected def finishHash(bs: Binders, seed: Int, arity: Int, tp: Type): Int =
     val elemHash = typeHash(bs, tp)
-    if (elemHash == NotCached) return NotCached
+    if elemHash == NotCached then return NotCached
     finishHash(hashing.mix(seed, elemHash), arity + 1)
-  }
 
-  protected def finishHash(bs: Binders, seed: Int, arity: Int, tp1: Type, tp2: Type): Int = {
+  protected def finishHash(
+      bs: Binders,
+      seed: Int,
+      arity: Int,
+      tp1: Type,
+      tp2: Type
+  ): Int =
     val elemHash = typeHash(bs, tp1)
-    if (elemHash == NotCached) return NotCached
+    if elemHash == NotCached then return NotCached
     finishHash(bs, hashing.mix(seed, elemHash), arity + 1, tp2)
-  }
 
-  protected def finishHash(bs: Binders, seed: Int, arity: Int, tps: List[Type]): Int = {
+  protected def finishHash(
+      bs: Binders,
+      seed: Int,
+      arity: Int,
+      tps: List[Type]
+  ): Int =
     var h = seed
     var xs = tps
     var len = arity
-    while (!xs.isEmpty) {
+    while !xs.isEmpty do
       val elemHash = typeHash(bs, xs.head)
-      if (elemHash == NotCached) return NotCached
+      if elemHash == NotCached then return NotCached
       h = hashing.mix(h, elemHash)
       xs = xs.tail
       len += 1
-    }
     finishHash(h, len)
-  }
 
-  protected def finishHash(bs: Binders, seed: Int, arity: Int, tp: Type, tps: List[Type]): Int = {
+  protected def finishHash(
+      bs: Binders,
+      seed: Int,
+      arity: Int,
+      tp: Type,
+      tps: List[Type]
+  ): Int =
     val elemHash = typeHash(bs, tp)
-    if (elemHash == NotCached) return NotCached
+    if elemHash == NotCached then return NotCached
     finishHash(bs, hashing.mix(seed, elemHash), arity + 1, tps)
-  }
-
 
   protected final def doHash(x: Any): Int =
     finishHash(hashing.mix(hashSeed, x.hashCode), 1)
@@ -109,18 +123,23 @@ trait Hashable {
   protected final def doHash(bs: Binders, tp1: Type, tps2: List[Type]): Int =
     finishHash(bs, hashSeed, 0, tp1, tps2)
 
-  protected final def doHash(bs: Binders, x1: Any, tp2: Type, tps3: List[Type]): Int =
+  protected final def doHash(
+      bs: Binders,
+      x1: Any,
+      tp2: Type,
+      tps3: List[Type]
+  ): Int =
     finishHash(bs, hashing.mix(hashSeed, x1.hashCode), 1, tp2, tps3)
 
   protected final def doHash(x1: Int, x2: Int): Int =
     finishHash(hashing.mix(hashing.mix(hashSeed, x1), x2), 1)
 
   protected final def addDelta(elemHash: Int, delta: Int): Int =
-    if (elemHash == NotCached) NotCached
+    if elemHash == NotCached then NotCached
     else avoidSpecialHashes(elemHash + delta)
 
   protected def avoidSpecialHashes(h: Int): Int =
-    if (h == NotCached) NotCachedAlt
-    else if (h == HashUnknown) HashUnknownAlt
+    if h == NotCached then NotCachedAlt
+    else if h == HashUnknown then HashUnknownAlt
     else h
-}
+end Hashable

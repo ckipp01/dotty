@@ -2,9 +2,9 @@ package dotty.tools
 package dotc
 package util
 
-/** A character buffer that exposes the internal array for reading.
- *  That way we can avoid copying when converting to names.
- */
+/** A character buffer that exposes the internal array for reading. That way we
+  * can avoid copying when converting to names.
+  */
 class CharBuffer(initialSize: Int = 1024):
   private var cs: Array[Char] = new Array[Char](initialSize)
   private var len: Int = 0
@@ -24,5 +24,3 @@ class CharBuffer(initialSize: Int = 1024):
   def clear(): Unit = len = 0
 
   override def toString = String(cs, 0, len)
-
-

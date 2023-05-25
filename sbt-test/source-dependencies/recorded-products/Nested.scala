@@ -1,17 +1,12 @@
 package foo.bar
 
-class Outer {
-  object InnerO {
+class Outer:
+  object InnerO:
     class A
     object B
-  }
-  class InnerC {
+  class InnerC:
     trait T
-  }
-}
 
-object Outer {
-  class X {
+object Outer:
+  class X:
     object Y
-  }
-}

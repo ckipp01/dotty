@@ -1,10 +1,6 @@
-package a
-{
-	package b
-	{
-		object A
-		{
-			private[a] def x = 3
-		}
-	}
+package a {
+  package b {
+    object A:
+      private[a] def x = 3
+  }
 }

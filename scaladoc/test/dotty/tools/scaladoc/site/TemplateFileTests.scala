@@ -8,27 +8,33 @@ import org.junit.Test
 import java.nio.file.Files
 
 class TemplateFileTests:
-  given staticSiteContext: StaticSiteContext = testDocContext().staticSiteContext.get
-  private def testTemplate(code: String, ext: String = "html")(op: TemplateFile => Unit): Unit =
+  given staticSiteContext: StaticSiteContext =
+    testDocContext().staticSiteContext.get
+  private def testTemplate(code: String, ext: String = "html")(
+      op: TemplateFile => Unit
+  ): Unit =
     val tmpFile = Files.createTempFile("headerTests", s".${ext}").toFile()
     try
       Files.write(tmpFile.toPath, code.getBytes)
       op(loadTemplateFile(tmpFile))
     finally tmpFile.delete()
 
-
   private def testContent(
-                            expected: String,
-                            props: Map[String, String],
-                            template: List[(String, String)]
-                          ) =
+      expected: String,
+      props: Map[String, String],
+      template: List[(String, String)]
+  ) =
     def rec(ctx: RenderingContext, remaining: List[(String, String)]): Unit =
       if remaining.isEmpty then
-        assertEquals(expected.trim(), ctx.layouts("content").resolveInner(ctx).code.trim())
+        assertEquals(
+          expected.trim(),
+          ctx.layouts("content").resolveInner(ctx).code.trim()
+        )
       else
         val (code, ext) = remaining.head
         testTemplate(code, ext) { template =>
-          val newCtx = ctx.copy(layouts = ctx.layouts + (template.name -> template))
+          val newCtx =
+            ctx.copy(layouts = ctx.layouts + (template.name -> template))
           rec(newCtx, remaining.drop(1))
         }
 
@@ -45,7 +51,6 @@ class TemplateFileTests:
       assertEquals(t.rawCode, "code")
       assertEquals(t.title.name, "myTitle")
     }
-
 
   @Test
   def testLinks(): Unit =
@@ -65,9 +70,8 @@ class TemplateFileTests:
         |ma kota w **{{ p1 }}** from [here](link/here.md)
         |""".stripMargin
 
-
     val expected =
-    """<p>Ala ma kota w <strong>paski</strong> from <a href="link/here.md">here</a>. Hej with <a href="link/target.md">link</a>!</p>""".stripMargin
+      """<p>Ala ma kota w <strong>paski</strong> from <a href="link/here.md">here</a>. Hej with <a href="link/target.md">link</a>!</p>""".stripMargin
 
     testContent(
       expected,
@@ -92,7 +96,6 @@ class TemplateFileTests:
         |---
         |ma kota w **{{ p1 }}**
         |""".stripMargin
-
 
     val expected =
       """Ala <p>ma kota w <strong>paski</strong></p>
@@ -133,7 +136,6 @@ class TemplateFileTests:
         |Hello {{ name }}!
         |""".stripMargin
 
-
     val expected =
       """<div id="root"><section id="test-page">
         |<h1 class="h500"><a href="#test-page" class="anchor"></a>Test page</h1>
@@ -152,6 +154,7 @@ class TemplateFileTests:
         content -> "md"
       )
     )
+  end nestedLayout_htmlMdHtml
 
   @Test
   def nestedLayout_mdHtmlMd(): Unit =
@@ -183,7 +186,6 @@ class TemplateFileTests:
         |Hello {{ name }}!
         |""".stripMargin
 
-
     val expected =
       """<h1>The Page</h1>
         |<h2>Test page</h2>
@@ -202,6 +204,7 @@ class TemplateFileTests:
         content -> "md"
       )
     )
+  end nestedLayout_mdHtmlMd
 
   @Test
   def markdown(): Unit =
@@ -213,11 +216,12 @@ class TemplateFileTests:
         """<section id="hello-there">
         |<h1 class="h500"><a href="#hello-there" class="anchor"></a>Hello there!</h1>
         |</section>""".stripMargin,
-      t.resolveInner(RenderingContext(Map("msg" -> "there"))).code.trim())
+        t.resolveInner(RenderingContext(Map("msg" -> "there"))).code.trim()
+      )
     }
 
   @Test
-  def mixedTemplates() : Unit =
+  def mixedTemplates(): Unit =
     testTemplate(
       """# Hello {{ msg }}!""",
       ext = "md"
@@ -226,13 +230,14 @@ class TemplateFileTests:
         """<section id="hello-there2">
         |<h1 class="h500"><a href="#hello-there2" class="anchor"></a>Hello there2!</h1>
         |</section>""".stripMargin,
-      t.resolveInner(RenderingContext(Map("msg" -> "there2"))).code.trim())
+        t.resolveInner(RenderingContext(Map("msg" -> "there2"))).code.trim()
+      )
     }
 
   @Test
   def htmlOnly(): Unit =
     val html =
-    """<div>Ala</ala>
+      """<div>Ala</ala>
       |
       |<span>Ula</span>
       |""".stripMargin
@@ -253,8 +258,5 @@ class TemplateFileTests:
          |$html
          |""".stripMargin
 
-
-    testContent(
-      html,
-      Map(),
-      List(base -> "html", content -> "html"))
+    testContent(html, Map(), List(base -> "html", content -> "html"))
+end TemplateFileTests

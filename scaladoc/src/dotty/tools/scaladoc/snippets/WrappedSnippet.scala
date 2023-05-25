@@ -4,17 +4,23 @@ package snippets
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 
-case class WrappedSnippet(snippet: String, outerLineOffset: Int, outerColumnOffset: Int, innerLineOffset: Int, innerColumnOffset: Int)
+case class WrappedSnippet(
+    snippet: String,
+    outerLineOffset: Int,
+    outerColumnOffset: Int,
+    innerLineOffset: Int,
+    innerColumnOffset: Int
+)
 
 object WrappedSnippet:
 
   val indent: Int = 2
 
   def apply(
-    str: String,
-    packageName: Option[String],
-    outerLineOffset: Int,
-    outerColumnOffset: Int,
+      str: String,
+      packageName: Option[String],
+      outerLineOffset: Int,
+      outerColumnOffset: Int
   ): WrappedSnippet =
     val baos = new ByteArrayOutputStream()
     val ps = new PrintStream(baos)
@@ -43,5 +49,4 @@ object WrappedSnippet:
       ps.println((" " * indent) + str)
     private def startHide() = ps.println(raw"//{")
     private def endHide() = ps.println(raw"//}")
-
-
+end WrappedSnippet

@@ -1,4 +1,2 @@
-class B {
+class B:
   val x = new A
-}
-

@@ -4,7 +4,7 @@ package lib
 class Value(val value: String)
 
 class Lib(
-  value: => Value,
-  a: Int = 0,
-  b: Int
+    value: => Value,
+    a: Int = 0,
+    b: Int
 )

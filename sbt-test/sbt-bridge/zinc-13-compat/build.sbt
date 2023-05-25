@@ -5,7 +5,8 @@ val Scala3Bridge = config("scala3-bridge")
 
 val scala3Version = sys.props("plugin.scalaVersion")
 
-lazy val root = project.in(file("."))
+lazy val root = project
+  .in(file("."))
   .configs(Scala3Compiler, Scala3Bridge)
   .settings(
     inConfig(Scala3Compiler)(Defaults.configSettings),
@@ -24,7 +25,9 @@ lazy val root = project.in(file("."))
       val allJars = (Scala3Compiler / managedClasspath).value.seq.map(_.data)
       val compilerJar = allJars
         .find(jar => jar.name.contains("scala3-compiler"))
-        .get.getAbsolutePath.toString
+        .get
+        .getAbsolutePath
+        .toString
       val libraryJars = allJars
         .filter(jar => jar.name.contains("library"))
         .map(_.getAbsolutePath.toString)
@@ -32,7 +35,9 @@ lazy val root = project.in(file("."))
       val bridgeJars = (Scala3Bridge / managedClasspath).value.seq.map(_.data)
       val bridgeJar = bridgeJars
         .find(att => att.name.contains("scala3-sbt-bridge"))
-        .get.getAbsolutePath.toString
+        .get
+        .getAbsolutePath
+        .toString
 
       IO.write(
         scala3File,
@@ -42,11 +47,15 @@ lazy val root = project.in(file("."))
             |object Scala3 {
             |  val version = "$scala3Version"
             |  val allJars = Array(
-            |    ${allJars.map(jar => s"""new File("${jar.getAbsolutePath}")""").mkString(",\n    ")}
+            |    ${allJars
+             .map(jar => s"""new File("${jar.getAbsolutePath}")""")
+             .mkString(",\n    ")}
             |  )
             |  val compilerJar = new File("$compilerJar")
             |  val libraryJars = Array(
-            |    ${libraryJars.map(jar => s"""new File("$jar")""").mkString(",\n    ")}
+            |    ${libraryJars
+             .map(jar => s"""new File("$jar")""")
+             .mkString(",\n    ")}
             |  )
             |  val bridgeJar = new File("$bridgeJar")
             |}

@@ -6,8 +6,8 @@ import scala.language.unsafeNulls
 import vulpix.TestConfiguration
 import vulpix.FileDiff
 
-import java.lang.System.{lineSeparator => EOL}
-import java.io.{ByteArrayOutputStream, File => JFile, PrintStream}
+import java.lang.System.{lineSeparator as EOL}
+import java.io.{ByteArrayOutputStream, File as JFile, PrintStream}
 import java.nio.charset.StandardCharsets
 
 import scala.io.Source
@@ -17,16 +17,21 @@ import scala.collection.mutable.ArrayBuffer
 import dotty.tools.dotc.core.Contexts.Context
 import dotty.tools.dotc.reporting.MessageRendering
 import org.junit.{After, Before}
-import org.junit.Assert._
+import org.junit.Assert.*
 
-class ReplTest(options: Array[String] = ReplTest.defaultOptions, out: ByteArrayOutputStream = new ByteArrayOutputStream)
-extends ReplDriver(options, new PrintStream(out, true, StandardCharsets.UTF_8.name)) with MessageRendering:
+class ReplTest(
+    options: Array[String] = ReplTest.defaultOptions,
+    out: ByteArrayOutputStream = new ByteArrayOutputStream
+) extends ReplDriver(
+      options,
+      new PrintStream(out, true, StandardCharsets.UTF_8.name)
+    )
+    with MessageRendering:
   /** Get the stored output from `out`, resetting the buffer */
-  def storedOutput(): String = {
+  def storedOutput(): String =
     val output = stripColor(out.toString(StandardCharsets.UTF_8.name))
     out.reset()
     output
-  }
 
   /** Make sure the context is new before each test */
   @Before def init(): Unit =
@@ -45,36 +50,41 @@ extends ReplDriver(options, new PrintStream(out, true, StandardCharsets.UTF_8.na
 
   def testFile(f: JFile): Unit = testScript(f.toString, readLines(f), Some(f))
 
-  def testScript(name: => String, lines: List[String], scriptFile: Option[JFile] = None): Unit = {
+  def testScript(
+      name: => String,
+      lines: List[String],
+      scriptFile: Option[JFile] = None
+  ): Unit =
     val prompt = "scala>"
 
     def evaluate(state: State, input: String) =
-      try {
+      try
         val nstate = run(input.drop(prompt.length))(using state)
         val out = input + EOL + storedOutput()
         (out, nstate)
-      }
-      catch {
+      catch
         case ex: Throwable =>
           System.err.println(s"failed while running script: $name, on:\n$input")
           throw ex
-      }
 
     def filterEmpties(line: String): List[String] =
-      line.replaceAll("""(?m)\s+$""", "") match {
-        case "" => Nil
+      line.replaceAll("""(?m)\s+$""", "") match
+        case ""           => Nil
         case nonEmptyLine => nonEmptyLine :: Nil
-      }
-    def nonBlank(line: String): Boolean = line.exists(!Character.isWhitespace(_))
+    def nonBlank(line: String): Boolean =
+      line.exists(!Character.isWhitespace(_))
 
     val expectedOutput = lines.filter(nonBlank)
-    val actualOutput = {
+    val actualOutput =
       val opts = toolArgsFor(ToolName.Scalac)(lines.take(1))
-      val (optsLine, inputLines) = if opts.isEmpty then ("", lines) else (lines.head, lines.drop(1))
+      val (optsLine, inputLines) =
+        if opts.isEmpty then ("", lines) else (lines.head, lines.drop(1))
       resetToInitial(opts)
 
-      assert(inputLines.head.startsWith(prompt),
-        s"""Each script must start with the prompt: "$prompt"""")
+      assert(
+        inputLines.head.startsWith(prompt),
+        s"""Each script must start with the prompt: "$prompt""""
+      )
       val inputRes = inputLines.filter(_.startsWith(prompt))
 
       val buf = new ArrayBuffer[String]
@@ -84,7 +94,6 @@ extends ReplDriver(options, new PrintStream(out, true, StandardCharsets.UTF_8.na
         nstate
       }
       (optsLine :: buf.toList).filter(nonBlank)
-    }
 
     if !FileDiff.matches(actualOutput, expectedOutput) then
       // Some tests aren't file-based but just pass a string, so can't update anything then
@@ -101,9 +110,17 @@ extends ReplDriver(options, new PrintStream(out, true, StandardCharsets.UTF_8.na
 
         fail(s"Error in script $name, expected output did not match actual")
     end if
-  }
+  end testScript
+end ReplTest
 
 object ReplTest:
-  val commonOptions = Array("-color:never", "-language:experimental.erasedDefinitions", "-pagewidth", "80")
-  val defaultOptions = commonOptions ++ Array("-classpath", TestConfiguration.basicClasspath)
-  lazy val withStagingOptions = commonOptions ++ Array("-classpath", TestConfiguration.withStagingClasspath)
+  val commonOptions = Array(
+    "-color:never",
+    "-language:experimental.erasedDefinitions",
+    "-pagewidth",
+    "80"
+  )
+  val defaultOptions =
+    commonOptions ++ Array("-classpath", TestConfiguration.basicClasspath)
+  lazy val withStagingOptions =
+    commonOptions ++ Array("-classpath", TestConfiguration.withStagingClasspath)

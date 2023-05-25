@@ -1,1 +1,2 @@
-class B { val y = A.x }
+class B:
+  val y = A.x

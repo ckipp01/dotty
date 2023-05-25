@@ -1,1 +1,2 @@
-trait A { val x = (new B).y }
+trait A:
+  val x = (new B).y

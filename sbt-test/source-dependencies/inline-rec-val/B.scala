@@ -1,3 +1,2 @@
-class B {
+class B:
   val n = A.callInline
-}

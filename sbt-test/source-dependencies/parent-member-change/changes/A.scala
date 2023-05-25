@@ -1,3 +1,2 @@
-class A {
-	def x(i: String) = i+"3"
-}
+class A:
+  def x(i: String) = i + "3"

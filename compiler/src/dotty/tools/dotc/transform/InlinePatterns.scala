@@ -2,31 +2,32 @@ package dotty.tools
 package dotc
 package transform
 
-import core._
-import MegaPhase._
-import Symbols._, Contexts._, Types._, Decorators._
-import NameOps._
-import Names._
+import core.*
+import MegaPhase.*
+import Symbols.*, Contexts.*, Types.*, Decorators.*
+import NameOps.*
+import Names.*
 
 import scala.collection.mutable.ListBuffer
 
 /** Rewrite an application
- *
- *    {new { def unapply(x0: X0)(x1: X1,..., xn: Xn) = b }}.unapply(y0)(y1, ..., yn)
- *
- *  where
- *
- *    - the method is `unapply` or `unapplySeq`
- *    - the method does not have type parameters
- *
- *  to
- *
- *    [xi := yi]b
- *
- *  This removes placeholders added by inline `unapply`/`unapplySeq` patterns.
- */
+  *
+  * {new { def unapply(x0: X0)(x1: X1,..., xn: Xn) = b }}.unapply(y0)(y1, ...,
+  * yn)
+  *
+  * where
+  *
+  *   - the method is `unapply` or `unapplySeq`
+  *   - the method does not have type parameters
+  *
+  * to
+  *
+  * [xi := yi]b
+  *
+  * This removes placeholders added by inline `unapply`/`unapplySeq` patterns.
+  */
 class InlinePatterns extends MiniPhase:
-  import ast.tpd._
+  import ast.tpd.*
 
   override def phaseName: String = InlinePatterns.name
 
@@ -51,12 +52,20 @@ class InlinePatterns extends MiniPhase:
     def unapply(app: Tree): (Tree, List[List[Tree]]) =
       app match
         case Apply(App(fn, argss), args) => (fn, argss :+ args)
-        case _ => (app, Nil)
+        case _                           => (app, Nil)
 
   // TODO merge with BetaReduce.scala
-  private def betaReduce(tree: Apply, fn: Tree, name: Name, argss: List[List[Tree]])(using Context): Tree =
+  private def betaReduce(
+      tree: Apply,
+      fn: Tree,
+      name: Name,
+      argss: List[List[Tree]]
+  )(using Context): Tree =
     fn match
-      case Block(TypeDef(_, template: Template) :: Nil, Apply(Select(New(_),_), Nil)) if template.constr.rhs.isEmpty =>
+      case Block(
+            TypeDef(_, template: Template) :: Nil,
+            Apply(Select(New(_), _), Nil)
+          ) if template.constr.rhs.isEmpty =>
         template.body match
           case List(ddef @ DefDef(`name`, _, _, _)) =>
             val bindings = new ListBuffer[DefTree]()
@@ -65,8 +74,8 @@ class InlinePatterns extends MiniPhase:
             seq(bindings1, expansion1)
           case _ => tree
       case _ => tree
+end InlinePatterns
 
 object InlinePatterns:
   val name: String = "inlinePatterns"
   val description: String = "remove placeholders of inlined patterns"
-

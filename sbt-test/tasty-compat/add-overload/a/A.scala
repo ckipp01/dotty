@@ -1,9 +1,6 @@
 package a
 
-object A {
+object A:
 
-  class Buf[A] {
+  class Buf[A]:
     def append(a: A): this.type = this
-  }
-
-}

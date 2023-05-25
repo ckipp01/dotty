@@ -1,7 +1,8 @@
 import java.net.URLClassLoader
 
-lazy val root = project.in(file(".")).
-  settings(
+lazy val root = project
+  .in(file("."))
+  .settings(
     TaskKey[Unit]("check-first") := checkTask("First").value,
     TaskKey[Unit]("check-second") := checkTask("Second").value
   )

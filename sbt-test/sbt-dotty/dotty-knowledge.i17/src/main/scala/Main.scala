@@ -1,4 +1,3 @@
 @main
-def testMethod(): Unit = {
+def testMethod(): Unit =
   println("Hello world!")
-}

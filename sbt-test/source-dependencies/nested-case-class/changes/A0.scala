@@ -1,11 +1,8 @@
 package example
 
-class A {
+class A:
   case class B(x: Int)
   def c = B
-}
-object A {
-  def main(args: Array[String]): Unit = {
+object A:
+  def main(args: Array[String]): Unit =
     (new A).c
-  }
-}

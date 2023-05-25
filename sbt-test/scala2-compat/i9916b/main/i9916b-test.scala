@@ -1,5 +1,4 @@
 import i9916b.T
 
-trait Test {
+trait Test:
   def foo: T
-}

@@ -4,12 +4,24 @@ package typer
 
 // Modelling the decision in IsFullyDefined
 object InstantiateModel:
-  enum LB  { case NN; case LL; case L1                             }; import LB.*
-  enum UB  { case AA; case UU; case U1                             }; import UB.*
-  enum Var { case V; case NotV                                     }; import Var.*
-  enum MSe { case M; case NotM                                     }; import MSe.*
-  enum Bot { case Fail; case Ok; case Flip                         }; import Bot.*
-  enum Act { case Min; case Max; case ToMax; case Skip; case False }; import Act.*
+  enum LB:
+    case NN; case LL; case L1
+  ; import LB.*
+  enum UB:
+    case AA; case UU; case U1
+  ; import UB.*
+  enum Var:
+    case V; case NotV
+  ; import Var.*
+  enum MSe:
+    case M; case NotM
+  ; import MSe.*
+  enum Bot:
+    case Fail; case Ok; case Flip
+  ; import Bot.*
+  enum Act:
+    case Min; case Max; case ToMax; case Skip; case False
+  ; import Act.*
 
   // NN/AA = Nothing/Any
   // LL/UU = the original bounds, on the type parameter
@@ -40,18 +52,21 @@ object InstantiateModel:
     case (LL, U1) => Max
     case (NN, U1) => Max
 
-    case (L1, U1) => if m==M || v==V then Min else ToMax
-    case (LL, UU) => if m==M || v==V then Min else ToMax
-    case (LL, AA) => if m==M || v==V then Min else ToMax
+    case (L1, U1) => if m == M || v == V then Min else ToMax
+    case (LL, UU) => if m == M || v == V then Min else ToMax
+    case (LL, AA) => if m == M || v == V then Min else ToMax
 
-    case (NN, UU) => bot match
-      case _    if m==M => Max
-    //case Ok   if v==V => Min   // removed, i14218 fix
-      case Fail if v==V => False
-      case _            => ToMax
+    case (NN, UU) =>
+      bot match
+        case _ if m == M => Max
+        // case Ok   if v==V => Min   // removed, i14218 fix
+        case Fail if v == V => False
+        case _              => ToMax
 
-    case (NN, AA) => bot match
-      case _    if m==M => Skip
-      case Ok   if v==V => Min
-      case Fail if v==V => False
-      case _            => ToMax
+    case (NN, AA) =>
+      bot match
+        case _ if m == M    => Skip
+        case Ok if v == V   => Min
+        case Fail if v == V => False
+        case _              => ToMax
+end InstantiateModel

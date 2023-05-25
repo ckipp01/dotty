@@ -1,4 +1,3 @@
-object C {
-	def main(args: Array[String]) =
-		println(B.onX(A))
-}
+object C:
+  def main(args: Array[String]) =
+    println(B.onX(A))

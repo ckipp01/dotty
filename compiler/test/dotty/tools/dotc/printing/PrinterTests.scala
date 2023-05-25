@@ -8,11 +8,12 @@ import ast.tpd.*
 import org.junit.Test
 import org.junit.Assert.*
 
-class PrinterTests extends DottyTest {
-  override def initializeCtx(fc: FreshContext) = super.initializeCtx(fc.setSetting(fc.settings.color, "never"))
+class PrinterTests extends DottyTest:
+  override def initializeCtx(fc: FreshContext) =
+    super.initializeCtx(fc.setSetting(fc.settings.color, "never"))
 
   @Test
-  def packageObject: Unit = {
+  def packageObject: Unit =
     val source = """
       package object foo {
         def bar: Int = 1
@@ -24,10 +25,9 @@ class PrinterTests extends DottyTest {
       val bar = tree.find(tree => tree.symbol.name == termName("bar")).get
       assertEquals("package object foo", bar.symbol.owner.show)
     }
-  }
 
   @Test
-  def tpTreeInfixOps: Unit = {
+  def tpTreeInfixOps: Unit =
     val source = """
       |class &&[T,U]
       |object Foo {
@@ -38,8 +38,8 @@ class PrinterTests extends DottyTest {
 
     checkCompile("typer", source) { (tree, context) =>
       given Context = context
-      val bar @ DefDef(_, _, _, _) = tree.find(tree => tree.symbol.name == termName("bar2")).get: @unchecked
+      val bar @ DefDef(_, _, _, _) =
+        tree.find(tree => tree.symbol.name == termName("bar2")).get: @unchecked
       assertEquals("Int & (Boolean | String)", bar.tpt.show)
     }
-  }
-}
+end PrinterTests

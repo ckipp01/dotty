@@ -1,4 +1,2 @@
-trait A
-{
-	val x = "a"
-}
+trait A:
+  val x = "a"

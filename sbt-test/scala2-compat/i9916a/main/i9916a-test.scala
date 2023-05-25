@@ -1,5 +1,4 @@
 import i9916a.Lib
 
-trait Test {
+trait Test:
   def foo: Lib.P
-}

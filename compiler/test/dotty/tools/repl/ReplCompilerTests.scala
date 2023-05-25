@@ -4,12 +4,12 @@ import scala.language.unsafeNulls
 
 import java.util.regex.Pattern
 
-import org.junit.Assert.{assertTrue => assert, _}
+import org.junit.Assert.{assertTrue as assert, *}
 import org.junit.{Ignore, Test}
 import dotty.tools.dotc.core.Contexts.Context
 
 class ReplCompilerTests extends ReplTest:
-  import ReplCompilerTests._
+  import ReplCompilerTests.*
 
   private def lines() =
     storedOutput().trim.linesIterator.toList
@@ -98,17 +98,17 @@ class ReplCompilerTests extends ReplTest:
     }
 
     val expected = List(
-     "// defined trait T1",
-     "// defined case class X",
-     "// defined case class Y",
-     "// defined case object O"
+      "// defined trait T1",
+      "// defined case class X",
+      "// defined case class Y",
+      "// defined case object O"
     )
 
     assertEquals(expected, lines())
   }
 
   // FIXME: Tests are not run in isolation, the classloader is corrupted after the first exception
-  @Ignore @Test def i3305: Unit = {
+  @Ignore @Test def i3305: Unit =
     initially {
       run("null.toString")
       assert(storedOutput().startsWith("java.lang.NullPointerException"))
@@ -116,19 +116,22 @@ class ReplCompilerTests extends ReplTest:
 
     initially {
       run("def foo: Int = 1 + foo; foo")
-      assert(storedOutput().startsWith("def foo: Int\njava.lang.StackOverflowError"))
+      assert(
+        storedOutput().startsWith("def foo: Int\njava.lang.StackOverflowError")
+      )
     }
 
     initially {
       run("""throw new IllegalArgumentException("Hello")""")
-      assert(storedOutput().startsWith("java.lang.IllegalArgumentException: Hello"))
+      assert(
+        storedOutput().startsWith("java.lang.IllegalArgumentException: Hello")
+      )
     }
 
     initially {
       run("val (x, y) = null")
       assert(storedOutput().startsWith("scala.MatchError: null"))
     }
-  }
 
   @Test def i2789: Unit = initially {
     run("(x: Int) => println(x)")
@@ -194,7 +197,9 @@ class ReplCompilerTests extends ReplTest:
     }
 
   @Test def i7934: Unit = contextually {
-    assertFalse(ParseResult.isIncomplete("_ + 1"))  // was: assertThrows[NullPointerException]
+    assertFalse(
+      ParseResult.isIncomplete("_ + 1")
+    ) // was: assertThrows[NullPointerException]
   }
 
   @Test def `i9374 accept collective extensions`: Unit = contextually {
@@ -204,7 +209,10 @@ class ReplCompilerTests extends ReplTest:
 
   @Test def testSingletonPrint = initially {
     run("""val a = "hello"; val x: a.type = a""")
-    assertMultiLineEquals("val a: String = hello\nval x: a.type = hello", storedOutput().trim)
+    assertMultiLineEquals(
+      "val a: String = hello\nval x: a.type = hello",
+      storedOutput().trim
+    )
   }
 
   @Test def i6574 = initially {
@@ -214,34 +222,49 @@ class ReplCompilerTests extends ReplTest:
 
   @Test def `i10214 must show classic MatchError` = initially {
     run("val 1 = 2: @unchecked")
-    assertEquals("scala.MatchError: 2 (of class java.lang.Integer)", storedOutput().linesIterator.next())
+    assertEquals(
+      "scala.MatchError: 2 (of class java.lang.Integer)",
+      storedOutput().linesIterator.next()
+    )
   }
   @Test def `i10214 must show useful regex MatchError` =
     initially {
       run("""val r = raw"\d+".r""")
     } andThen {
       run("""val r() = "abc": @unchecked""")
-      assertEquals("scala.MatchError: abc (of class java.lang.String)", storedOutput().linesIterator.drop(1).next())
+      assertEquals(
+        "scala.MatchError: abc (of class java.lang.String)",
+        storedOutput().linesIterator.drop(1).next()
+      )
     }
   @Test def `i10214 must show MatchError on literal type` = initially {
     run("val (x: 1) = 2: @unchecked")
-    assertEquals("scala.MatchError: 2 (of class java.lang.Integer)", storedOutput().linesIterator.next())
+    assertEquals(
+      "scala.MatchError: 2 (of class java.lang.Integer)",
+      storedOutput().linesIterator.next()
+    )
   }
   @Test def `i12920 must truncate stack trace to user code` = initially {
     run("???")
     val all = lines()
     assertEquals(3, all.length)
-    assertEquals("scala.NotImplementedError: an implementation is missing", all.head)
+    assertEquals(
+      "scala.NotImplementedError: an implementation is missing",
+      all.head
+    )
     /* avoid asserting much about line number or elided count
     scala.NotImplementedError: an implementation is missing
       at scala.Predef$.$qmark$qmark$qmark(Predef.scala:344)
       ... 28 elided
      */
   }
-  @Test def `i14281 context class loader must be REPL class loader` = initially {
-    run("class C ; assert(classOf[C].getClassLoader eq Thread.currentThread.getContextClassLoader)")
-    assertEquals(List("// defined class C"), lines())
-  }
+  @Test def `i14281 context class loader must be REPL class loader` =
+    initially {
+      run(
+        "class C ; assert(classOf[C].getClassLoader eq Thread.currentThread.getContextClassLoader)"
+      )
+      assertEquals(List("// defined class C"), lines())
+    }
 
   def assertNotFoundError(id: String): Unit =
     val lines = storedOutput().linesIterator
@@ -271,7 +294,10 @@ class ReplCompilerTests extends ReplTest:
     val state = run("val a = 1; val x = ???; val y = x")
     val all = lines()
     assertEquals(3, all.length)
-    assertEquals("scala.NotImplementedError: an implementation is missing", all.head)
+    assertEquals(
+      "scala.NotImplementedError: an implementation is missing",
+      all.head
+    )
     state
   } andThen {
     val state = run("x")
@@ -282,7 +308,7 @@ class ReplCompilerTests extends ReplTest:
     assertNotFoundError("y")
     state
   } andThen {
-    run("a")   // `a` should retain its original binding
+    run("a") // `a` should retain its original binding
     assertEquals("val res0: Int = 1234", storedOutput().trim)
   }
 
@@ -293,7 +319,7 @@ class ReplCompilerTests extends ReplTest:
     val _ = storedOutput() // discard output
     state
   } andThen {
-    run(":imports")  // scala.util.Try should not be imported
+    run(":imports") // scala.util.Try should not be imported
     assertEquals("import scala.collection.mutable", storedOutput().trim)
   }
 
@@ -306,13 +332,22 @@ class ReplCompilerTests extends ReplTest:
              |""".stripMargin)
     val all = lines()
     assertEquals(3, all.length)
-    assertEquals("scala.NotImplementedError: an implementation is missing", all.head)
-    assert("type alias in failed wrapper should not be rendered",
-      !all.exists(_.startsWith("// defined alias type Foo = String")))
-    assert("type definitions in failed wrapper should not be rendered",
-      !all.exists(_.startsWith("// defined trait Bar")))
-    assert("defs in failed wrapper should not be rendered",
-      !all.exists(_.startsWith("def bar: Bar")))
+    assertEquals(
+      "scala.NotImplementedError: an implementation is missing",
+      all.head
+    )
+    assert(
+      "type alias in failed wrapper should not be rendered",
+      !all.exists(_.startsWith("// defined alias type Foo = String"))
+    )
+    assert(
+      "type definitions in failed wrapper should not be rendered",
+      !all.exists(_.startsWith("// defined trait Bar"))
+    )
+    assert(
+      "defs in failed wrapper should not be rendered",
+      !all.exists(_.startsWith("def bar: Bar"))
+    )
     state
   } andThen {
     val state = run("def foo: Foo = ???")
@@ -338,7 +373,10 @@ class ReplCompilerTests extends ReplTest:
     val state = run("val _ = ???")
     val all = lines()
     assertEquals(3, all.length)
-    assertEquals("scala.NotImplementedError: an implementation is missing", all.head)
+    assertEquals(
+      "scala.NotImplementedError: an implementation is missing",
+      all.head
+    )
     state
   } andThen {
     run("val _ = assert(false)")
@@ -352,6 +390,7 @@ class ReplCompilerTests extends ReplTest:
 
   @Test def `i13097 expect template after colon` = contextually:
     assert(ParseResult.isIncomplete("class C:"))
+end ReplCompilerTests
 
 object ReplCompilerTests:
 
@@ -365,7 +404,8 @@ object ReplCompilerTests:
 
 end ReplCompilerTests
 
-class ReplXPrintTyperTests extends ReplTest(ReplTest.defaultOptions :+ "-Xprint:typer"):
+class ReplXPrintTyperTests
+    extends ReplTest(ReplTest.defaultOptions :+ "-Xprint:typer"):
   @Test def i9111 = initially {
     run("""|enum E {
            |  case A

@@ -1,14 +1,17 @@
 package dotty.tools.scaladoc
 package transformers
 
-class ImplicitMembersExtensionTransformer(using DocContext) extends(Module => Module):
+class ImplicitMembersExtensionTransformer(using DocContext)
+    extends (Module => Module):
   override def apply(original: Module): Module =
     val classlikeMap = original.members
 
     def retrieveCompanion(m: Member) = m.companion.flatMap { (_, dri) =>
-     val res = classlikeMap.get(dri)
+      val res = classlikeMap.get(dri)
       if res.isEmpty then
-        report.warning(s"Companion for class ${m.name} exists but is missing in classlike map")
+        report.warning(
+          s"Companion for class ${m.name} exists but is missing in classlike map"
+        )
       res
     }
 
@@ -25,31 +28,53 @@ class ImplicitMembersExtensionTransformer(using DocContext) extends(Module => Mo
       val applicableDRIs = c.parents.map(_.dri).toSet + c.dri
 
       val MyDri = c.dri
-      def collectApplicableMembers(source: Member): Seq[Member] = source.members.flatMap {
-        case m @ Member(_, _, _, Kind.Extension(ExtensionTarget(_, _, _, _, MyDri, _), _), Origin.RegularlyDefined) =>
-          val kind = m.kind match
-            case Kind.Extension(_, d) => d
-            case _ => Kind.Def(Nil)
+      def collectApplicableMembers(source: Member): Seq[Member] =
+        source.members.flatMap {
+          case m @ Member(
+                _,
+                _,
+                _,
+                Kind.Extension(ExtensionTarget(_, _, _, _, MyDri, _), _),
+                Origin.RegularlyDefined
+              ) =>
+            val kind = m.kind match
+              case Kind.Extension(_, d) => d
+              case _                    => Kind.Def(Nil)
 
-          Seq(m.withOrigin(Origin.ExtensionFrom(source.name, source.dri)).withKind(kind))
-        case m @ Member(_, _, _, conversionProvider: ImplicitConversionProvider, Origin.RegularlyDefined) =>
-          conversionProvider.conversion match
-            case Some(ImplicitConversion(MyDri, to)) =>
-              classlikeMap.get(to).toSeq.flatMap { owner =>
-                val newMembers = owner.members.filter(_.origin match
-                  case Origin.RegularlyDefined => true
-                  case _ => false
-                )
-                newMembers.map(_.withOrigin(Origin.ImplicitlyAddedBy(m.name, m.dri)))
-              }
-            case _ =>
-              Nil
-        case other =>
-          None
-      }
+            Seq(
+              m.withOrigin(Origin.ExtensionFrom(source.name, source.dri))
+                .withKind(kind)
+            )
+          case m @ Member(
+                _,
+                _,
+                _,
+                conversionProvider: ImplicitConversionProvider,
+                Origin.RegularlyDefined
+              ) =>
+            conversionProvider.conversion match
+              case Some(ImplicitConversion(MyDri, to)) =>
+                classlikeMap.get(to).toSeq.flatMap { owner =>
+                  val newMembers = owner.members.filter(_.origin match
+                    case Origin.RegularlyDefined => true
+                    case _                       => false
+                  )
+                  newMembers.map(
+                    _.withOrigin(Origin.ImplicitlyAddedBy(m.name, m.dri))
+                  )
+                }
+              case _ =>
+                Nil
+          case other =>
+            None
+        }
 
-      val newImplicitMembers = implictSources.flatMap(collectApplicableMembers).distinct
+      val newImplicitMembers =
+        implictSources.flatMap(collectApplicableMembers).distinct
       val expandedMembers = c.members.map(expandMember(outerMembers ++ Seq(c)))
       c.withMembers(newImplicitMembers ++ expandedMembers)
+    end expandMember
 
     original.updatePackages(_.map(expandMember(Nil)(_)))
+  end apply
+end ImplicitMembersExtensionTransformer

@@ -6,18 +6,24 @@ import java.io.Writer
 import scala.language.unsafeNulls
 import scala.collection.mutable.StringBuilder
 
-/**
- * Serializes scoverage data.
- * @see https://github.com/scoverage/scalac-scoverage-plugin/blob/main/scalac-scoverage-plugin/src/main/scala/scoverage/Serializer.scala
- */
+/** Serializes scoverage data.
+  * @see
+  *   https://github.com/scoverage/scalac-scoverage-plugin/blob/main/scalac-scoverage-plugin/src/main/scala/scoverage/Serializer.scala
+  */
 object Serializer:
 
   private val CoverageFileName = "scoverage.coverage"
   private val CoverageDataFormatVersion = "3.0"
 
-  /** Write out coverage data to the given data directory, using the default coverage filename */
+  /** Write out coverage data to the given data directory, using the default
+    * coverage filename
+    */
   def serialize(coverage: Coverage, dataDir: String, sourceRoot: String): Unit =
-    serialize(coverage, Paths.get(dataDir, CoverageFileName).toAbsolutePath, Paths.get(sourceRoot).toAbsolutePath)
+    serialize(
+      coverage,
+      Paths.get(dataDir, CoverageFileName).toAbsolutePath,
+      Paths.get(sourceRoot).toAbsolutePath
+    )
 
   /** Write out coverage data to a file. */
   def serialize(coverage: Coverage, file: Path, sourceRoot: Path): Unit =
@@ -27,8 +33,9 @@ object Serializer:
     finally
       writer.close()
 
-  /** Write out coverage data (info about each statement that can be covered) to a writer.
-   */
+  /** Write out coverage data (info about each statement that can be covered) to
+    * a writer.
+    */
   def serialize(coverage: Coverage, writer: Writer, sourceRoot: Path): Unit =
 
     def getRelativePath(filePath: Path): String =
@@ -38,7 +45,8 @@ object Serializer:
       relPath.toString
 
     def writeHeader(writer: Writer): Unit =
-      writer.write(s"""# Coverage data, format version: $CoverageDataFormatVersion
+      writer.write(
+        s"""# Coverage data, format version: $CoverageDataFormatVersion
                       |# Statement data:
                       |# - id
                       |# - source path
@@ -58,7 +66,8 @@ object Serializer:
                       |# - description (can be multi-line)
                       |# '\f' sign
                       |# ------------------------------------------
-                      |""".stripMargin)
+                      |""".stripMargin
+      )
 
     def writeStatement(stmt: Statement, writer: Writer): Unit =
       // Note: we write 0 for the count because we have not measured the actual coverage at this point
@@ -85,27 +94,29 @@ object Serializer:
     coverage.statements.toSeq
       .sortBy(_.id)
       .foreach(stmt => writeStatement(stmt, writer))
+  end serialize
 
-  /** Makes a String suitable for output in the coverage statement data as a single line.
-   * Escaped characters: '\\' (backslash), '\n', '\r', '\f'
-   */
-  extension (str: String) def escaped: String =
-    val builder = StringBuilder(str.length)
-    var i = 0
-    while
-      i < str.length
-    do
-      str.charAt(i) match
-        case '\\' =>
-          builder ++= "\\\\"
-        case '\n' =>
-          builder ++= "\\n"
-        case '\r' =>
-          builder ++= "\\r"
-        case '\f' =>
-          builder ++= "\\f"
-        case c =>
-          builder += c
-      i += 1
-    end while
-    builder.result()
+  /** Makes a String suitable for output in the coverage statement data as a
+    * single line. Escaped characters: '\\' (backslash), '\n', '\r', '\f'
+    */
+  extension (str: String)
+    def escaped: String =
+      val builder = StringBuilder(str.length)
+      var i = 0
+      while i < str.length
+      do
+        str.charAt(i) match
+          case '\\' =>
+            builder ++= "\\\\"
+          case '\n' =>
+            builder ++= "\\n"
+          case '\r' =>
+            builder ++= "\\r"
+          case '\f' =>
+            builder ++= "\\f"
+          case c =>
+            builder += c
+        i += 1
+      end while
+      builder.result()
+end Serializer

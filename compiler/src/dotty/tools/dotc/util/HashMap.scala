@@ -2,22 +2,21 @@ package dotty.tools.dotc.util
 
 import scala.language.unsafeNulls
 
-/** A specialized implementation of GenericHashMap with standard hashCode and equals
- *  as comparison
- */
-class HashMap[Key, Value]
-    (initialCapacity: Int = 8, capacityMultiple: Int = 2)
-extends GenericHashMap[Key, Value](initialCapacity, capacityMultiple):
+/** A specialized implementation of GenericHashMap with standard hashCode and
+  * equals as comparison
+  */
+class HashMap[Key, Value](initialCapacity: Int = 8, capacityMultiple: Int = 2)
+    extends GenericHashMap[Key, Value](initialCapacity, capacityMultiple):
 
-  /** Hashcode is left-shifted by 1, so lowest bit is not lost
-   *  when taking the index.
-   */
+  /** Hashcode is left-shifted by 1, so lowest bit is not lost when taking the
+    * index.
+    */
   final def hash(key: Key): Int =
     val h = key.hashCode
     // Part of the MurmurHash3 32 bit finalizer
-    val i = (h ^ (h >>> 16)) * 0x85EBCA6B
-    val j = (i ^ (i >>> 13)) & 0x7FFFFFFF
-    (if j==0 then 0x41081989 else j) << 1
+    val i = (h ^ (h >>> 16)) * 0x85ebca6b
+    val j = (i ^ (i >>> 13)) & 0x7fffffff
+    (if j == 0 then 0x41081989 else j) << 1
 
   final def isEqual(x: Key, y: Key): Boolean = x.equals(y)
 
@@ -74,8 +73,7 @@ extends GenericHashMap[Key, Value](initialCapacity, capacityMultiple):
     setValue(idx, value)
 
   override def copyFrom(oldTable: Array[AnyRef | Null]): Unit =
-    if isDense then
-      Array.copy(oldTable, 0, table, 0, oldTable.length)
+    if isDense then Array.copy(oldTable, 0, table, 0, oldTable.length)
     else
       var idx = 0
       while idx < oldTable.length do

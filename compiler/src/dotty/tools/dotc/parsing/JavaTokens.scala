@@ -4,45 +4,71 @@ package parsing
 
 import collection.immutable.BitSet
 
-object JavaTokens extends TokensCommon {
+object JavaTokens extends TokensCommon:
   inline val minToken = EMPTY
   final def maxToken: Int = DOUBLE
 
   final val javaOnlyKeywords: TokenSet = tokenRange(INSTANCEOF, ASSERT)
-  final val sharedKeywords: BitSet = BitSet( IF, FOR, ELSE, THIS, NULL, NEW, SUPER, ABSTRACT, FINAL, PRIVATE, PROTECTED,
-    EXTENDS, TRUE, FALSE, CLASS, IMPORT, PACKAGE, DO, THROW, TRY, CATCH, FINALLY, WHILE, RETURN )
+  final val sharedKeywords: BitSet = BitSet(
+    IF,
+    FOR,
+    ELSE,
+    THIS,
+    NULL,
+    NEW,
+    SUPER,
+    ABSTRACT,
+    FINAL,
+    PRIVATE,
+    PROTECTED,
+    EXTENDS,
+    TRUE,
+    FALSE,
+    CLASS,
+    IMPORT,
+    PACKAGE,
+    DO,
+    THROW,
+    TRY,
+    CATCH,
+    FINALLY,
+    WHILE,
+    RETURN
+  )
   final val primTypes: TokenSet = tokenRange(VOID, DOUBLE)
   final val keywords: BitSet = sharedKeywords | javaOnlyKeywords | primTypes
 
   /** keywords */
-  inline val INSTANCEOF = 101;       enter(INSTANCEOF, "instanceof")
-  inline val CONST = 102;            enter(CONST, "const")
+  inline val INSTANCEOF = 101; enter(INSTANCEOF, "instanceof")
+  inline val CONST = 102; enter(CONST, "const")
 
   /** templates */
-  inline val INTERFACE = 105;        enter(INTERFACE, "interface")
-  inline val ENUM = 106;             enter(ENUM, "enum")
-  inline val IMPLEMENTS = 107;       enter(IMPLEMENTS, "implements")
+  inline val INTERFACE = 105; enter(INTERFACE, "interface")
+  inline val ENUM = 106; enter(ENUM, "enum")
+  inline val IMPLEMENTS = 107; enter(IMPLEMENTS, "implements")
 
   /** modifiers */
-  inline val PUBLIC = 110;           enter(PUBLIC, "public")
-  inline val DEFAULT = 111;          enter(DEFAULT, "default")
-  inline val STATIC = 112;           enter(STATIC, "static")
-  inline val TRANSIENT = 113;        enter(TRANSIENT, "transient")
-  inline val VOLATILE = 114;         enter(VOLATILE, "volatile")
-  inline val SYNCHRONIZED = 115;     enter(SYNCHRONIZED, "synchronized")
-  inline val NATIVE = 116;           enter(NATIVE, "native")
-  inline val STRICTFP = 117;         enter(STRICTFP, "strictfp")
-  inline val THROWS = 118;           enter(THROWS, "throws")
+  inline val PUBLIC = 110; enter(PUBLIC, "public")
+  inline val DEFAULT = 111; enter(DEFAULT, "default")
+  inline val STATIC = 112; enter(STATIC, "static")
+  inline val TRANSIENT = 113; enter(TRANSIENT, "transient")
+  inline val VOLATILE = 114; enter(VOLATILE, "volatile")
+  inline val SYNCHRONIZED = 115; enter(SYNCHRONIZED, "synchronized")
+  inline val NATIVE = 116; enter(NATIVE, "native")
+  inline val STRICTFP = 117; enter(STRICTFP, "strictfp")
+  inline val THROWS = 118; enter(THROWS, "throws")
 
   /** control structures */
-  inline val BREAK = 130;            enter(BREAK, "break")
-  inline val CONTINUE = 131;         enter(CONTINUE, "continue")
-  inline val GOTO = 132;             enter(GOTO, "goto")
-  inline val SWITCH = 133;           enter(SWITCH, "switch")
-  inline val ASSERT = 134;           enter(ASSERT, "assert")
+  inline val BREAK = 130; enter(BREAK, "break")
+  inline val CONTINUE = 131; enter(CONTINUE, "continue")
+  inline val GOTO = 132; enter(GOTO, "goto")
+  inline val SWITCH = 133; enter(SWITCH, "switch")
+  inline val ASSERT = 134; enter(ASSERT, "assert")
 
-  /** contextual keywords (turned into keywords in certain conditions, see JLS 3.9 of Java 9+) */
-  inline val RECORD = 135;           enter(RECORD, "record")
+  /** contextual keywords (turned into keywords in certain conditions, see JLS
+    * 3.9 of Java 9+)
+    */
+  inline val RECORD = 135; enter(RECORD, "record")
 
   /** special symbols */
   inline val EQEQ = 140
@@ -83,13 +109,13 @@ object JavaTokens extends TokensCommon {
   inline val GTGTGTEQ = 175
 
   /** primitive types */
-  inline val VOID = 180;             enter(VOID, "void")
-  inline val BOOLEAN = 181;          enter(BOOLEAN, "boolean")
-  inline val BYTE = 182;             enter(BYTE, "byte")
-  inline val SHORT = 183;            enter(SHORT, "short")
-  inline val CHAR = 184;             enter(CHAR, "char")
-  inline val INT = 185;              enter(INT, "int")
-  inline val LONG = 186;             enter(LONG, "long")
-  inline val FLOAT = 187;            enter(FLOAT, "float")
-  inline val DOUBLE = 188;           enter(DOUBLE, "double")
-}
+  inline val VOID = 180; enter(VOID, "void")
+  inline val BOOLEAN = 181; enter(BOOLEAN, "boolean")
+  inline val BYTE = 182; enter(BYTE, "byte")
+  inline val SHORT = 183; enter(SHORT, "short")
+  inline val CHAR = 184; enter(CHAR, "char")
+  inline val INT = 185; enter(INT, "int")
+  inline val LONG = 186; enter(LONG, "long")
+  inline val FLOAT = 187; enter(FLOAT, "float")
+  inline val DOUBLE = 188; enter(DOUBLE, "double")
+end JavaTokens

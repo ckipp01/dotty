@@ -6,14 +6,16 @@ import scala.language.unsafeNulls
 
 import java.io.File
 
-object TestConfiguration {
+object TestConfiguration:
 
   val pageWidth = 120
 
   val noCheckOptions = Array(
-    "-pagewidth", pageWidth.toString,
+    "-pagewidth",
+    pageWidth.toString,
     "-color:never",
-    "-Xtarget", defaultTarget
+    "-Xtarget",
+    defaultTarget
   )
 
   val checkOptions = Array(
@@ -25,55 +27,80 @@ object TestConfiguration {
     "-Xverify-signatures"
   )
 
-  val basicClasspath = mkClasspath(List(
-    Properties.scalaLibrary,
-    Properties.dottyLibrary
-  ))
+  val basicClasspath = mkClasspath(
+    List(
+      Properties.scalaLibrary,
+      Properties.dottyLibrary
+    )
+  )
 
-  val withCompilerClasspath = mkClasspath(List(
-    Properties.scalaLibrary,
-    Properties.scalaAsm,
-    Properties.jlineTerminal,
-    Properties.jlineReader,
-    Properties.compilerInterface,
-    Properties.dottyInterfaces,
-    Properties.dottyLibrary,
-    Properties.tastyCore,
-    Properties.dottyCompiler
-  ))
+  val withCompilerClasspath = mkClasspath(
+    List(
+      Properties.scalaLibrary,
+      Properties.scalaAsm,
+      Properties.jlineTerminal,
+      Properties.jlineReader,
+      Properties.compilerInterface,
+      Properties.dottyInterfaces,
+      Properties.dottyLibrary,
+      Properties.tastyCore,
+      Properties.dottyCompiler
+    )
+  )
 
   lazy val withStagingClasspath =
-    withCompilerClasspath + File.pathSeparator + mkClasspath(List(Properties.dottyStaging))
+    withCompilerClasspath + File.pathSeparator + mkClasspath(
+      List(Properties.dottyStaging)
+    )
 
   lazy val withTastyInspectorClasspath =
-    withCompilerClasspath + File.pathSeparator + mkClasspath(List(Properties.dottyTastyInspector))
+    withCompilerClasspath + File.pathSeparator + mkClasspath(
+      List(Properties.dottyTastyInspector)
+    )
 
-  lazy val scalaJSClasspath = mkClasspath(List(
-    Properties.scalaJSJavalib,
-    Properties.scalaJSLibrary,
-    Properties.dottyLibraryJS
-  ))
+  lazy val scalaJSClasspath = mkClasspath(
+    List(
+      Properties.scalaJSJavalib,
+      Properties.scalaJSLibrary,
+      Properties.dottyLibraryJS
+    )
+  )
 
   def mkClasspath(classpaths: List[String]): String =
-    classpaths.map({ p =>
-      val file = new java.io.File(p)
-      assert(file.exists, s"File $p couldn't be found.")
-      file.getAbsolutePath
-    }).mkString(File.pathSeparator)
+    classpaths
+      .map({ p =>
+        val file = new java.io.File(p)
+        assert(file.exists, s"File $p couldn't be found.")
+        file.getAbsolutePath
+      })
+      .mkString(File.pathSeparator)
 
   val yCheckOptions = Array("-Ycheck:all")
 
-  val commonOptions = Array("-indent") ++ checkOptions ++ noCheckOptions ++ yCheckOptions
+  val commonOptions =
+    Array("-indent") ++ checkOptions ++ noCheckOptions ++ yCheckOptions
   val defaultOptions = TestFlags(basicClasspath, commonOptions)
-  val unindentOptions = TestFlags(basicClasspath, Array("-no-indent") ++ checkOptions ++ noCheckOptions ++ yCheckOptions)
+  val unindentOptions = TestFlags(
+    basicClasspath,
+    Array("-no-indent") ++ checkOptions ++ noCheckOptions ++ yCheckOptions
+  )
   val withCompilerOptions =
-    defaultOptions.withClasspath(withCompilerClasspath).withRunClasspath(withCompilerClasspath)
+    defaultOptions
+      .withClasspath(withCompilerClasspath)
+      .withRunClasspath(withCompilerClasspath)
   lazy val withStagingOptions =
-    defaultOptions.withClasspath(withStagingClasspath).withRunClasspath(withStagingClasspath)
+    defaultOptions
+      .withClasspath(withStagingClasspath)
+      .withRunClasspath(withStagingClasspath)
   lazy val withTastyInspectorOptions =
-    defaultOptions.withClasspath(withTastyInspectorClasspath).withRunClasspath(withTastyInspectorClasspath)
+    defaultOptions
+      .withClasspath(withTastyInspectorClasspath)
+      .withRunClasspath(withTastyInspectorClasspath)
   lazy val scalaJSOptions =
-    defaultOptions.and("-scalajs").withClasspath(scalaJSClasspath).withRunClasspath(scalaJSClasspath)
+    defaultOptions
+      .and("-scalajs")
+      .withClasspath(scalaJSClasspath)
+      .withRunClasspath(scalaJSClasspath)
   val allowDeepSubtypes = defaultOptions without "-Yno-deep-subtypes"
   val allowDoubleBindings = defaultOptions without "-Yno-double-bindings"
   val picklingOptions = defaultOptions and (
@@ -83,7 +110,9 @@ object TestConfiguration {
     "-Yprint-pos-syms"
   )
   val picklingWithCompilerOptions =
-    picklingOptions.withClasspath(withCompilerClasspath).withRunClasspath(withCompilerClasspath)
+    picklingOptions
+      .withClasspath(withCompilerClasspath)
+      .withRunClasspath(withCompilerClasspath)
   val recheckOptions = defaultOptions.and("-Yrecheck-test")
   val scala2CompatMode = defaultOptions.and("-source", "3.0-migration")
   val explicitUTF8 = defaultOptions and ("-encoding", "UTF8")
@@ -93,9 +122,8 @@ object TestConfiguration {
   val explicitNullsOptions = defaultOptions and "-Yexplicit-nulls"
 
   /** Default target of the generated class files */
-  private def defaultTarget: String = {
+  private def defaultTarget: String =
     import scala.util.Properties.isJavaAtLeast
 
     if isJavaAtLeast("9") then "9" else "8"
-  }
-}
+end TestConfiguration

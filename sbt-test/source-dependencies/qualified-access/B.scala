@@ -1,6 +1,4 @@
 package a
 
-object B
-{
-	val y = b.A.x
-}
+object B:
+  val y = b.A.x

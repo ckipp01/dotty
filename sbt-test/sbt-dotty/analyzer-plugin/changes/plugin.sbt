@@ -7,7 +7,6 @@ lazy val plugin = project
     version := "0.0.1",
     organization := "org.scala-lang",
     scalaVersion := dottyVersion,
-
     libraryDependencies ++= Seq(
       "org.scala-lang" %% "scala3-compiler" % scalaVersion.value % "provided"
     )

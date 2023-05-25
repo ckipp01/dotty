@@ -1,25 +1,24 @@
 package dotty.tools.dotc
 package transform
 
-import core._
+import core.*
 import ast.tpd
-import MegaPhase._
-import Contexts._
-import Symbols._
-import Phases._
+import MegaPhase.*
+import Contexts.*
+import Symbols.*
+import Phases.*
 import dotty.tools.io.JarArchive
 import dotty.tools.backend.jvm.GenBCode
 
-/**
- * Small phase to be run to collect main classes and store them in the context.
- * The general rule to run this phase is:
- * - The output of compilation is JarArchive
- * - There is no `-Xmain-class` defined
- *
- * The following flags affect this phase:
- *   -d path.jar
- *   -Xmain-class
- */
+/** Small phase to be run to collect main classes and store them in the context.
+  * The general rule to run this phase is:
+  *   - The output of compilation is JarArchive
+  *   - There is no `-Xmain-class` defined
+  *
+  * The following flags affect this phase:
+  * -d path.jar
+  * -Xmain-class
+  */
 class CollectEntryPoints extends MiniPhase:
 
   override def phaseName: String = CollectEntryPoints.name
@@ -27,7 +26,9 @@ class CollectEntryPoints extends MiniPhase:
   override def description: String = CollectEntryPoints.description
 
   override def isRunnable(using Context): Boolean =
-    def forceRun = ctx.settings.XmainClass.isDefault && ctx.settings.outputDir.value.isInstanceOf[JarArchive]
+    def forceRun =
+      ctx.settings.XmainClass.isDefault && ctx.settings.outputDir.value
+        .isInstanceOf[JarArchive]
     super.isRunnable && forceRun
 
   override def transformTypeDef(tree: tpd.TypeDef)(using Context): tpd.Tree =
@@ -38,16 +39,18 @@ class CollectEntryPoints extends MiniPhase:
     val sym = tree.symbol
     import core.NameOps.stripModuleClassSuffix
     val name = sym.fullName.stripModuleClassSuffix.toString
-    Option.when(sym.isStatic && !sym.is(Flags.Trait) && ctx.platform.hasMainMethod(sym))(name)
+    Option.when(
+      sym.isStatic && !sym.is(Flags.Trait) && ctx.platform.hasMainMethod(sym)
+    )(name)
 
-  private def registerEntryPoint(s: String)(using Context) = {
-    genBCodePhase match {
+  private def registerEntryPoint(s: String)(using Context) =
+    genBCodePhase match
       case genBCodePhase: GenBCode =>
         genBCodePhase.registerEntryPoint(s)
       case _ =>
-    }
-  }
+end CollectEntryPoints
 
 object CollectEntryPoints:
   val name: String = "Collect entry points"
-  val description: String = "collect all entry points and save them in the context"
+  val description: String =
+    "collect all entry points and save them in the context"

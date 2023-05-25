@@ -1,3 +1,2 @@
-object D {
+object D:
   def foobar = C.baz
-}

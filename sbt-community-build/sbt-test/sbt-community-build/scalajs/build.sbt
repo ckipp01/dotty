@@ -5,7 +5,7 @@ lazy val aJVM = project
   .settings(
     name := "a",
     version := "0.5.1-SNAPSHOT",
-    libraryDependencies := Seq(),  // don't depend on scala-library
+    libraryDependencies := Seq() // don't depend on scala-library
   )
 
 lazy val aJS = project
@@ -13,14 +13,14 @@ lazy val aJS = project
   .settings(
     name := "a",
     version := "0.5.1-SNAPSHOT",
-    libraryDependencies := Seq(),  // don't depend on scala-library
+    libraryDependencies := Seq() // don't depend on scala-library
   )
 
 lazy val bJVM = project
   .settings(onlyThisTestResolverSettings)
   .settings(
     name := "b",
-    libraryDependencies := Seq(organization.value %%% "a" % "0.5.0-SNAPSHOT"),
+    libraryDependencies := Seq(organization.value %%% "a" % "0.5.0-SNAPSHOT")
   )
 
 lazy val bJS = project
@@ -28,5 +28,5 @@ lazy val bJS = project
   .settings(onlyThisTestResolverSettings)
   .settings(
     name := "b",
-    libraryDependencies := Seq(organization.value %%% "a" % "0.5.0-SNAPSHOT"),
+    libraryDependencies := Seq(organization.value %%% "a" % "0.5.0-SNAPSHOT")
   )

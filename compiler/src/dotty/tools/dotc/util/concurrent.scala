@@ -9,7 +9,7 @@ object concurrent:
   class Future[T](exec: Executor[T]):
     private var result: Option[Try[T]] = None
     def force: Try[T] = synchronized {
-      while result.isEmpty && exec.isAlive do wait(1000 /*ms*/)
+      while result.isEmpty && exec.isAlive do wait(1000 /*ms*/ )
       result.getOrElse(Failure(NoCompletion()))
     }
     def complete(r: Try[T]): Unit = synchronized {
@@ -38,7 +38,7 @@ object concurrent:
     }
 
     private def nextPending(): Option[WorkItem] = synchronized {
-      while pending.isEmpty && !allScheduled do wait(1000 /*ms*/)
+      while pending.isEmpty && !allScheduled do wait(1000 /*ms*/ )
       if pending.isEmpty then None
       else
         val item = pending.head
@@ -47,8 +47,7 @@ object concurrent:
     }
 
     override def run(): Unit =
-      while
-        nextPending() match
+      while nextPending() match
           case Some((f, op)) =>
             f.complete(Try(op()))
             true
@@ -57,6 +56,3 @@ object concurrent:
       do ()
   end Executor
 end concurrent
-
-
-

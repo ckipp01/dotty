@@ -1,6 +1,6 @@
 package collectionstrawman
 
-class ListModule {
+class ListModule:
 
   sealed trait IList[A]
   case class ICons[A](head: A, next: IList[A]) extends IList[A]
@@ -9,5 +9,3 @@ class ListModule {
   case class IPair[A, B](a: A, b: B)
 
   case object IUnit
-
-}

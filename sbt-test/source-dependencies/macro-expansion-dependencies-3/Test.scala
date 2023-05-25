@@ -1,9 +1,7 @@
 class A
 
-object Test {
-  import Macros._
+object Test:
+  import Macros.*
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]): Unit =
     foo
-  }
-}

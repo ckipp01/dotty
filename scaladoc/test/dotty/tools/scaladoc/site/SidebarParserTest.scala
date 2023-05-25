@@ -2,7 +2,7 @@ package dotty.tools.scaladoc
 package site
 
 import org.junit.Test
-import org.junit.Assert._
+import org.junit.Assert.*
 
 // TODO add negaitve and more details tests
 class SidebarParserTest:
@@ -43,13 +43,46 @@ class SidebarParserTest:
         Sidebar.Page(Some("My title"), "my-page1.md", false),
         Sidebar.Page(None, "my-page2.md", false),
         Sidebar.Page(None, "my-page3/subsection", false),
-        Sidebar.Category(Some("Reference"), None, List(Sidebar.Page(None, "my-page3.md", true)), None),
-        Sidebar.Category(None, Some("my-page4/index.md"),  List(Sidebar.Page(None, "my-page4/my-page4.md", false)), None),
-        Sidebar.Category(Some("My subsection"), Some("my-page5/index.md"),  List(Sidebar.Page(None, "my-page5/my-page5.md", false)), None),
-        Sidebar.Category(None, None,  List(Sidebar.Page(None, "my-page7/my-page7.md", false)), None),
-        Sidebar.Category(None, Some("my-page6/index.md"),  List(Sidebar.Category(None, Some("my-page6/my-page6/index.md"),  List(Sidebar.Page(None, "my-page6/my-page6/my-page6.md", false)), None)), None),
+        Sidebar.Category(
+          Some("Reference"),
+          None,
+          List(Sidebar.Page(None, "my-page3.md", true)),
+          None
+        ),
+        Sidebar.Category(
+          None,
+          Some("my-page4/index.md"),
+          List(Sidebar.Page(None, "my-page4/my-page4.md", false)),
+          None
+        ),
+        Sidebar.Category(
+          Some("My subsection"),
+          Some("my-page5/index.md"),
+          List(Sidebar.Page(None, "my-page5/my-page5.md", false)),
+          None
+        ),
+        Sidebar.Category(
+          None,
+          None,
+          List(Sidebar.Page(None, "my-page7/my-page7.md", false)),
+          None
+        ),
+        Sidebar.Category(
+          None,
+          Some("my-page6/index.md"),
+          List(
+            Sidebar.Category(
+              None,
+              Some("my-page6/my-page6/index.md"),
+              List(Sidebar.Page(None, "my-page6/my-page6/my-page6.md", false)),
+              None
+            )
+          ),
+          None
+        )
       ),
       None
     ),
     Sidebar.load(sidebar)(using testContext)
   )
+end SidebarParserTest

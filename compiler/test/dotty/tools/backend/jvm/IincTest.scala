@@ -1,12 +1,12 @@
 package dotty.tools.backend.jvm
 
 import org.junit.Test
-import org.junit.Assert._
+import org.junit.Assert.*
 
-import scala.tools.asm.Opcodes._
+import scala.tools.asm.Opcodes.*
 
-class IincTest extends DottyBytecodeTest {
-  import ASMConverters._
+class IincTest extends DottyBytecodeTest:
+  import ASMConverters.*
 
   @Test def increment = test(
     """{
@@ -50,7 +50,7 @@ class IincTest extends DottyBytecodeTest {
     Nil
   )
 
-  private def test(code: String, expectedIincs: List[Int])= {
+  private def test(code: String, expectedIincs: List[Int]) =
     val source =
       s"""class Increment {
          | def test(x: Int): Int = $code
@@ -58,14 +58,14 @@ class IincTest extends DottyBytecodeTest {
        """.stripMargin
 
     checkBCode(source) { dir =>
-      val clsIn   = dir.lookupName("Increment.class", directory = false).input
+      val clsIn = dir.lookupName("Increment.class", directory = false).input
       val clsNode = loadClassNode(clsIn)
-      val meth   = getMethod(clsNode, "test")
+      val meth = getMethod(clsNode, "test")
 
-      val foundIincs = instructionsFromMethod(meth).collect { case iinc: Incr => iinc.incr }
+      val foundIincs = instructionsFromMethod(meth).collect { case iinc: Incr =>
+        iinc.incr
+      }
 
       assertEquals(expectedIincs, foundIincs)
     }
-  }
-
-}
+end IincTest

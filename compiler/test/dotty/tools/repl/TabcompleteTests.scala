@@ -2,13 +2,13 @@ package dotty.tools.repl
 
 import scala.language.unsafeNulls
 
-import org.junit.Assert._
+import org.junit.Assert.*
 import org.junit.Test
 
 /** These tests test input that has proved problematic */
-class TabcompleteTests extends ReplTest {
+class TabcompleteTests extends ReplTest:
 
-  /** Returns the `(<instance completions>, <companion completions>)`*/
+  /** Returns the `(<instance completions>, <companion completions>)` */
   private def tabComplete(src: String)(implicit state: State): List[String] =
     completions(src.length, src, state).map(_.value).sorted
 
@@ -32,7 +32,7 @@ class TabcompleteTests extends ReplTest {
     assertEquals(List("apply"), comp)
   }
 
-  @Test def tabCompleteTwiceIn = {
+  @Test def tabCompleteTwiceIn =
     val src1 = "class Foo { def bar(xs: List[Int]) = xs.map"
     val src2 = "class Foo { def bar(xs: List[Int]) = xs.mapC"
 
@@ -42,7 +42,6 @@ class TabcompleteTests extends ReplTest {
       val comp2 = tabComplete(src2)
       assertEquals(List("mapConserve"), comp2)
     }
-  }
 
   @Test def i3309 = initially {
     // We make sure we do not crash
@@ -88,7 +87,10 @@ class TabcompleteTests extends ReplTest {
 
   @Test def tabClosureComplete = initially {
     assertEquals(List("map", "mapConserve"), tabComplete("Nil.map"))
-    assertEquals(List("map", "mapConserve"), tabComplete("(x: Int => Int) => Nil.map"))
+    assertEquals(
+      List("map", "mapConserve"),
+      tabComplete("(x: Int => Int) => Nil.map")
+    )
     assertEquals(List("apply"), tabComplete("(x: Int => Int) => x.ap"))
   }
 
@@ -102,17 +104,54 @@ class TabcompleteTests extends ReplTest {
   @Test def `null` = initially {
     val comp = tabComplete("null.")
     assertEquals(
-      List("!=", "##", "==", "asInstanceOf", "eq", "equals", "getClass", "hashCode",
-          "isInstanceOf", "ne", "notify", "notifyAll", "synchronized", "toString", "wait"),
-      comp.distinct.sorted)
+      List(
+        "!=",
+        "##",
+        "==",
+        "asInstanceOf",
+        "eq",
+        "equals",
+        "getClass",
+        "hashCode",
+        "isInstanceOf",
+        "ne",
+        "notify",
+        "notifyAll",
+        "synchronized",
+        "toString",
+        "wait"
+      ),
+      comp.distinct.sorted
+    )
   }
 
   @Test def anyRef = initially {
     val comp = tabComplete("(null: AnyRef).")
     assertEquals(
-      List("!=", "##", "->", "==", "asInstanceOf", "ensuring", "eq", "equals", "formatted",
-          "getClass", "hashCode", "isInstanceOf", "ne", "nn", "notify", "notifyAll", "synchronized", "toString", "wait", "→"),
-      comp.distinct.sorted)
+      List(
+        "!=",
+        "##",
+        "->",
+        "==",
+        "asInstanceOf",
+        "ensuring",
+        "eq",
+        "equals",
+        "formatted",
+        "getClass",
+        "hashCode",
+        "isInstanceOf",
+        "ne",
+        "nn",
+        "notify",
+        "notifyAll",
+        "synchronized",
+        "toString",
+        "wait",
+        "→"
+      ),
+      comp.distinct.sorted
+    )
   }
 
   @Test def `???` = initially {
@@ -125,16 +164,26 @@ class TabcompleteTests extends ReplTest {
   }
 
   @Test def i6415 = initially {
-    assertEquals(List("Predef"), tabComplete("object Foo { opaque type T = Pre"))
+    assertEquals(
+      List("Predef"),
+      tabComplete("object Foo { opaque type T = Pre")
+    )
   }
 
   @Test def i6361 = initially {
-    assertEquals(Nil, tabComplete("object foo { given bar: Int = 10 }; import foo.*; ba"))
+    assertEquals(
+      Nil,
+      tabComplete("object foo { given bar: Int = 10 }; import foo.*; ba")
+    )
   }
 
   @Test def i12600 = initially {
-    assertEquals(List("select", "show", "simplified", "substituteTypes"),
-      tabComplete("import quoted.* ; def fooImpl(using Quotes): Expr[Int] = { import quotes.reflect.* ; TypeRepr.of[Int].s"))
+    assertEquals(
+      List("select", "show", "simplified", "substituteTypes"),
+      tabComplete(
+        "import quoted.* ; def fooImpl(using Quotes): Expr[Int] = { import quotes.reflect.* ; TypeRepr.of[Int].s"
+      )
+    )
   }
 
   @Test def backticked = initially {
@@ -176,9 +225,9 @@ class TabcompleteTests extends ReplTest {
                      |  case dot_product_*
                      |  case __system
                      |
-                     |Foo.""".stripMargin))
+                     |Foo.""".stripMargin)
+    )
   }
-
 
   @Test def backtickedAlready = initially {
     assertEquals(
@@ -192,7 +241,8 @@ class TabcompleteTests extends ReplTest {
                      |  case dot_product_*
                      |  case __system
                      |
-                     |Foo.`bac""".stripMargin))
+                     |Foo.`bac""".stripMargin)
+    )
   }
 
   @Test def backtickedImport = initially {
@@ -201,7 +251,8 @@ class TabcompleteTests extends ReplTest {
         "`scalaUtilChainingOps`",
         "`synchronized`"
       ),
-      tabComplete("import scala.util.chaining.`s"))
+      tabComplete("import scala.util.chaining.`s")
+    )
   }
 
   @Test def commands = initially {
@@ -237,4 +288,4 @@ class TabcompleteTests extends ReplTest {
   @Test def i9334 = initially {
     assert(tabComplete("class Foo[T]; classOf[Foo].").contains("getName"))
   }
-}
+end TabcompleteTests

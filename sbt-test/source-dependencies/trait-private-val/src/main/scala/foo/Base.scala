@@ -1,5 +1,4 @@
 package foo
 
-trait Base {
+trait Base:
   def somePublicMethod(): Int = 123
-}

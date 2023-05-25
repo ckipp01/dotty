@@ -1,7 +1,7 @@
 package dotty.tools.scaladoc
 
 import java.nio.file.Path
-import dotty.tools.scaladoc.util.Escape._
+import dotty.tools.scaladoc.util.Escape.*
 
 val staticFileSymbolUUID = "___staticFile___"
 
@@ -9,10 +9,10 @@ val topLevelDri = DRI("/")
 
 // we may need target...
 final case class DRI(
-  location: String,
-  anchor: String = "",
-  externalLink: Option[String] = None,
-  symbolUUID: String = ""
+    location: String,
+    anchor: String = "",
+    externalLink: Option[String] = None,
+    symbolUUID: String = ""
 ):
   def withNoExternalLink = copy(externalLink = None)
 
