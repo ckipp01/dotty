@@ -142,7 +142,7 @@ object JrtClassPath:
   def apply(release: Option[String]): Option[ClassPath] =
     import scala.util.Properties.*
     if !isJavaAtLeast("9") then None
-    else {
+    else
       // Longer term we'd like an official API for this in the JDK
       // Discussion: http://mail.openjdk.java.net/pipermail/compiler-dev/2018-March/thread.html#11738
 
@@ -164,7 +164,6 @@ object JrtClassPath:
             case _: ProviderNotFoundException |
                 _: FileSystemNotFoundException =>
               None
-    }
 
 /** Implementation `ClassPath` based on the JDK 9 encapsulated runtime modules
   * (JEP-220)
@@ -233,7 +232,7 @@ final class JrtClassPath(fs: java.nio.file.FileSystem)
 
   def findClassFile(className: String): Option[AbstractFile] =
     if !className.contains(".") then None
-    else {
+    else
       val (inPackage, _) = separatePkgAndClassNames(className)
       packageToModuleBases
         .getOrElse(inPackage, Nil)
@@ -245,7 +244,6 @@ final class JrtClassPath(fs: java.nio.file.FileSystem)
         .take(1)
         .toList
         .headOption
-    }
 end JrtClassPath
 
 /** Implementation `ClassPath` based on the \$JAVA_HOME/lib/ct.sym backing
@@ -284,22 +282,21 @@ final class CtSymClassPath(ctSym: java.nio.file.Path, release: Int)
         .iterator()
         .asScala
         .filter(Files.isDirectory(_))
-        .foreach {
-          p =>
-            val moduleNamePathElementCount = if isJava12OrHigher then 1 else 0
-            if p.getNameCount > root.getNameCount + moduleNamePathElementCount
-            then
-              val packageDotted = p
-                .subpath(
-                  moduleNamePathElementCount + root.getNameCount,
-                  p.getNameCount
-                )
-                .toString
-                .replace('/', '.')
-              index.getOrElseUpdate(
-                packageDotted,
-                new collection.mutable.ListBuffer
-              ) += p
+        .foreach { p =>
+          val moduleNamePathElementCount = if isJava12OrHigher then 1 else 0
+          if p.getNameCount > root.getNameCount + moduleNamePathElementCount
+          then
+            val packageDotted = p
+              .subpath(
+                moduleNamePathElementCount + root.getNameCount,
+                p.getNameCount
+              )
+              .toString
+              .replace('/', '.')
+            index.getOrElseUpdate(
+              packageDotted,
+              new collection.mutable.ListBuffer
+            ) += p
         }
     )
     index
@@ -317,7 +314,7 @@ final class CtSymClassPath(ctSym: java.nio.file.Path, release: Int)
       .toVector
   private[dotty] def classes(inPackage: PackageName): Seq[ClassFileEntry] =
     if inPackage.isRoot then Nil
-    else {
+    else
       val sigFiles = packageIndex
         .getOrElse(inPackage.dottedString, Nil)
         .iterator
@@ -329,7 +326,6 @@ final class CtSymClassPath(ctSym: java.nio.file.Path, release: Int)
             .filter(_.getFileName.toString.endsWith(".sig"))
         )
       sigFiles.map(f => ClassFileEntryImpl(f.toPlainFile)).toVector
-    }
 
   override private[dotty] def list(inPackage: PackageName): ClassPathEntries =
     if inPackage.isRoot then ClassPathEntries(packages(inPackage), Nil)
@@ -339,7 +335,7 @@ final class CtSymClassPath(ctSym: java.nio.file.Path, release: Int)
   def asClassPathStrings: Seq[String] = Nil
   def findClassFile(className: String): Option[AbstractFile] =
     if !className.contains(".") then None
-    else {
+    else
       val (inPackage, classSimpleName) = separatePkgAndClassNames(className)
       packageIndex
         .getOrElse(inPackage, Nil)
@@ -351,7 +347,6 @@ final class CtSymClassPath(ctSym: java.nio.file.Path, release: Int)
         .take(1)
         .toList
         .headOption
-    }
 end CtSymClassPath
 
 case class DirectoryClassPath(dir: JFile)

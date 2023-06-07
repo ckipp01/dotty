@@ -322,10 +322,9 @@ final class newMain extends MainAnnotation[FromString, Any]:
         def recurse(s: String, acc: Vector[String]): Seq[String] =
           val lastSpace = s.trim.nn.lastIndexOf(' ', maxLength)
           if (s.length <= maxLength) || (lastSpace < 0) then acc :+ s
-          else {
+          else
             val (shortLine, rest) = s.splitAt(lastSpace)
             recurse(rest.trim.nn, acc :+ shortLine)
-          }
 
         recurse(line, Vector()).toList
 

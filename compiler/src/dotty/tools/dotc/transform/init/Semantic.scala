@@ -35,10 +35,9 @@ object Semantic:
     *
     * Value = Hot | Cold | Warm | ThisRef | Fun | RefSet
     *
-    * Cold ┌──────► ▲ ◄────┐ ◄────┐ │ │ │ │ │ │ │ │
-    * \| │ │ │
-    * \| │ │ │ ThisRef Warm Fun RefSet │ ▲ ▲ ▲ │ │ │ │
-    * \| │ │ │ ▲ │ │ │ │ │ │ │ └─────────┴───────┴───────┘ Hot
+    * Cold ┌──────► ▲ ◄────┐ ◄────┐ │ │ │ │ │ │ │ │ \| │ │ │ \| │ │ │ ThisRef
+    * Warm Fun RefSet │ ▲ ▲ ▲ │ │ │ │ \| │ │ │ ▲ │ │ │ │ │ │ │
+    * └─────────┴───────┴───────┘ Hot
     *
     * The diagram above does not reflect relationship between `RefSet` and other
     * values. `RefSet` represents a set of values which could be `ThisRef`,

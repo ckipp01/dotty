@@ -58,7 +58,7 @@ object ShowAPI:
 
   private def showTemplate(cl: ClassLike)(implicit nesting: Int) =
     if nesting <= 0 then "<nesting level reached>"
-    else {
+    else
       val showSelf =
         if cl.selfType.isInstanceOf[EmptyType] then ""
         else " self: " + showNestedType(cl.selfType) + " =>"
@@ -76,7 +76,6 @@ object ShowAPI:
             .map(showNestedDefinition)
         ) +
         "}"
-    }
 
   def showType(t: Type)(implicit nesting: Int): String = t match
     case st: Projection   => showType(st.prefix) + "#" + st.id

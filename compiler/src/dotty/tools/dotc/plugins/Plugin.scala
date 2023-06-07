@@ -199,10 +199,9 @@ object Plugin:
                 s"Disabling plugin ${plugin.name}"
               )
             )
-          else {
+          else
             seen += classname
             Success(plugin)
-          }
         }
       })
     enabled // distinct and not disabled

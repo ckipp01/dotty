@@ -132,10 +132,9 @@ object BCodeAsmCommon:
         strs ::= new java.lang.String(ubytesToCharArray(ba))
         encLength = 0
         prevOffset = offset
-      else {
+      else
         encLength += deltaEncLength
         offset += 1
-      }
     if prevOffset < offset then
       assert(offset == bSeven.length)
       val ba = bSeven.slice(prevOffset, offset)

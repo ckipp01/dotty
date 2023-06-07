@@ -146,7 +146,7 @@ class SuperAccessors(thisPhase: DenotTransformer):
         report.log(
           i"ok super $sel ${sym.showLocated} $member $clazz ${member.isIncompleteIn(clazz)}"
         )
-    else {
+    else
       val owner = sym.owner
       if !owner.is(Trait) then
         if mix.name.isEmpty then
@@ -164,7 +164,7 @@ class SuperAccessors(thisPhase: DenotTransformer):
                 em"${sym.showLocated} cannot be directly accessed from ${clazz} because ${overriding.owner} redeclares it as abstract",
                 sel.srcPos
               )
-        else {
+        else
           // scala/scala-dev#143:
           //   a call `super[T].m` that resolves to `A.m` cannot be translated to correct bytecode if
           //   `A` is a class (not a trait / interface), but not the direct superclass. Invokespecial
@@ -181,9 +181,7 @@ class SuperAccessors(thisPhase: DenotTransformer):
               |An unqualified super call (super.${sym.name}) would be allowed.""",
               sel.srcPos
             )
-        }
       end if
-    }
     end if
 
     val needAccessor =
@@ -251,14 +249,13 @@ class SuperAccessors(thisPhase: DenotTransformer):
     val impl = op(tree)
     val accessors = accDefs.remove(currentClass).nn
     if accessors.isEmpty then impl
-    else {
+    else
       val (params, rest) = impl.body span {
         case td: TypeDef     => !td.isClassDef
         case vd: ValOrDefDef => vd.symbol.flags.is(ParamAccessor)
         case _               => false
       }
       cpy.Template(impl)(body = params ++ accessors ++ rest)
-    }
 
   /** Wrap `DefDef` producing operation `op`, potentially setting `invalidClass`
     * info

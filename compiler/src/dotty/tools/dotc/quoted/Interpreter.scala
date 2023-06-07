@@ -111,7 +111,7 @@ class Interpreter(pos: SrcPos, classLoader0: ClassLoader)(using Context):
       (obj: AnyRef) =>
         interpretTree(ddef.rhs)(using env.updated(arg.symbol, obj))
 
-      // Interpret `foo(j = x, i = y)` which it is expanded to
+    // Interpret `foo(j = x, i = y)` which it is expanded to
     // `val j$1 = x; val i$1 = y; foo(i = i$1, j = j$1)`
     case Block(stats, expr) => interpretBlock(stats, expr)
     case NamedArg(_, arg)   => interpretTree(arg)
@@ -222,11 +222,10 @@ class Interpreter(pos: SrcPos, classLoader0: ClassLoader)(using Context):
       // is top level object
       val moduleClass = loadClass(sym.fullName.toString)
       moduleClass.getField(str.MODULE_INSTANCE_FIELD).get(null)
-    else {
+    else
       // nested object in an object
       val clazz = loadClass(sym.binaryClassName)
       clazz.getConstructor().newInstance().asInstanceOf[Object]
-    }
 
   private def loadReplLineClass(moduleClass: Symbol): Class[?] =
     val lineClassloader =

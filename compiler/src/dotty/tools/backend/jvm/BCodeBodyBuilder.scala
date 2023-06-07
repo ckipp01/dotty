@@ -209,10 +209,9 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
             stackHeight -= 2
             generatedType = UNIT
             bc.astore(elementType)
-          else {
+          else
             generatedType = INT
             emit(asm.Opcodes.ARRAYLENGTH)
-          }
           lineNumber(tree)
 
           generatedType
@@ -401,7 +400,7 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
           )
           if symIsModuleClass && tree.symbol != claszSymbol then
             generatedType = genLoadModule(tree)
-          else {
+          else
             mnode.visitVarInsn(asm.Opcodes.ALOAD, 0)
             // When compiling Array.scala, the constructor invokes `Array.this.super.<init>`. The expectedType
             // is `[Object` (computed by typeToBType, the type of This(Array) is `Array[T]`). If we would set
@@ -409,7 +408,6 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
             // similar for primitives (`I` vs `Int`).
             if tree.symbol != defn.ArrayClass && !tree.symbol.isPrimitiveValueClass
             then generatedType = classBTypeFromSymbol(claszSymbol)
-          }
 
         case DesugaredSelect(Ident(nme.EMPTY_PACKAGE), module) =>
           assert(
@@ -434,10 +432,9 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
           else if sym.isStaticMember then
             genLoadQualUnlessElidable()
             fieldLoad(sym, receiverClass)
-          else {
+          else
             genLoadQualifier(tree)
             fieldLoad(sym, receiverClass)
-          }
 
         case t @ Ident(name) =>
           val sym = tree.symbol
@@ -499,7 +496,6 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
             s"Unexpected tree in genLoad: $tree/${tree.getClass} at: ${tree.span}"
           )
       end match
-
       // emit conversion and send to the right destination
       if generatedDest == LoadDestination.FallThrough then
         genAdaptAndSendToDest(generatedType, expectedType, dest)
@@ -572,7 +568,8 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
       val opc =
         if isLoad then
           if isStatic then asm.Opcodes.GETSTATIC else asm.Opcodes.GETFIELD
-        else if isStatic then asm.Opcodes.PUTSTATIC else asm.Opcodes.PUTFIELD
+        else if isStatic then asm.Opcodes.PUTSTATIC
+        else asm.Opcodes.PUTFIELD
       mnode.visitFieldInsn(opc, owner, fieldJName, fieldDescr)
 
     // ---------------- emitting constant values ----------------
@@ -675,7 +672,7 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
               locals.store(earlyReturnVar)
             bc goTo nextCleanup
             shouldEmitCleanup = true
-      else {
+      else
         // return from labeled
         assert(fromSym.is(LabelFlag), fromSym)
         assert(!fromSym.is(Method), fromSym)
@@ -686,7 +683,6 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
          */
         val (exprExpectedType, exprDest) = findJumpDest(fromSym)
         genLoadTo(expr, exprExpectedType, exprDest)
-      }
       end if
     end genReturn
     // end of genReturn()
@@ -751,10 +747,9 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
           )
         else if r.isPrimitive then
           bc isInstance boxedClassOfPrimitive(r.asPrimitiveBType)
-        else {
+        else
           assert(r.isRef, r) // ensure that it's not a method
           genCast(r.asRefBType, cast)
-        }
 
         if cast then r else BOOL
     // end of genTypeApply()
@@ -891,7 +886,7 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
 
           if isPrimitive(fun) then // primitive method call
             generatedType = genPrimitiveOp(app, expectedType)
-          else { // normal method call
+          else // normal method call
             val invokeStyle =
               if sym.isStaticMember then InvokeStyle.Static
               else if sym.is(Private) || sym.isClassConstructor then
@@ -933,10 +928,10 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
                 methodBType.descriptor
               )
               generatedType = methodBType.returnType
-            else {
+            else
               val receiverClass =
                 if !invokeStyle.isVirtual then null
-                else {
+                else
                   // receiverClass is used in the bytecode to as the method receiver. using sym.owner
                   // may lead to IllegalAccessErrors, see 9954eaf / aladdin bug 455.
                   val qualSym = qual.tpe.typeSymbol
@@ -951,12 +946,9 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
                     )
                     defn.ObjectClass
                   else qualSym
-                }
               generatedType =
                 genCallMethod(sym, invokeStyle, app.span, receiverClass)
-            }
             end if
-          }
           end if
       end match
 
@@ -1072,7 +1064,7 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
             val (caseLabel, caseBody) = sb
             markProgramPoint(caseLabel)
             genLoadTo(caseBody, generatedType, postMatchDest)
-        else {
+        else
 
           /* Since the JVM doesn't have a way to switch on a string, we  switch
            * on the `hashCode` of the string then do an `equals` check (with a
@@ -1127,7 +1119,6 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
                 abort(s"Invalid pattern in Match node: $tree at: ${tree.span}")
             end match
           end for
-
           // Organize the hashCode options into switch cases
           var flatKeys: List[Int] = Nil
           var targets: List[asm.Label] = Nil
@@ -1187,7 +1178,6 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
           for (caseLabel, caseBody) <- indirectBlocks.reverse do
             markProgramPoint(caseLabel)
             genLoadTo(caseBody, generatedType, postMatchDest)
-        }
         end if
 
         if postMatch != null then markProgramPoint(postMatch)
@@ -1339,7 +1329,7 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
       def inStaticMethod = methSymbol != null && methSymbol.isStaticMember
       if claszSymbol == module.moduleClass && jMethodName != "readResolve" && !inStaticMethod
       then mnode.visitVarInsn(asm.Opcodes.ALOAD, 0)
-      else {
+      else
         val mbt = symInfoTK(module).asClassBType
         mnode.visitFieldInsn(
           asm.Opcodes.GETSTATIC,
@@ -1347,14 +1337,12 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
           str.MODULE_INSTANCE_FIELD,
           mbt.descriptor // for nostalgics: toTypeKind(module.tpe).descriptor
         )
-      }
 
     def genConversion(from: BType, to: BType, cast: Boolean): Unit =
       if cast then bc.emitT2T(from, to)
-      else {
+      else
         bc drop from
         bc boolconst (from == to)
-      }
 
     def genCast(to: RefBType, cast: Boolean): Unit =
       if cast then bc checkCast to
@@ -1426,7 +1414,7 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
             stackHeight -= 1
 
             bc.genStringBuilderEnd
-          else {
+          else
 
             /* `StringConcatFactory#makeConcatWithConstants` accepts max 200 argument slots. If
              * the string concatenation is longer (unlikely), we spill into multiple calls
@@ -1493,7 +1481,6 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
                 Seq.fill(countConcats)(StringRef.toASMType),
                 Seq.empty
               )
-          }
           end if
       end match
       StringRef
@@ -1575,7 +1562,7 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
           val staticName = traitSuperAccessorName(method)
           bc.invokestatic(receiverName, staticName, staticDesc, isInterface)
         else bc.invokespecial(receiverName, jname, mdescr, isInterface)
-      else {
+      else
         val opc = style match
           case Static  => Opcodes.INVOKESTATIC
           case Special => Opcodes.INVOKESPECIAL
@@ -1583,7 +1570,6 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
             if isInterface then Opcodes.INVOKEINTERFACE
             else Opcodes.INVOKEVIRTUAL
         bc.emitInvoke(opc, receiverName, jname, mdescr, isInterface)
-      }
 
       bmType.returnType
     end genCallMethod
@@ -1628,12 +1614,12 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
           targetIfNoJump,
           negated = !negated
         )
-      else {
+      else
         if tk.isIntSizedType then // BOOL, BYTE, CHAR, SHORT, or INT
           bc.emitIF_ICMP(op, success)
         else if tk.isRef then // REFERENCE(_) | ARRAY(_)
           bc.emitIF_ACMP(op, success)
-        else {
+        else
           import Primitives.*
           def useCmpG =
             if negated then op == GT || op == GE else op == LT || op == LE
@@ -1644,9 +1630,7 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
             case DOUBLE =>
               emit(if useCmpG then asm.Opcodes.DCMPG else asm.Opcodes.DCMPL)
           bc.emitIF(op, success)
-        }
         if targetIfNoJump != failure then bc goTo failure
-      }
 
     /* Emits code to compare (and consume) stack-top and zero using the 'op' operator */
     private def genCZJUMP(
@@ -1667,14 +1651,14 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
           targetIfNoJump,
           negated = !negated
         )
-      else {
+      else
         if tk.isIntSizedType then // BOOL, BYTE, CHAR, SHORT, or INT
           bc.emitIF(op, success)
         else if tk.isRef then // REFERENCE(_) | ARRAY(_)
           (op: @unchecked) match // references are only compared with EQ and NE
             case EQ => bc emitIFNULL success
             case NE => bc emitIFNONNULL success
-        else {
+        else
           def useCmpG =
             if negated then op == GT || op == GE else op == LT || op == LE
           (tk: @unchecked) match
@@ -1688,9 +1672,7 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
               emit(asm.Opcodes.DCONST_0)
               emit(if useCmpG then asm.Opcodes.DCMPG else asm.Opcodes.DCMPL)
           bc.emitIF(op, success)
-        }
         if targetIfNoJump != failure then bc goTo failure
-      }
       end if
     end genCZJUMP
 
@@ -1730,14 +1712,13 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
           // special-case reference (in)equality test for null (null eq x, x eq null)
           genLoad(nonNullSide, ObjectRef)
           genCZJUMP(success, failure, op, ObjectRef, targetIfNoJump)
-        else {
+        else
           val tk = tpeTK(l).maxType(tpeTK(r))
           genLoad(l, tk)
           stackHeight += tk.size
           genLoad(r, tk)
           stackHeight -= tk.size
           genCJUMP(success, failure, op, tk, targetIfNoJump)
-        }
 
       def loadAndTestBoolean() =
         genLoad(tree, BOOL)
@@ -1873,64 +1854,62 @@ trait BCodeBodyBuilder extends BCodeSkelBuilder:
         stackHeight -= 1
         genCallMethod(equalsMethod, InvokeStyle.Static)
         genCZJUMP(success, failure, Primitives.NE, BOOL, targetIfNoJump)
+      else if isNull(l) then
+        // null == expr -> expr eq null
+        genLoad(r, ObjectRef)
+        genCZJUMP(success, failure, Primitives.EQ, ObjectRef, targetIfNoJump)
+      else if isNull(r) then
+        // expr == null -> expr eq null
+        genLoad(l, ObjectRef)
+        genCZJUMP(success, failure, Primitives.EQ, ObjectRef, targetIfNoJump)
+      else if isNonNullExpr(l) then
+        // SI-7852 Avoid null check if L is statically non-null.
+        genLoad(l, ObjectRef)
+        stackHeight += 1
+        genLoad(r, ObjectRef)
+        stackHeight -= 1
+        genCallMethod(defn.Any_equals, InvokeStyle.Virtual)
+        genCZJUMP(success, failure, Primitives.NE, BOOL, targetIfNoJump)
       else
-        if isNull(l) then
-          // null == expr -> expr eq null
-          genLoad(r, ObjectRef)
-          genCZJUMP(success, failure, Primitives.EQ, ObjectRef, targetIfNoJump)
-        else if isNull(r) then
-          // expr == null -> expr eq null
-          genLoad(l, ObjectRef)
-          genCZJUMP(success, failure, Primitives.EQ, ObjectRef, targetIfNoJump)
-        else if isNonNullExpr(l) then
-          // SI-7852 Avoid null check if L is statically non-null.
-          genLoad(l, ObjectRef)
-          stackHeight += 1
-          genLoad(r, ObjectRef)
-          stackHeight -= 1
-          genCallMethod(defn.Any_equals, InvokeStyle.Virtual)
-          genCZJUMP(success, failure, Primitives.NE, BOOL, targetIfNoJump)
-        else {
-          // l == r -> if (l eq null) r eq null else l.equals(r)
-          val eqEqTempLocal = locals.makeLocal(
-            ObjectRef,
-            nme.EQEQ_LOCAL_VAR.mangledString,
-            defn.ObjectType,
-            r.span
-          )
-          val lNull = new asm.Label
-          val lNonNull = new asm.Label
+        // l == r -> if (l eq null) r eq null else l.equals(r)
+        val eqEqTempLocal = locals.makeLocal(
+          ObjectRef,
+          nme.EQEQ_LOCAL_VAR.mangledString,
+          defn.ObjectType,
+          r.span
+        )
+        val lNull = new asm.Label
+        val lNonNull = new asm.Label
 
-          genLoad(l, ObjectRef)
-          stackHeight += 1
-          genLoad(r, ObjectRef)
-          stackHeight -= 1
-          locals.store(eqEqTempLocal)
-          bc dup ObjectRef
-          genCZJUMP(
-            lNull,
-            lNonNull,
-            Primitives.EQ,
-            ObjectRef,
-            targetIfNoJump = lNull
-          )
+        genLoad(l, ObjectRef)
+        stackHeight += 1
+        genLoad(r, ObjectRef)
+        stackHeight -= 1
+        locals.store(eqEqTempLocal)
+        bc dup ObjectRef
+        genCZJUMP(
+          lNull,
+          lNonNull,
+          Primitives.EQ,
+          ObjectRef,
+          targetIfNoJump = lNull
+        )
 
-          markProgramPoint(lNull)
-          bc drop ObjectRef
-          locals.load(eqEqTempLocal)
-          genCZJUMP(
-            success,
-            failure,
-            Primitives.EQ,
-            ObjectRef,
-            targetIfNoJump = lNonNull
-          )
+        markProgramPoint(lNull)
+        bc drop ObjectRef
+        locals.load(eqEqTempLocal)
+        genCZJUMP(
+          success,
+          failure,
+          Primitives.EQ,
+          ObjectRef,
+          targetIfNoJump = lNonNull
+        )
 
-          markProgramPoint(lNonNull)
-          locals.load(eqEqTempLocal)
-          genCallMethod(defn.Any_equals, InvokeStyle.Virtual)
-          genCZJUMP(success, failure, Primitives.NE, BOOL, targetIfNoJump)
-        }
+        markProgramPoint(lNonNull)
+        locals.load(eqEqTempLocal)
+        genCallMethod(defn.Any_equals, InvokeStyle.Virtual)
+        genCZJUMP(success, failure, Primitives.NE, BOOL, targetIfNoJump)
       end if
     end genEqEqPrimitive
 

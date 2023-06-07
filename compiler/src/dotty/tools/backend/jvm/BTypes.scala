@@ -678,14 +678,13 @@ abstract class BTypes:
         if !other.isInterface then
           return false // this is an interface, the other is some class other than object. interfaces cannot extend classes, so the result is false.
         // else: this and other are both interfaces. continue to (*)
-      else {
+      else
         val sc = info.superClass
         if sc.isDefined && sc.get.isSubtypeOf(other) then
           return true // the superclass of this class conforms to other
         if !other.isInterface then
           return false // this and other are both classes, and the superclass of this does not conform
         // else: this is a class, the other is an interface. continue to (*)
-      }
 
       // (*) check if some interface of this class conforms to other.
       info.interfaces.exists(_.isSubtypeOf(other))
@@ -741,10 +740,9 @@ abstract class BTypes:
       while {
         if chainB contains chainA.head then fcs = chainA.head
         else if chainA contains chainB.head then fcs = chainB.head
-        else {
+        else
           chainA = chainA.tail
           chainB = chainB.tail
-        }
         fcs == null
       } do ()
       fcs

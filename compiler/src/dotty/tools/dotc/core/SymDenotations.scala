@@ -179,12 +179,11 @@ object SymDenotations:
           finally
             indent -= 1
             println(i"${"  " * indent}completed $name in $owner")
-        else {
+        else
           if myFlags.is(Touched) then
             throw CyclicReference(this)(using ctx.withOwner(symbol))
           myFlags |= Touched
           atPhase(validFor.firstPhaseId)(completer.complete(this))
-        }
 
     protected[dotc] def info_=(tp: Type): Unit =
       /* // DEBUG
@@ -457,7 +456,8 @@ object SymDenotations:
       case cinfo: LazyType =>
         val knownDecls = cinfo.decls
         if knownDecls ne EmptyScope then knownDecls
-        else { completeOnce(); unforcedDecls }
+        else
+          completeOnce(); unforcedDecls
       case _ => info.decls
 
     /** If this is a package class, the symbols entered in it before it is
@@ -553,7 +553,7 @@ object SymDenotations:
           PackageClass
         )
       then name
-      else {
+      else
         var filler = ""
         var encl = symbol
         while !encl.isClass && !encl.isPackageObject do
@@ -574,7 +574,6 @@ object SymDenotations:
           qualify(n)
         }
         if name.isTypeName then fn.toTypeName else fn.toTermName
-      }
 
     /** The encoded flat name of this denotation, where joined names are
       * separated by `separator` characters.
@@ -2077,7 +2076,7 @@ object SymDenotations:
         myTypeParams =
           if ctx.erasedTypes || is(Module) then
             Nil // fast return for modules to avoid scanning package decls
-          else {
+          else
             val di = initial
             if this ne di then di.typeParams
             else
@@ -2085,7 +2084,6 @@ object SymDenotations:
                 case info: TypeParamsCompleter =>
                   info.completerTypeParams(symbol)
                 case _ => typeParamsFromDecls
-          }
       myTypeParams.nn
 
     override protected[dotc] final def info_=(tp: Type): Unit =
@@ -2563,11 +2561,10 @@ object SymDenotations:
         computeMemberNames(
           keepOnly
         ) // don't cache package member names; they might change
-      else {
+      else
         if !memberNamesCache.isValid then
           memberNamesCache = MemberNames.newCache()
         memberNamesCache(keepOnly, this)
-      }
 
     def computeMemberNames(
         keepOnly: NameFilter
@@ -2596,11 +2593,10 @@ object SymDenotations:
     ): Name =
       val cached = fullNameCache(kind)
       if cached != null then cached
-      else {
+      else
         val fn = super.fullNameSeparated(kind)
         fullNameCache = fullNameCache.updated(kind, fn)
         fn
-      }
 
     // to avoid overloading ambiguities
     override def fullName(using Context): Name = super.fullName
@@ -2630,7 +2626,7 @@ object SymDenotations:
     def ensureFreshScopeAfter(phase: DenotTransformer)(using Context): Unit =
       if ctx.phaseId != phase.next.id then
         atPhase(phase.next)(ensureFreshScopeAfter(phase))
-      else {
+      else
         val prevClassInfo = atPhase(phase) {
           current.asInstanceOf[ClassDenotation].classInfo
         }
@@ -2641,7 +2637,6 @@ object SymDenotations:
           )
             .copyCaches(this, phase.next)
             .installAfter(phase)
-      }
 
     private var myCompanion: Symbol = NoSymbol
 
@@ -2956,7 +2951,7 @@ object SymDenotations:
         ValidForeverFlags
       ) || denot.isRefinementClass || denot.isImport
     then true
-    else {
+    else
       val initial = denot.initial
       val firstPhaseId =
         initial.validFor.firstPhaseId.max(typerPhase.id)
@@ -2964,7 +2959,6 @@ object SymDenotations:
       else if (initial ne denot) || ctx.phaseId != firstPhaseId then
         atPhase(firstPhaseId)(stillValidInOwner(initial))
       else stillValidInOwner(denot)
-    }
 
   private[SymDenotations] def stillValidInOwner(denot: SymDenotation)(using
       Context
@@ -3246,10 +3240,9 @@ object SymDenotations:
     def invalidate(): Unit =
       if cache != null then
         if locked then cache = SimpleIdentityMap.empty
-        else {
+        else
           cache = null
           invalidateDependents()
-        }
 
     def apply(keepOnly: NameFilter, clsd: ClassDenotation)(implicit
         onBehalf: MemberNames,
@@ -3259,14 +3252,13 @@ object SymDenotations:
       val cached = cache.nn(keepOnly)
       try
         if cached != null then cached
-        else {
+        else
           locked = true
           val computed =
             try clsd.computeMemberNames(keepOnly)(this, ctx)
             finally locked = false
           cache = cache.nn.updated(keepOnly, computed)
           computed
-        }
       finally addDependent(onBehalf)
 
     def sameGroup(p1: Phase, p2: Phase) =
@@ -3303,7 +3295,7 @@ object SymDenotations:
       assert(isValid)
       try
         if cache != null then cache.uncheckedNN
-        else {
+        else
           if locked then throw CyclicReference(clsd)
           locked = true
           provisional = false
@@ -3313,7 +3305,6 @@ object SymDenotations:
           if !provisional then cache = computed
           else onBehalf.signalProvisional()
           computed
-        }
       finally addDependent(onBehalf)
 
     def sameGroup(p1: Phase, p2: Phase) =

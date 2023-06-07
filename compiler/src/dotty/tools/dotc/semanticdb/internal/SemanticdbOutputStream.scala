@@ -333,10 +333,9 @@ class SemanticdbOutputStream(output: OutputStream, buffer: Array[Byte]):
       if (value & ~0x7f) == 0 then
         writeRawByte(value)
         return
-      else {
+      else
         writeRawByte((value & 0x7f) | 0x80)
         value >>>= 7
-      }
 
   def writeRawVarint64(value0: Long): Unit =
     var value = value0
@@ -344,10 +343,9 @@ class SemanticdbOutputStream(output: OutputStream, buffer: Array[Byte]):
       if (value & ~0x7fL) == 0 then
         writeRawByte(value.toInt)
         return
-      else {
+      else
         writeRawByte((value.toInt & 0x7f) | 0x80)
         value >>>= 7
-      }
 
   def writeRawLittleEndian32(value: Int): Unit =
     writeRawByte((value) & 0xff)
@@ -449,11 +447,10 @@ class SemanticdbOutputStream(output: OutputStream, buffer: Array[Byte]):
   def writeRawBytes(value: ByteBuffer): Unit =
     if value.hasArray() then
       writeRawBytes(value.array(), value.arrayOffset(), value.capacity())
-    else {
+    else
       val duplicated = value.duplicate()
       duplicated.clear()
       writeRawBytesInternal(duplicated)
-    }
 
   private def writeRawBytesInternal(value: ByteBuffer): Unit =
     var length = value.remaining()
@@ -461,7 +458,7 @@ class SemanticdbOutputStream(output: OutputStream, buffer: Array[Byte]):
       value.get(buffer, position, length)
       position += length
       totalBytesWritten += length
-    else {
+    else
       val bytesWritten = limit - position
       value.get(buffer, position, bytesWritten)
       length -= bytesWritten
@@ -476,7 +473,6 @@ class SemanticdbOutputStream(output: OutputStream, buffer: Array[Byte]):
       value.get(buffer, 0, length)
       position = length
       totalBytesWritten += length
-    }
 
   def writeRawBytes(value: Array[Byte], offset0: Int, length0: Int): Unit =
     var offset = offset0
@@ -485,7 +481,7 @@ class SemanticdbOutputStream(output: OutputStream, buffer: Array[Byte]):
       System.arraycopy(value, offset, buffer, position, length)
       position += length
       totalBytesWritten += length
-    else {
+    else
       val bytesWritten = limit - position
       System.arraycopy(value, offset, buffer, position, bytesWritten)
       offset += bytesWritten
@@ -498,7 +494,6 @@ class SemanticdbOutputStream(output: OutputStream, buffer: Array[Byte]):
         position = length
       else output.write(value, offset, length)
       totalBytesWritten += length
-    }
 end SemanticdbOutputStream
 
 object Internal:

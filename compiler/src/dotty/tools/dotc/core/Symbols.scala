@@ -1005,7 +1005,7 @@ object Symbols:
           !(ttmap.oldOwners contains sym.owner)
       ) && !mapAlways
     then originals
-    else {
+    else
       val copies: List[Symbol] = for (original <- originals) yield
         val odenot = original.denot
         original.copy(
@@ -1083,7 +1083,6 @@ object Symbols:
             sealedCopy.annotations.mapConserve(ttmap1.apply)
 
       copies
-    }
 
   /** Matches lists of term symbols, including the empty list. All symbols in
     * the list are assumed to be of the same kind.

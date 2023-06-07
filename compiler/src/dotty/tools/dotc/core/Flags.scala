@@ -33,7 +33,7 @@ object Flags:
     def |(y: FlagSet): FlagSet =
       if x.bits == 0 then y
       else if y.bits == 0 then x
-      else {
+      else
         val tbits = x.bits & y.bits & KINDFLAGS
         if tbits == 0 then
           assert(
@@ -41,7 +41,6 @@ object Flags:
             s"illegal flagset combination: ${x.flagsString} and ${y.flagsString}"
           )
         FlagSet(tbits | ((x.bits | y.bits) & ~KINDFLAGS))
-      }
 
     /** The intersection of the given flag sets */
     def &(y: FlagSet): FlagSet = FlagSet(x.bits & y.bits)
@@ -133,14 +132,13 @@ object Flags:
       */
     private def flagString(idx: Int): List[String] =
       if (x.bits & (1L << idx)) == 0 then Nil
-      else {
+      else
         def halfString(kind: Int) =
           if (x.bits & (1L << kind)) != 0 then flagName(idx)(kind) else ""
         val termFS = halfString(TERMindex)
         val typeFS = halfString(TYPEindex)
         val strs = termFS :: (if termFS == typeFS then Nil else typeFS :: Nil)
         strs filter (_.nonEmpty)
-      }
 
     /** The list of non-empty names of flags that are set in the given flag set
       */

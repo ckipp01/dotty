@@ -23,7 +23,7 @@ case class SourceTree(tree: tpd.Import | tpd.NameTree, source: SourceFile):
       val treeSpan = tree.span
       if treeSpan.isZeroExtent || tree.name.toTermName == nme.ERROR then
         NoSourcePosition
-      else {
+      else
         // Constructors are named `<init>` in the trees, but `this` in the source.
         val nameLength = tree.name match
           case nme.CONSTRUCTOR => nme.this_.toString.length
@@ -39,7 +39,6 @@ case class SourceTree(tree: tpd.Import | tpd.NameTree, source: SourceFile):
               (treeSpan.end - nameLength, treeSpan.end)
           Span(start, end, start)
         source.atSpan(position)
-      }
     case _ =>
       NoSourcePosition
 end SourceTree
@@ -52,7 +51,7 @@ object SourceTree:
       !sym.source.exists
     then // FIXME: We cannot deal with external projects yet
       Nil
-    else {
+    else
       import ast.Trees.*
       def sourceTreeOfClass(tree: tpd.Tree): Option[SourceTree] = tree match
         case PackageDef(_, stats) =>
@@ -75,5 +74,4 @@ object SourceTree:
         case Some(namedTree) =>
           namedTree :: sourceImports(tree, namedTree.source)
         case None => Nil
-    }
 end SourceTree

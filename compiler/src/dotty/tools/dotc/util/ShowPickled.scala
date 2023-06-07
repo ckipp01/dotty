@@ -161,10 +161,9 @@ object ShowPickled:
       if buf.readIndex == end then
         printFlags(None)
         printReadNat(x)
-      else {
+      else
         printFlags(Some(x))
         printTypeRef()
-      }
 
     /** Note: the entries which require some semantic analysis to be correctly
       * interpreted are for the most part going to tell you the wrong thing.

@@ -241,7 +241,7 @@ object Scala2Erasure:
       defn.ArrayOf(intersectionDominator(parents.collect {
         case defn.ArrayOf(arg) => arg
       }))
-    else {
+    else
       def isUnshadowed(psym: PseudoSymbol) =
         !(psyms.exists(qsym =>
           !psym.sameSymbol(qsym) && qsym.isNonBottomSubClass(psym)
@@ -252,7 +252,6 @@ object Scala2Erasure:
       }
       (if cs.hasNext then cs
        else parents.iterator.filter(p => isUnshadowed(pseudoSymbol(p)))).next()
-    }
   end intersectionDominator
 
   /** A flattened list of parents of this intersection.

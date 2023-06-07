@@ -78,7 +78,7 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
        * - Module values are not exported; their module class takes care of the export.
        */
       Nil
-    else {
+    else
       val symForAnnot =
         if sym.isConstructor && isScalaClass(sym.owner) then sym.owner
         else sym
@@ -90,7 +90,6 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
             annot.argumentConstantString(1).getOrElse(DefaultModuleID)
           TopLevelExportInfo(moduleID, jsName)(annot.tree.sourcePos)
       }
-    }
 
   private def staticExportsOf(sym: Symbol): List[StaticExportInfo] =
     if sym.is(Accessor) then Nil
@@ -407,7 +406,7 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
 
     val setterArgAndBody =
       if setters.isEmpty then None
-      else {
+      else
         val formalArgsRegistry = new FormalArgsRegistry(1, false)
         val (List(arg), None) = formalArgsRegistry.genFormalArgs(): @unchecked
         val body = genOverloadDispatchSameArgc(
@@ -418,7 +417,6 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
           None
         )
         Some((arg, body))
-      }
 
     js.JSPropertyDef(
       flags,
@@ -560,7 +558,7 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
     val body =
       if cases.isEmpty then defaultCase
       else if cases.tail.isEmpty && altsWithVarArgs.isEmpty then cases.head._2
-      else {
+      else
         val restArgRef = formalArgsRegistry.genRestArgRef()
         js.Match(
           js.AsInstanceOf(
@@ -570,7 +568,6 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
           cases,
           defaultCase
         )(tpe)
-      }
 
     body
   end genExportMethodMultiAlts
@@ -645,7 +642,7 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
       // Therefore, we should fail
       reportCannotDisambiguateError(jsName, alts.map(_.sym))
       js.Undefined()
-    else {
+    else
       val altsByTypeTest = groupByWithoutHashCode(alts) { exported =>
         typeTestForTpe(exported.exportArgTypeAt(paramIndex))
       }
@@ -660,7 +657,7 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
           paramIndex + 1,
           maxArgc
         )
-      else {
+      else
         // Sort them so that, e.g., isInstanceOf[String] comes before isInstanceOf[Object]
         val sortedAltsByTypeTest = topoSortDistinctsWith(altsByTypeTest) {
           (lhs, rhs) =>
@@ -717,9 +714,7 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
             js.If(condOrUndef, genSubAlts, elsep)(tpe)
           }
         }
-      }
       end if
-    }
     end if
   end genOverloadDispatchSameArgcRec
 
@@ -874,7 +869,7 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
   )(implicit pos: SourcePosition): js.Tree =
     if param.repeated then
       genJSArrayToVarArgs(formalArgsRegistry.genVarargRef(paramIndex))
-    else {
+    else
       val jsArg = formalArgsRegistry.genArgRef(paramIndex)
 
       // Unboxed argument (if it is defined)
@@ -894,7 +889,6 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
       else
         // Otherwise, it is always the unboxed argument
         unboxedArg
-    }
 
   def genCallDefaultGetter(
       sym: Symbol,
@@ -926,7 +920,7 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
             i"expected empty captures for ${targetSym.fullName} at $pos"
           )
           genLoadModule(targetSym)
-        else {
+        else
           assert(captures.sizeIs == 1, "expected exactly one capture")
 
           // Find the module accessor. We cannot use memberBasedOnFlags because of scala-js/scala-js#4526.
@@ -948,7 +942,6 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
           if outer.isJSType then
             genApplyJSClassMethod(receiver, modAccessor, Nil)
           else genApplyMethodMaybeStatically(receiver, modAccessor, Nil)
-        }
       else js.This()(currentThisType)
 
     // Pass previous arguments to defaultGetter
@@ -972,14 +965,13 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
             s"got non-constructor method $sym with default method in JS native companion"
           )
           js.Undefined()
-        else {
+        else
           report.error(
             "When overriding a native method with default arguments, " +
               "the overriding method must explicitly repeat the default arguments.",
             sym.srcPos
           )
           js.Undefined()
-        }
       else genApplyMethod(targetTree, defaultGetter, defaultGetterArgs)
 
     // #15419 If the getter returns void, we must "box" it by returning undefined
@@ -1024,12 +1016,11 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
     if currentClass.isNonNativeJSClass then
       assert(sym.owner == currentClass, sym.fullName)
       boxIfNeeded(genApplyJSClassMethod(receiver, sym, args))
-    else
-      if sym.isClassConstructor then
-        js.New(encodeClassName(currentClass), encodeMethodSym(sym), args)
-      else if sym.isPrivate then
-        boxIfNeeded(genApplyMethodStatically(receiver, sym, args))
-      else boxIfNeeded(genApplyMethod(receiver, sym, args))
+    else if sym.isClassConstructor then
+      js.New(encodeClassName(currentClass), encodeMethodSym(sym), args)
+    else if sym.isPrivate then
+      boxIfNeeded(genApplyMethodStatically(receiver, sym, args))
+    else boxIfNeeded(genApplyMethod(receiver, sym, args))
 
   private def genThrowTypeError(
       msg: String = "No matching overload"
@@ -1047,10 +1038,9 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
 
     private val paramsHasDefault =
       if !atPhase(elimRepeatedPhase)(sym.hasDefaultParams) then Vector.empty
-      else {
+      else
         val targetSym = targetSymForDefaultGetter(sym)
         params.indices.map(i => defaultGetterDenot(targetSym, sym, i).exists)
-      }
 
     def hasDefaultAt(paramIndex: Int): Boolean =
       paramIndex < paramsHasDefault.size && paramsHasDefault(paramIndex)
@@ -1070,13 +1060,12 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
 
     def exportArgTypeAt(paramIndex: Int): Type =
       if paramIndex < params.length then params(paramIndex).info
-      else {
+      else
         assert(
           hasRepeatedParam,
           i"$sym does not have varargs nor enough params for $paramIndex"
         )
         params.last.info
-      }
 
     def typeInfo: String = sym.info.toString
 
@@ -1112,12 +1101,11 @@ final class JSExportsGen(jsCodeGen: JSCodeGen)(using Context):
     def loop(coll: List[A], acc: List[A]): List[A] =
       if coll.isEmpty then acc
       else if coll.tail.isEmpty then coll.head :: acc
-      else {
+      else
         val (lhs, rhs) =
           coll.span(x => !coll.forall(y => (x eq y) || !lteq(x, y)))
         assert(!rhs.isEmpty, s"cycle while ordering $coll")
         loop(lhs ::: rhs.tail, rhs.head :: acc)
-      }
 
     loop(coll, Nil)
 

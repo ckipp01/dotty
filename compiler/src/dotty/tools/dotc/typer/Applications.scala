@@ -224,7 +224,7 @@ object Applications:
         if isGetMatch(unapplyResult, pos) then unapplySeq(getTp)(fail)
         else fail
       }
-    else {
+    else
       assert(unapplyName == nme.unapply)
       if isProductMatch(unapplyResult, args.length, pos) then
         productSelectorTypes(unapplyResult, pos)
@@ -242,7 +242,6 @@ object Applications:
       else if unapplyResult.derivesFrom(defn.NonEmptyTupleClass) then
         foldApplyTupleType(unapplyResult)
       else fail
-    }
   end unapplyArgs
 
   def foldApplyTupleType(tp: Type)(using Context): List[Type] =
@@ -635,14 +634,13 @@ trait Applications extends Compatibility:
                   nameToArg,
                   toDrop
                 )
-              else { // name not (or no longer) available for named arg
+              else // name not (or no longer) available for named arg
                 def msg =
                   if methodType.paramNames contains aname then
                     em"parameter $aname of $methString is already instantiated"
                   else em"$methString does not have a parameter $aname"
                 fail(msg, arg.asInstanceOf[Arg])
                 arg :: handleNamed(pnamesRest, args1, nameToArg, toDrop)
-              }
             case arg :: args1 =>
               arg :: handleNamed(
                 pnamesRest,
@@ -1010,7 +1008,7 @@ trait Applications extends Compatibility:
       ) // needs to be a `def` because typedArgs can change later
       val app1 =
         if !success then app0.withType(UnspecifiedErrorType)
-        else {
+        else
           if !sameSeq(args, orderedArgs)
             && !isJavaAnnotConstr(methRef.symbol)
             && !typedArgs.forall(isSafeArg)
@@ -1052,7 +1050,6 @@ trait Applications extends Compatibility:
           if sameSeq(typedArgs, args) then // trick to cut down on tree copying
             typedArgs = args.asInstanceOf[List[Tree]]
           assignType(app0, normalizedFun, typedArgs)
-        }
       wrapDefs(liftedDefs, app1)
     end result
   end TypedApply
@@ -1116,9 +1113,9 @@ trait Applications extends Compatibility:
           then IgnoredProto(pt)
           else
             pt // Don't ignore expected value types of `new` expressions with parameterized type.
-          // If we have a `new C()` with expected type `C[T]` we want to use the type to
-          // instantiate `C` immediately. This is necessary since `C` might _also_ have using
-          // clauses that we want to instantiate with the best available type. See i15664.scala.
+        // If we have a `new C()` with expected type `C[T]` we want to use the type to
+        // instantiate `C` immediately. This is necessary since `C` might _also_ have using
+        // clauses that we want to instantiate with the best available type. See i15664.scala.
         case _ => IgnoredProto(pt)
         // Do ignore other expected result types, since there might be an implicit conversion
         // on the result. We could drop this if we disallow unrestricted implicit conversions.
@@ -1319,7 +1316,7 @@ trait Applications extends Compatibility:
             failedVal
           }
         }
-      else {
+      else
         val app = tree.fun match
           case _: untpd.SplicePattern => typedAppliedSplice(tree, pt)
           case _                      => realApply
@@ -1330,7 +1327,6 @@ trait Applications extends Compatibility:
               checkCanEqual(left.tpe.widen, right.tpe.widen, app.span)
           case _ =>
         app
-      }
     app1 match
       case Apply(Block(stats, fn), args) =>
         tpd.cpy.Block(app1)(stats, tpd.cpy.Apply(app1)(fn, args))
@@ -2089,7 +2085,7 @@ trait Applications extends Compatibility:
       def isAsSpecificValueType(tp1: Type, tp2: Type)(using Context) =
         if ctx.mode.is(Mode.OldOverloadingResolution) then
           isCompatible(tp1, tp2)
-        else {
+        else
           val flip = new TypeMap:
             def apply(t: Type) = t match
               case t @ AppliedType(tycon, args) =>
@@ -2110,7 +2106,6 @@ trait Applications extends Compatibility:
               flip(tp.widen.widenToParents)
             case _ => flip(tp)
           (prepare(tp1) relaxed_<:< prepare(tp2)) || viewExists(tp1, tp2)
-        }
 
       /** Widen the result type of synthetic given methods from the
         * implementation class to the type that's implemented. Example

@@ -246,14 +246,13 @@ abstract class WeakHashSet[A <: AnyRef](
 
         val e = entry
         if e == null then false
-        else {
+        else
           lookaheadelement = e.get
           if lookaheadelement == null then
             // element null means the weakref has been cleared since we last did a removeStaleEntries(), move to the next entry
             entry = e.tail
             hasNext
           else true
-        }
 
       def next(): A =
         if lookaheadelement == null then

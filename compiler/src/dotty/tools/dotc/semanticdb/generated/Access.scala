@@ -588,10 +588,10 @@ final case class PrivateWithinAccess(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = symbol
     if !__v.isEmpty then _output__.writeString(1, __v)
-  };
+  ;
   def withSymbol(__v: _root_.scala.Predef.String): PrivateWithinAccess =
     copy(symbol = __v)
 
@@ -732,10 +732,10 @@ final case class ProtectedWithinAccess(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = symbol
     if !__v.isEmpty then _output__.writeString(1, __v)
-  };
+  ;
   def withSymbol(__v: _root_.scala.Predef.String): ProtectedWithinAccess =
     copy(symbol = __v)
 

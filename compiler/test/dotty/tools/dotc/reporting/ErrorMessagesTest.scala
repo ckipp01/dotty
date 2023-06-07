@@ -33,11 +33,10 @@ trait ErrorMessagesTest extends DottyTest:
     val runCtx = checkCompile(checkAfterPhase, source) { (_, _) => () }
 
     if !runCtx.reporter.hasErrors then new EmptyReport
-    else {
+    else
       val rep = runCtx.reporter.asInstanceOf[StoreReporter]
       val msgs = rep.removeBufferedMessages(using runCtx).map(_.msg).reverse
       new Report(msgs, runCtx)
-    }
 
   def assertMessageCount(expected: Int, messages: List[Message]): Unit =
     assertEquals(messages.mkString, expected, messages.length)

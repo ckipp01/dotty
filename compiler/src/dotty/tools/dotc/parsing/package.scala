@@ -18,7 +18,7 @@ package object parsing:
     */
   def precedence(operator: Name): Int =
     if operator eq nme.ERROR then -1
-    else {
+    else
       val firstCh = operator.firstCodePoint
       if isScalaLetter(firstCh) then 1
       else if operator.isOpAssignmentName then 0
@@ -33,7 +33,6 @@ package object parsing:
           case '+' | '-'       => 8
           case '*' | '/' | '%' => 9
           case _               => 10
-    }
 
   def minPrec: Int = 0
   def minInfixPrec: Int = 1

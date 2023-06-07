@@ -297,11 +297,10 @@ object Scopes:
 
     private def createHash(tableSize: Int)(using Context): Unit =
       if size > tableSize * FillFactor then createHash(tableSize * 2)
-      else {
+      else
         hashTable = new Array[ScopeEntry | Null](tableSize)
         enterAllInHash(lastEntry)
         // checkConsistent() // DEBUG
-      }
 
     private def enterAllInHash(e: ScopeEntry | Null, n: Int = 0)(using
         Context
@@ -310,31 +309,28 @@ object Scopes:
         if n < MaxRecursions then
           enterAllInHash(e.prev, n + 1)
           enterInHash(e)
-        else {
+        else
           var entries: List[ScopeEntry] = List()
           var ee: ScopeEntry | Null = e
           while ee != null do
             entries = ee :: entries
             ee = ee.prev
           entries foreach enterInHash
-        }
 
     /** Remove entry from this scope (which is required to be present) */
     final def unlink(e: ScopeEntry)(using Context): Unit =
       if lastEntry == e then lastEntry = e.prev
-      else {
+      else
         var e1 = lastEntry.nn
         while e1.prev != e do e1 = e1.prev.nn
         e1.prev = e.prev
-      }
       if hashTable != null then
         val index = e.name.hashCode & (hashTable.nn.length - 1)
         var e1 = hashTable.nn(index)
         if e1 == e then hashTable.nn(index) = e.tail
-        else {
+        else
           while e1.nn.tail != e do e1 = e1.nn.tail
           e1.nn.tail = e.tail
-        }
       elemsCache = null
       size -= 1
 
@@ -369,10 +365,9 @@ object Scopes:
       if hashTable != null then
         e = hashTable.nn(name.hashCode & (hashTable.nn.length - 1))
         while (e != null) && e.name != name do e = e.tail
-      else {
+      else
         e = lastEntry
         while (e != null) && e.name != name do e = e.prev
-      }
       if (e == null) && (synthesize != null) then
         val sym = synthesize.uncheckedNN(name)
         if sym.exists then newScopeEntry(sym.name, sym) else e

@@ -38,7 +38,7 @@ class PatternMatcher extends MiniPhase:
 
   override def transformMatch(tree: Match)(using Context): Tree =
     if tree.isInstanceOf[InlineMatch] then tree
-    else {
+    else
       // Widen termrefs with underlying `=> T` types. Otherwise ElimByName will produce
       // inconsistent types. See i7743.scala.
       // Question: Does this need to be done more systematically, not just for pattern matches?
@@ -52,7 +52,6 @@ class PatternMatcher extends MiniPhase:
       SpaceEngine.checkRedundancy(tree)
 
       translated.ensureConforms(matchType)
-    }
 end PatternMatcher
 
 object PatternMatcher:
@@ -328,14 +327,13 @@ object PatternMatcher:
                 letAbstract(toSeq) { toSeqResult =>
                   patternPlan(toSeqResult, arg, onSuccess)
                 }
-              else {
+              else
                 val dropped = ref(getResult)
                   .select(defn.Seq_drop.matchingMember(getResult.info))
                   .appliedTo(Literal(Constant(args.length - 1)))
                 letAbstract(dropped) { droppedResult =>
                   patternPlan(droppedResult, arg, onSuccess)
                 }
-              }
             matchElemsPlan(getResult, args.init, exact = false, matchRemaining)
           case _ =>
             matchElemsPlan(getResult, args, exact = true, onSuccess)
@@ -471,7 +469,7 @@ object PatternMatcher:
               // Generate a throwaway but type-correct plan.
               // This plan will never execute because it'll be guarded by a `NonNullTest`.
               ResultPlan(tpd.Throw(tpd.nullLiteral))
-            else {
+            else
               def applyImplicits(
                   acc: Tree,
                   implicits: List[Tree],
@@ -494,17 +492,15 @@ object PatternMatcher:
               )
               val unapp = applyImplicits(unapp0, implicits, mt.resultType)
               unapplyPlan(unapp, args)
-            }
           if scrutinee.info.isNotNull || nonNull(scrutinee) then unappPlan
           else TestPlan(NonNullTest, scrutinee, tree.span, unappPlan)
         case Bind(name, body) =>
           if name == nme.WILDCARD then patternPlan(scrutinee, body, onSuccess)
-          else {
+          else
             // The type of `name` may refer to val in `body`, therefore should come after `body`
             val bound = tree.symbol.asTerm
             initializer(bound) = ref(scrutinee)
             patternPlan(scrutinee, body, LetPlan(bound, onSuccess))
-          }
         case Alternative(alts) =>
           altsLabeledAbstract { onf =>
             SeqPlan(
@@ -735,21 +731,19 @@ object PatternMatcher:
               super.transform(tree)
         override def apply(plan: LetPlan): Plan =
           if toDrop(plan.sym) then apply(plan.body)
-          else {
+          else
             initializer(plan.sym) = apply(initializer(plan.sym))
             plan.body = apply(plan.body)
             plan
-          }
         override def apply(plan: SeqPlan): Plan =
           val newHead = apply(plan.head)
           if !canFallThrough(newHead) then
             // If the head cannot fall through, the tail is dead code
             newHead
-          else {
+          else
             plan.head = newHead
             plan.tail = apply(plan.tail)
             plan
-          }
       Inliner(plan)
     end inlineVars
 

@@ -78,6 +78,7 @@ case class State(
 ):
   def validObjectIndexes =
     (1 to objectIndex).filterNot(invalidObjectIndexes.contains(_))
+end State
 
 /** Main REPL instance, orchestrating input, compilation and presentation */
 class ReplDriver(
@@ -544,10 +545,9 @@ class ReplDriver(
             scala.io.Source.fromFile(file, StandardCharsets.UTF_8.name)
           )(_.mkString).get
           run(contents)
-        else {
+        else
           out.println(s"""Couldn't find file "${file.getCanonicalPath}"""")
           state
-        }
 
       case TypeOf(expr) =>
         expr match

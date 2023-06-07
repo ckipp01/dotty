@@ -231,7 +231,7 @@ class BTypesFromSymbols[I <: DottyBackendInterface](
     val isNested = !innerClassSym.originalOwner.originalLexicallyEnclosingClass
       .is(PackageClass)
     if !isNested then None
-    else {
+    else
       // See comment in BTypes, when is a class marked static in the InnerClass table.
       val isStaticNestedClass =
         innerClassSym.originalOwner.originalLexicallyEnclosingClass.isOriginallyStaticOwner
@@ -249,7 +249,7 @@ class BTypesFromSymbols[I <: DottyBackendInterface](
 
       val outerName: Option[String] =
         if isAnonymousOrLocalClass(innerClassSym) then None
-        else {
+        else
           val outerName =
             innerClassSym.originalOwner.originalLexicallyEnclosingClass.javaBinaryName
           def dropModule(str: String): String =
@@ -261,22 +261,19 @@ class BTypesFromSymbols[I <: DottyBackendInterface](
             then dropModule(outerName)
             else outerName
           Some(outerNameModule.toString)
-        }
 
       val innerName: Option[String] =
         if innerClassSym.isAnonymousClass || innerClassSym.isAnonymousFunction
         then None
-        else {
+        else
           val original = innerClassSym.initial
           Some(
             atPhase(original.validFor.phaseId)(innerClassSym.name).mangledString
           ) // moduleSuffix for module classes
-        }
 
       Some(
         NestedInfo(enclosingClass, outerName, innerName, isStaticNestedClass)
       )
-    }
     end if
   end buildNestedInfo
 

@@ -315,12 +315,11 @@ class TailRec extends MiniPhase:
     /** Rewrite this tree to contain no tail recursive calls */
     def transform(tree: Tree, tailPosition: Boolean)(using Context): Tree =
       if inTailPosition == tailPosition then transform(tree)
-      else {
+      else
         val saved = inTailPosition
         inTailPosition = tailPosition
         try transform(tree)
         finally inTailPosition = saved
-      }
 
     def yesTailTransform(tree: Tree)(using Context): Tree =
       transform(tree, tailPosition = true)

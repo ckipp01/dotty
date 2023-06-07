@@ -292,10 +292,9 @@ class ClassfileParser(
       completer.attrCompleter = parseAttributes(member)
 
       getScope(jflags).enter(member)
-    else {
+    else
       in.nextChar // info
       skipAttributes()
-    }
   end parseMember
 
   class MemberCompleter(name: SimpleName, jflags: Int, sig: String)
@@ -383,11 +382,10 @@ class ClassfileParser(
           report.warning(
             em"no linked class for java enum $sym in ${sym.owner}. A referencing class file might be missing an InnerClasses entry."
           )
-        else {
+        else
           if !enumClass.is(Flags.Sealed) then
             enumClass.setFlag(Flags.AbstractSealed)
           enumClass.addAnnotation(Annotation.Child(sym, NoSpan))
-        }
     end complete
   end MemberCompleter
 
@@ -594,7 +592,7 @@ class ClassfileParser(
     val tpe =
       if (owner == null) || !owner.isClass then
         sig2type(tparams, skiptvs = false)
-      else {
+      else
         classTParams = tparams
         val parents = new ListBuffer[Type]()
         while index < end do
@@ -603,7 +601,6 @@ class ClassfileParser(
             skiptvs = false
           ) // here the variance doesn't matter
         TempClassInfoType(parents.toList, instanceScope, owner)
-      }
     if ownTypeParams.isEmpty then tpe else TempPolyType(ownTypeParams, tpe)
   end sigToType
   // sigToType
@@ -635,11 +632,10 @@ class ClassfileParser(
         if skip then None else Some(lit(Constant(pool.getName(index).value)))
       case BOOL_TAG | BYTE_TAG | CHAR_TAG | SHORT_TAG =>
         if skip then None
-        else {
+        else
           val constant =
             convertTo(pool.getConstant(index), constantTagToType(tag))
           Some(lit(constant))
-        }
       case INT_TAG | LONG_TAG | FLOAT_TAG | DOUBLE_TAG =>
         if skip then None else Some(lit(pool.getConstant(index)))
       case CLASS_TAG =>
@@ -658,10 +654,9 @@ class ClassfileParser(
             case None                => hasError = true
         if hasError then None
         else if skip then None
-        else {
+        else
           val elems = arr.toList
           Some(untpd.JavaSeqLiteral(elems, untpd.TypeTree()))
-        }
       case ANNOTATION_TAG =>
         parseAnnotation(index, skip).map(_.untpdTree)
     end match
@@ -1050,12 +1045,11 @@ class ClassfileParser(
                     tastyOutStream.flush()
                     tastyOutStream.toByteArray
                   finally stream.close()
-                else {
+                else
                   report.error(
                     em"Could not find $path in ${classfile.underlyingSource}"
                   )
                   Array.empty
-                }
               case _ =>
                 val dir = classfile.container
                 val name = classfile.name.stripSuffix(".class") + ".tasty"
@@ -1175,12 +1169,11 @@ class ClassfileParser(
       def getMember(sym: Symbol, name: Name)(using Context): Symbol =
         if isStatic(entry.jflags) then
           if sym == classRoot.symbol then staticScope.lookup(name)
-          else {
+          else
             var moduleClass = sym.registeredCompanion
             if !moduleClass.exists && sym.isAbsent() then
               moduleClass = sym.scalacLinkedClass
             moduleClass.info.member(name).symbol
-          }
         else if sym == classRoot.symbol then instanceScope.lookup(name)
         else if sym == classRoot.symbol.owner && name == classRoot.name then
           classRoot.symbol
@@ -1349,11 +1342,10 @@ class ClassfileParser(
         if name.value.charAt(0) == ARRAY_TAG then
           c = sigToType(name.value)
           values(index) = c
-        else {
+        else
           val sym = classNameToSymbol(name.name)
           values(index) = sym
           c = sym.typeRef
-        }
       else
         c = value match
           case tp: Type    => tp

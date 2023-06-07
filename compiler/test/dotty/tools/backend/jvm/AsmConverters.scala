@@ -281,7 +281,8 @@ object ASMConverters:
       if m contains v1 then m(v1) == v2
       else if m.valuesIterator contains v2 then
         false // v2 is already associated with some different value v1
-      else { m(v1) = v2; true }
+      else
+        m(v1) = v2; true
     def sameVar(v1: Int, v2: Int) = same(v1, v2, varMap)
     def sameLabel(l1: Label, l2: Label) = same(l1.offset, l2.offset, labelMap)
     def sameLabels(ls1: List[Label], ls2: List[Label]) =

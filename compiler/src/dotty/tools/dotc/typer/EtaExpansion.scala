@@ -51,7 +51,7 @@ abstract class Lifter:
       prefix: TermName = EmptyTermName
   )(using Context): Tree =
     if noLift(expr) then expr
-    else {
+    else
       val name = UniqueName.fresh(prefix)
       // don't instantiate here, as the type params could be further constrained, see tests/pos/pickleinf.scala
       var liftedType = expr.tpe.widen.deskolemized
@@ -71,7 +71,6 @@ abstract class Lifter:
         .changeNonLocalOwners(lifted)
         .setDefTree
       ref(lifted.termRef).withSpan(expr.span.focus)
-    }
 
   /** Lift out common part of lhs tree taking part in an operator assignment
     * such as

@@ -94,13 +94,13 @@ object Decorators:
         if pending.isEmpty then
           if mapped == null then unchanged
           else mapped.prependToList(unchanged)
-        else {
+        else
           val head0 = pending.head
           val head1 = f(head0)
 
           if head1.asInstanceOf[AnyRef] eq head0.asInstanceOf[AnyRef] then
             loop(mapped, unchanged, pending.tail)
-          else {
+          else
             val b = if mapped == null then new ListBuffer[U] else mapped
             var xc = unchanged
             while xc ne pending do
@@ -109,8 +109,6 @@ object Decorators:
             b += head1
             val tail0 = pending.tail
             loop(b, tail0.asInstanceOf[List[U]], tail0)
-          }
-        }
       loop(null, xs.asInstanceOf[List[U]], xs)
 
     /** Like `xs filter p` but returns list `xs` itself - instead of a copy - if
@@ -164,14 +162,13 @@ object Decorators:
       */
     def zipWithConserve[U, V <: T](ys: List[U])(f: (T, U) => V): List[V] =
       if xs.isEmpty || ys.isEmpty then Nil
-      else {
+      else
         val x1 = f(xs.head, ys.head)
         val xs1 = xs.tail.zipWithConserve(ys.tail)(f)
         if (x1.asInstanceOf[AnyRef] eq xs.head
             .asInstanceOf[AnyRef]) && (xs1 eq xs.tail)
         then xs.asInstanceOf[List[V]]
         else x1 :: xs1
-      }
 
     /** Like `xs.lazyZip(xs.indices).map(f)`, but returns list `xs` itself
       *   - instead of a copy - if function `f` maps all elements of `xs` to
@@ -319,6 +316,7 @@ object Decorators:
 
     /** Returns the simple class name of `x`. */
     def className: String = x.getClass.getSimpleName.nn
+  end extension
 
   extension [T](x: T)
     def assertingErrorsReported(using Context): T =

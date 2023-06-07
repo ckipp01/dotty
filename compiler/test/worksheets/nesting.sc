@@ -21,5 +21,5 @@ object nesting:
   // | a23
   val d =
     c.foo // > d  : dotty.tools.dotc.core.nesting.c.D = dotty.tools.dotc.core.nesting$C$D$1
-  // | @2705d88a
+    // | @2705d88a
   d.show // > res0: String = foo.D

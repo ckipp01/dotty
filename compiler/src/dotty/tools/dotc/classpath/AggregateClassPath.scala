@@ -149,11 +149,10 @@ case class AggregateClassPath(aggregates: Seq[ClassPath]) extends ClassPath:
         if existing.source.isEmpty && entry.source.isDefined then
           mergedEntries(index) =
             ClassAndSourceFilesEntry(existing.binary.get, entry.source.get)
-      else {
+      else
         indices(name) = count
         mergedEntries += entry
         count += 1
-      }
     if mergedEntries.isEmpty then Nil else mergedEntries.toIndexedSeq
   end mergeClassesAndSources
 

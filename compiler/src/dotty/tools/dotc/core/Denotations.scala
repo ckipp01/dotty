@@ -453,11 +453,10 @@ object Denotations:
           case denot1 @ MultiDenotation(denot11, denot12) =>
             val d1 = mergeDenot(denot11, denot2)
             if d1.exists then denot1.derivedUnionDenotation(d1, denot12)
-            else {
+            else
               val d2 = mergeDenot(denot12, denot2)
               if d2.exists then denot1.derivedUnionDenotation(denot11, d2)
               else NoDenotation
-            }
           case denot1: SingleDenotation =>
             if denot1 eq denot2 then denot1
             else if denot1.matches(denot2) then mergeSingleDenot(denot1, denot2)
@@ -834,12 +833,11 @@ object Denotations:
       */
     def initial: SingleDenotation =
       if validFor.firstPhaseId <= 1 then this
-      else {
+      else
         var current = nextInRun
         while current.validFor.code > this.validFor.code do
           current = current.nextInRun
         current
-      }
 
     def history: List[SingleDenotation] =
       val b = new ListBuffer[SingleDenotation]
@@ -1044,7 +1042,7 @@ object Denotations:
     protected def installAfter(phase: DenotTransformer)(using Context): Unit =
       val targetId = phase.next.id
       if ctx.phaseId != targetId then atPhase(phase.next)(installAfter(phase))
-      else {
+      else
         val current = symbol.current
         // println(s"installing $this after $phase/${phase.id}, valid = ${current.validFor}")
         // printPeriods(current)
@@ -1052,12 +1050,10 @@ object Denotations:
           Period(ctx.runId, targetId, current.validFor.lastPhaseId)
         if current.validFor.firstPhaseId >= targetId then
           current.replaceWith(this)
-        else {
+        else
           current.validFor =
             Period(ctx.runId, current.validFor.firstPhaseId, targetId - 1)
           insertAfter(current)
-        }
-      }
       // printPeriods(this)
 
     /** Apply a transformation `f` to all denotations in this group that start
@@ -1535,14 +1531,13 @@ object Denotations:
         if result.exists then result
         else if isPackageFromCoreLibMissing then
           throw new MissingCoreLibraryException(selector.toString)
-        else {
+        else
           val alt =
             if generateStubs then
               missingHook(owner.symbol.moduleClass, selector)
             else NoSymbol
           if alt.exists then alt.denot
           else MissingRef(owner, selector)
-        }
       else owner
     def recur(path: Name, wrap: TermName => Name = identity): Denotation =
       path match

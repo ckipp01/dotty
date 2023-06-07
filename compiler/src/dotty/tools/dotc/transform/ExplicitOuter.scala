@@ -88,11 +88,10 @@ class ExplicitOuter extends MiniPhase with InfoTransformer:
 
       if clsHasOuter then
         if isTrait then newDefs += DefDef(outerAccessor(cls).asTerm, EmptyTree)
-        else {
+        else
           val outerParamAcc = outerParamAccessor(cls)
           newDefs += ValDef(outerParamAcc, EmptyTree)
           newDefs += DefDef(outerAccessor(cls).asTerm, ref(outerParamAcc))
-        }
 
       for parentTrait <- cls.mixins do
         if needsOuterIfReferenced(parentTrait) then
@@ -419,12 +418,12 @@ object ExplicitOuter:
         case _ =>
           // Need to be careful to dealias before erasure, otherwise we lose prefixes.
           atPhaseNoLater(erasurePhase)(outerPrefix(tpe.underlying))
-        // underlying is fine here and below since we are calling this after erasure.
-        // However, there is some weird stuff going on with parboiled2 where an
-        // AppliedType with a type alias as constructor is fed to outerPrefix.
-        // For some other unknown reason this works with underlying but not with superType.
-        // I was not able to minimize the problem and parboiled2 spits out way too much
-        // macro generated code to be able to pinpoint the root problem.
+      // underlying is fine here and below since we are calling this after erasure.
+      // However, there is some weird stuff going on with parboiled2 where an
+      // AppliedType with a type alias as constructor is fed to outerPrefix.
+      // For some other unknown reason this works with underlying but not with superType.
+      // I was not able to minimize the problem and parboiled2 spits out way too much
+      // macro generated code to be able to pinpoint the root problem.
     case tpe: TypeProxy =>
       outerPrefix(tpe.underlying)
 

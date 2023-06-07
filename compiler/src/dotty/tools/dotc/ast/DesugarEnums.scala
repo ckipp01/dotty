@@ -76,7 +76,7 @@ object DesugarEnums:
         tparam.info.bounds.lo
       else if tparam.is(Contravariant) && isGround(tparam.info.bounds.hi) then
         tparam.info.bounds.hi
-      else {
+      else
         def problem =
           if !tparam.isOneOf(VarianceFlags) then "is invariant"
           else
@@ -86,7 +86,6 @@ object DesugarEnums:
                       |type parameter $tparam $problem""",
           ctx.source.atSpan(span)
         )
-      }
     }
     TypeTree(enumClass.typeRef.appliedTo(targs)).withSpan(span)
 
@@ -374,7 +373,7 @@ object DesugarEnums:
     if !enumClass.exists then EmptyTree
     else if impl.parents.isEmpty then
       expandSimpleEnumCase(name, mods, definesLookups, span)
-    else {
+    else
       val (tag, scaffolding) =
         nextOrdinal(name, CaseKind.Object, definesLookups)
       val impl1 = cpy
@@ -387,7 +386,6 @@ object DesugarEnums:
         mods.withAddedFlags(EnumValue, span)
       )
       flatTree(vdef :: scaffolding).withSpan(span)
-    }
 
   /** Expand a simple enum case */
   def expandSimpleEnumCase(
@@ -402,7 +400,7 @@ object DesugarEnums:
       val impl =
         Template(emptyConstructor, parent :: Nil, Nil, EmptyValDef, Nil)
       expandEnumModule(name, impl, mods, definesLookups, span)
-    else {
+    else
       val (tag, scaffolding) =
         nextOrdinal(name, CaseKind.Simple, definesLookups)
       val creator = Apply(
@@ -413,5 +411,4 @@ object DesugarEnums:
         mods.withAddedFlags(EnumValue, span)
       )
       flatTree(vdef :: scaffolding).withSpan(span)
-    }
 end DesugarEnums

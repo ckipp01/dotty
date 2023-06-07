@@ -110,7 +110,7 @@ class VarianceChecker(using Context):
     private def checkVarianceOfSymbol(tvar: Symbol): Option[VarianceError] =
       val relative = relativeVariance(tvar, base)
       if relative == Bivariant then None
-      else {
+      else
         val required =
           if variance == 1 then relative
           else if variance == -1 then flip(relative)
@@ -128,7 +128,6 @@ class VarianceChecker(using Context):
         report.log(s"owner chain: ${base.ownersIterator.toList}")
         if tvar.isOneOf(required) then None
         else Some(VarianceError(tvar, required))
-      }
 
     /** For PolyTypes, type parameters are skipped because they are defined
       * explicitly (their TypeDefs will be passed here.) For MethodTypes, the

@@ -94,7 +94,7 @@ object PrepJSExports:
       // Constructors do not need an exporter method. We only perform the checks at this phase.
       checkClassOrModuleExports(clsSym, exports.head.pos)
       Nil
-    else {
+    else
       assert(
         !baseSym.is(Bridge),
         s"genExportMember called for bridge symbol $baseSym"
@@ -104,7 +104,6 @@ object PrepJSExports:
       normalExports.flatMap(exp =>
         genExportDefs(baseSym, exp.jsName, exp.pos.span)
       )
-    }
     end if
   end genExportMember
 
@@ -364,14 +363,13 @@ object PrepJSExports:
                   "You may not export a lazy val as static",
                   exportPos
                 )
+            else if sym.is(Trait) then
+              report.error("You may not export a trait as static.", exportPos)
             else
-              if sym.is(Trait) then
-                report.error("You may not export a trait as static.", exportPos)
-              else
-                report.error(
-                  "Implementation restriction: cannot export a class or object as static",
-                  exportPos
-                )
+              report.error(
+                "Implementation restriction: cannot export a class or object as static",
+                exportPos
+              )
         end match
 
         ExportInfo(name, destination)(exportPos)

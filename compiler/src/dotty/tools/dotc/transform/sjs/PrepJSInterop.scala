@@ -206,9 +206,8 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
           else if sym == jsdefn.scalaEnumeration.EnumerationClass then
             OwnerKind.EnumImpl
           else OwnerKind.EnumClass
-        else
-          if sym.is(Module) then OwnerKind.NonEnumScalaMod
-          else OwnerKind.NonEnumScalaClass
+        else if sym.is(Module) then OwnerKind.NonEnumScalaMod
+        else OwnerKind.NonEnumScalaClass
       enterOwner(kind) {
         super.transform(tree)
       }
@@ -530,7 +529,6 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
               classDef
             )
       end for
-
       // Checks for non-native JS stuff
       if !isJSNative then
         // It cannot be in a native JS class or trait
@@ -620,9 +618,8 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
           if sym.is(ModuleClass) then OwnerKind.JSMod
           else if sym.is(Trait) then OwnerKind.JSTrait
           else OwnerKind.JSNonTraitClass
-        else
-          if sym.is(ModuleClass) then OwnerKind.JSNativeMod
-          else OwnerKind.JSNativeClass
+        else if sym.is(ModuleClass) then OwnerKind.JSNativeMod
+        else OwnerKind.JSNativeClass
       enterOwner(kind) {
         super.transform(classDef)
       }
@@ -658,16 +655,16 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
           annotPos
         )
       else
-        // The symbol can be annotated with @js.native. Now check its JS native loading spec.
-        if sym.is(Trait) then
-          for annot <- sym.annotations do
-            val annotSym = annot.symbol
-            if isJSNativeLoadingSpecAnnot(annotSym) then
-              report.error(
-                em"Traits may not have an @${annotSym.name} annotation.",
-                annot.tree
-              )
-        else checkJSNativeLoadSpecOf(treePos, sym)
+      // The symbol can be annotated with @js.native. Now check its JS native loading spec.
+      if sym.is(Trait) then
+        for annot <- sym.annotations do
+          val annotSym = annot.symbol
+          if isJSNativeLoadingSpecAnnot(annotSym) then
+            report.error(
+              em"Traits may not have an @${annotSym.name} annotation.",
+              annot.tree
+            )
+      else checkJSNativeLoadSpecOf(treePos, sym)
 
     private def checkJSNativeLoadSpecOf(pos: SrcPos, sym: Symbol)(using
         Context
@@ -715,7 +712,7 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
                 checkGlobalRefName(jsName)
               case JSName.Computed(_) =>
                 () // compile error above or in `checkJSNameArgument`
-      else {
+      else
         def checkGlobalRefPath(pathName: String): Unit =
           val dotIndex = pathName.indexOf('.')
           val globalRef =
@@ -773,7 +770,6 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
             // We already emitted an error in checkAndGetJSNativeLoadingSpecAnnotOf
             ()
         end match
-      }
       end if
     end checkJSNativeLoadSpecOf
 
@@ -958,7 +954,7 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
               "A non-native JS class cannot declare a method named like a binary operation without `@JSName`",
               tree
             )
-      else {
+      else
         def checkNoDefaultOrRepeated(subject: String) =
           if sym.info.paramInfoss.flatten.exists(_.isRepeatedParam) then
             report.error(s"$subject may not have repeated parameters", tree)
@@ -1003,7 +999,6 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
                   tree
                 )
         end match
-      }
       end if
 
       if sym.hasAnnotation(defn.NativeAnnot) then
@@ -1103,34 +1098,34 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
             end if
         end if
       else // enclosingOwner isnt OwnerKind.JSNonNative
-        // Check that the rhs is valid
-        if sym.isPrimaryConstructor || sym.isOneOf(
-            Param | ParamAccessor | Deferred | Synthetic
-          )
-          || sym.name.is(DefaultGetterName) || sym.isSetter
-        then {
-          /* Ignore, i.e., allow:
-           * - primary constructor
-           * - all kinds of parameters
-           * - setters
-           * - default parameter getters (i.e., the default value of parameters)
-           * - abstract members
-           * - synthetic members (to avoid double errors with case classes, e.g. generated copy method)
-           */
-        } else if sym.isConstructor then
-          // Force secondary ctor to have only a call to the primary ctor inside
-          tree.rhs match
-            case Block(List(Apply(trg, _)), Literal(Constant(())))
-                if trg.symbol.isPrimaryConstructor && trg.symbol.owner == sym.owner =>
-            // everything is fine here
-            case _ =>
-              report.error(
-                "A secondary constructor of a native JS class may only call the primary constructor",
-                tree.rhs
-              )
-        else
-          // Check that the tree's rhs is exactly `= js.native`
-          checkRHSCallsJSNative(tree, "Concrete members of JS native types")
+      // Check that the rhs is valid
+      if sym.isPrimaryConstructor || sym.isOneOf(
+          Param | ParamAccessor | Deferred | Synthetic
+        )
+        || sym.name.is(DefaultGetterName) || sym.isSetter
+      then {
+        /* Ignore, i.e., allow:
+         * - primary constructor
+         * - all kinds of parameters
+         * - setters
+         * - default parameter getters (i.e., the default value of parameters)
+         * - abstract members
+         * - synthetic members (to avoid double errors with case classes, e.g. generated copy method)
+         */
+      } else if sym.isConstructor then
+        // Force secondary ctor to have only a call to the primary ctor inside
+        tree.rhs match
+          case Block(List(Apply(trg, _)), Literal(Constant(())))
+              if trg.symbol.isPrimaryConstructor && trg.symbol.owner == sym.owner =>
+          // everything is fine here
+          case _ =>
+            report.error(
+              "A secondary constructor of a native JS class may only call the primary constructor",
+              tree.rhs
+            )
+      else
+        // Check that the tree's rhs is exactly `= js.native`
+        checkRHSCallsJSNative(tree, "Concrete members of JS native types")
       end if
 
       super.transform(tree)
@@ -1241,7 +1236,7 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
             "A String argument to JSName must be a literal string",
             argTree
           )
-      else {
+      else
         // We have a js.Symbol. It must be a stable reference.
         val sym = argTree.symbol
         if !sym.isStatic || !sym.isStableMember then
@@ -1256,7 +1251,6 @@ class PrepJSInterop extends MacroTransform with IdentityDenotTransformer:
               "This will cause a stackoverflow at runtime",
             argTree
           )
-      }
     end checkJSNameArgument
 
     /** Constant-folds arguments to `@JSExportTopLevel` and `@JSExportStatic`.

@@ -56,7 +56,7 @@ object Utility:
             { s => throw new RuntimeException(s) }
           )
           sb.append(theChar)
-        else {
+        else
           if rfb eq null then rfb = new StringBuilder()
           rfb append c
           c = it.next()
@@ -72,7 +72,6 @@ object Utility:
                 sb.clear()
               nb += entityRef(ref) // add entityref
             case _ =>
-        }
       else sb append c
     end while
 

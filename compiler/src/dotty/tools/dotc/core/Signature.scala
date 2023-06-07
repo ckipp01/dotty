@@ -75,13 +75,12 @@ case class Signature(paramsSig: List[ParamSig], resSig: TypeName):
       if consistent(name1, name2) then name1 else name2
     if this == that then this
     else if !this.paramsSig.hasSameLengthAs(that.paramsSig) then that
-    else {
+    else
       val mapped = Signature(
         this.paramsSig.zipWithConserve(that.paramsSig)(update),
         update(this.resSig, that.resSig)
       )
       if mapped == this then this else mapped
-    }
 
   /** The degree to which this signature matches `that`. If parameter signatures
     * are consistent and result types names match (i.e. they are the same or one

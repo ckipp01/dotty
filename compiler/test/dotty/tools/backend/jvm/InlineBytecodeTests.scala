@@ -83,18 +83,9 @@ class InlineBytecodeTests extends DottyBytecodeTest:
 
   /** Disabled since locally comes from Predef now
     * @Test
-    *   def inlineLocally = { val source = """
-    * \|class Foo {
-    * \| def meth1: Unit = locally {
-    * \| val a = 5
-    * \| a
-    * \| }
-    * \|
-    * \| def meth2: Unit = {
-    * \| val a = 5
-    * \| a
-    * \| }
-    * \|} """.stripMargin
+    *   def inlineLocally = { val source = """ \|class Foo { \| def meth1: Unit
+    *   \= locally { \| val a = 5 \| a \| } \| \| def meth2: Unit = { \| val a =
+    *   5 \| a \| } \|} """.stripMargin
     *
     * checkBCode(source) { dir => val clsIn = dir.lookupName("Foo.class",
     * directory = false).input val clsNode = loadClassNode(clsIn) val meth1 =

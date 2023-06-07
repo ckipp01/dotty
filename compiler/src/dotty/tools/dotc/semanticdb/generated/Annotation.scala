@@ -36,13 +36,13 @@ final case class Annotation(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = dotty.tools.dotc.semanticdb.Annotation._typemapper_tpe.toBase(tpe)
     if __v.serializedSize != 0 then
       _output__.writeTag(1, 2)
       _output__.writeUInt32NoTag(__v.serializedSize)
       __v.writeTo(_output__)
-  };
+  ;
   def withTpe(__v: dotty.tools.dotc.semanticdb.Type): Annotation =
     copy(tpe = __v)
 

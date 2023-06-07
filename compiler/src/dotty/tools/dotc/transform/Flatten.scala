@@ -45,10 +45,9 @@ class Flatten extends MiniPhase with SymTransformer:
 
   private def liftIfNested(tree: Tree)(using Context) =
     if ctx.owner.is(Package) then tree
-    else {
+    else
       transformFollowing(tree).foreachInThicket(t => liftedDefs.nn += t)
       EmptyTree
-    }
 
   override def transformStats(stats: List[Tree])(using Context): List[Tree] =
     if ctx.owner.is(Package) then

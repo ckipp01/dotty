@@ -762,10 +762,10 @@ final case class BooleanConstant(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = value
     if __v != false then _output__.writeBool(1, __v)
-  };
+  ;
   def withValue(__v: _root_.scala.Boolean): BooleanConstant = copy(value = __v)
 
   // @@protoc_insertion_point(GeneratedMessage[dotty.tools.dotc.semanticdb.BooleanConstant])
@@ -831,10 +831,10 @@ final case class ByteConstant(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = value
     if __v != 0 then _output__.writeInt32(1, __v)
-  };
+  ;
   def withValue(__v: _root_.scala.Int): ByteConstant = copy(value = __v)
 
   // @@protoc_insertion_point(GeneratedMessage[dotty.tools.dotc.semanticdb.ByteConstant])
@@ -900,10 +900,10 @@ final case class ShortConstant(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = value
     if __v != 0 then _output__.writeInt32(1, __v)
-  };
+  ;
   def withValue(__v: _root_.scala.Int): ShortConstant = copy(value = __v)
 
   // @@protoc_insertion_point(GeneratedMessage[dotty.tools.dotc.semanticdb.ShortConstant])
@@ -969,10 +969,10 @@ final case class CharConstant(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = value
     if __v != 0 then _output__.writeInt32(1, __v)
-  };
+  ;
   def withValue(__v: _root_.scala.Int): CharConstant = copy(value = __v)
 
   // @@protoc_insertion_point(GeneratedMessage[dotty.tools.dotc.semanticdb.CharConstant])
@@ -1038,10 +1038,10 @@ final case class IntConstant(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = value
     if __v != 0 then _output__.writeInt32(1, __v)
-  };
+  ;
   def withValue(__v: _root_.scala.Int): IntConstant = copy(value = __v)
 
   // @@protoc_insertion_point(GeneratedMessage[dotty.tools.dotc.semanticdb.IntConstant])
@@ -1107,10 +1107,10 @@ final case class LongConstant(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = value
     if __v != 0L then _output__.writeInt64(1, __v)
-  };
+  ;
   def withValue(__v: _root_.scala.Long): LongConstant = copy(value = __v)
 
   // @@protoc_insertion_point(GeneratedMessage[dotty.tools.dotc.semanticdb.LongConstant])
@@ -1176,10 +1176,10 @@ final case class FloatConstant(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = value
     if __v != 0.0f then _output__.writeFloat(1, __v)
-  };
+  ;
   def withValue(__v: _root_.scala.Float): FloatConstant = copy(value = __v)
 
   // @@protoc_insertion_point(GeneratedMessage[dotty.tools.dotc.semanticdb.FloatConstant])
@@ -1245,10 +1245,10 @@ final case class DoubleConstant(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = value
     if __v != 0.0 then _output__.writeDouble(1, __v)
-  };
+  ;
   def withValue(__v: _root_.scala.Double): DoubleConstant = copy(value = __v)
 
   // @@protoc_insertion_point(GeneratedMessage[dotty.tools.dotc.semanticdb.DoubleConstant])
@@ -1314,10 +1314,10 @@ final case class StringConstant(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = value
     if !__v.isEmpty then _output__.writeString(1, __v)
-  };
+  ;
   def withValue(__v: _root_.scala.Predef.String): StringConstant =
     copy(value = __v)
 

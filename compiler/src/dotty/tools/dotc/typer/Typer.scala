@@ -226,6 +226,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
         if owner.isPackageObject then owner = owner.owner
         !owner.isEmptyPackage || ctx.owner.enclosingPackageClass.isEmptyPackage
       }
+    end qualifies
 
     /** Find the denotation of enclosing `name` in given context `ctx`.
       * @param previous
@@ -438,7 +439,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
 
       @tailrec def loop(lastCtx: Context)(using Context): Type =
         if ctx.scope eq EmptyScope then previous
-        else {
+        else
           var result: Type = NoType
           val curOwner = ctx.owner
 
@@ -555,7 +556,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
                 if isSelfDenot(defDenot) then curOwner.enclosingClass.thisType
                 else if ctx.isJava && defDenot.symbol.isStatic then
                   defDenot.symbol.namedType
-                else {
+                else
                   val effectiveOwner =
                     if curOwner.isTerm && defDenot.symbol.maybeOwner.isType then
                       // Don't mix NoPrefix and thisType prefixes, since type comparer
@@ -563,7 +564,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
                       defDenot.symbol.owner
                     else curOwner
                   effectiveOwner.thisType.select(name, defDenot)
-                }
               if !curOwner.is(Package) || isDefinedInCurrentUnit(defDenot) then
                 result = checkNewOrShadowed(
                   found,
@@ -614,17 +614,14 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
                 val wildImp = wildImportRef(curImport.uncheckedNN)
                 if wildImp.exists then
                   checkImportAlternatives(wildImp, WildImport, ctx)(using outer)
-                else {
+                else
                   updateUnimported()
                   loop(ctx)(using outer)
-                }
-              else {
+              else
                 updateUnimported()
                 loop(ctx)(using outer)
-              }
             else loop(ctx)(using outer)
           end if
-        }
 
       // begin findRefRecur
       loop(NoContext)
@@ -1092,14 +1089,13 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
         case id: untpd.Ident
             if (ctx.mode is Mode.Pattern) && untpd.isVarPattern(id) =>
           if id.name == nme.WILDCARD || id.name == nme.WILDCARD_STAR then ifPat
-          else {
+          else
             import untpd.*
             typed(
               Bind(id.name, Typed(Ident(wildName), tree.tpt))
                 .withSpan(tree.span),
               pt
             )
-          }
         case _ => ifExpr
 
     def ascription(tpt: Tree, isWildcard: Boolean) =
@@ -1159,7 +1155,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
         ifExpr = typedWildcardStarArgExpr,
         wildName = nme.WILDCARD_STAR
       )
-    else {
+    else
       def typedTpt = checkSimpleKinded(
         typedType(tree.tpt, mapPatternBounds = true)
       )
@@ -1184,7 +1180,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
         ifExpr = ascription(typedTpt, isWildcard = false),
         wildName = nme.WILDCARD
       )
-    }
     end if
   end typedTyped
 
@@ -1339,7 +1334,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
                     cpy.Assign(tree)(lhs1, typed(tree.rhs, lhsBounds.loBound))
                   )
                     .computeAssignNullable()
-                else {
+                else
                   val pre = ref.prefix
                   val setterName = ref.name.setterName
                   val setter = pre.member(setterName)
@@ -1360,7 +1355,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
                       )
                     case _ =>
                       reassignmentToVal
-                }
                 end if
               case TryDynamicCallType =>
                 typedDynamicAssign(tree, pt)
@@ -1445,7 +1439,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
           tree.cast(targetTpt)
     def noLeaks(t: Tree): Boolean = escapingRefs(t, localSyms).isEmpty
     if noLeaks(tree) then tree
-    else {
+    else
       fullyDefinedType(tree.tpe, "block", tree.srcPos)
       var avoidingType = TypeOps.avoid(tree.tpe, localSyms)
       val ptDefined = isFullyDefined(pt, ForceDegree.none)
@@ -1457,7 +1451,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
         i"leak: ${escapingRefs(tree1, localSyms).toList}%, % in $tree1"
       )
       tree1
-    }
   end ensureNoLocalRefs
 
   def typedIf(tree: untpd.If, pt: Type)(using Context): Tree =
@@ -2042,7 +2035,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
             cases1,
             pt
           )
-        else {
+        else
           val (protoFormals, _) = decomposeProtoFunction(pt, 1, tree.srcPos)
           val checkMode = desugar.MatchCheck.Exhaustive
           typed(
@@ -2051,7 +2044,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
               .withSpan(tree.span),
             pt
           )
-        }
       case _ =>
         if tree.isInline then checkInInlineContext("inline match", tree.srcPos)
         val sel1 = typedExpr(tree.selector)
@@ -2145,7 +2137,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
           case _ =>
             result
         end match
-
   /** Special typing of Match tree when the expected type is a MatchType, and
     * the patterns of the Match tree and the MatchType correspond.
     */
@@ -2423,7 +2414,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
       val elemtpt1 = typed(tree.elemtpt, elemProto)
       val elems1 = tree.elems.mapconserve(typed(_, elemtpt1.tpe))
       assign(elems1, elemtpt1)
-    else {
+    else
       val elems1 = tree.elems.mapconserve(typed(_, elemProto))
       val elemtptType =
         if isFullyDefined(elemProto, ForceDegree.none) then elemProto
@@ -2432,7 +2423,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
         else TypeComparer.lub(elems1.tpes)
       val elemtpt1 = typed(tree.elemtpt, elemtptType)
       assign(elems1, elemtpt1)
-    }
 
   def typedInlined(tree: untpd.Inlined, pt: Type)(using Context): Tree =
     val (bindings1, exprCtx) = typedBlockStats(tree.bindings)
@@ -2552,7 +2542,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
     else if tparams.isEmpty then
       report.error(TypeDoesNotTakeParameters(tpt1.tpe, tree.args), tree.srcPos)
       tpt1
-    else {
+    else
       var args = tree.args
       val args1 =
         if args.length != tparams.length then
@@ -2671,7 +2661,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
         tpt1,
         checkedArgs
       )
-    }
     end if
   end typedAppliedTypeTree
 
@@ -2767,7 +2756,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
           val Typed(_, tpt) = tree.body: @unchecked
           name = desugar.inventGivenOrExtensionName(tpt)
         if name == nme.WILDCARD then body1
-        else {
+        else
           // In `x @ Nil`, `Nil` is a _stable identifier pattern_ and will be compiled
           // to an `==` test, so the type of `x` is unrelated to the type of `Nil`.
           // Similarly, in `x @ 1`, `1` is a _literal pattern_ and will also be compiled
@@ -2801,7 +2790,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
               tree.srcPos
             )
           assignType(cpy.Bind(tree)(name, body1), sym)
-        }
         end if
     end match
   end typedBind
@@ -3160,7 +3148,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
     def classExistsOnSelf(decls: Scope, self: tpd.ValDef): Boolean =
       val selfType = self.tpt.tpe
       if !selfType.exists || (selfType.classSymbol eq cls) then false
-      else {
+      else
         def memberInSelfButNotThis(decl: Symbol) =
           selfType
             .member(decl.name)
@@ -3177,7 +3165,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
             report.error(msg, decl.srcPos)
           foundRedef || other.exists
         }
-      }
 
     ensureCorrectSuperClass()
     completeAnnotations(cdef, cls)
@@ -3198,7 +3185,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
     if self1.tpt.tpe.isError || classExistsOnSelf(cls.unforcedDecls, self1) then
       // fail fast to avoid typing the body with an error type
       cdef.withType(UnspecifiedErrorType)
-    else {
+    else
       val dummy = localDummy(cls, impl)
       val body1 = addAccessorDefs(
         cls,
@@ -3278,7 +3265,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
         cdef1.putAttachment(AttachedDeriver, deriver)
 
       cdef1
-    }
     end if
   end typedClassDef
 
@@ -3420,7 +3406,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
       else
         assert(ctx.reporter.errorsReported)
         TypeTree(UnspecifiedErrorType)
-    else {
+    else
       val arg2 = arg1 match
         case Typed(arg2, tpt: TypeTree) =>
           tpt.tpe match
@@ -3436,7 +3422,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
         else arg1.tpe.widenIfUnstable
       val annotatedTpt = TypeTree(AnnotatedType(argType, Annotation(annot1)))
       assignType(cpy.Typed(tree)(arg2, annotatedTpt), annotatedTpt)
-    }
   end typedAnnotated
 
   def typedTypedSplice(tree: untpd.TypedSplice)(using Context): Tree =
@@ -3511,7 +3496,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
         )
       else if ctx.mode.is(Mode.Pattern) then
         typedUnApply(cpy.Apply(tree)(op, l :: r :: Nil), pt)
-      else {
+      else
         val app = typedApply(desugar.binop(l, op, r), pt)
         if op.name.isRightAssocOperatorName then
           val defs = new mutable.ListBuffer[Tree]
@@ -3526,7 +3511,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
               tpd.cpy.Block(app)(stats, lift(expr))
           wrapDefs(defs, lift(app))
         else app
-      }
     // issue 10383: we stripBlock because e.g. default arguments desugar to blocks during typing,
     // and the block itself doesn't have a symbol (because a Block isn't a ProxyTree),
     // but the last expression in the block does have the right symbol
@@ -3539,7 +3523,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
     val arity = tree.trees.length
     if arity <= Definitions.MaxTupleArity then
       typed(desugar.smallTuple(tree).withSpan(tree.span), pt)
-    else {
+    else
       val pts =
         pt.tupleElementTypes match
           case Some(types) if types.size == arity => types
@@ -3561,7 +3545,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
               )
           )
           .withSpan(tree.span)
-      else {
+      else
         val tupleXXLobj = untpd.ref(defn.TupleXXLModule.termRef)
         val app = untpd.cpy
           .Apply(tree)(tupleXXLobj, elems.map(untpd.TypedSplice(_)))
@@ -3571,7 +3555,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
           if ctx.mode.is(Mode.Pattern) then pt else defn.TupleXXLClass.typeRef
         )
         if ctx.mode.is(Mode.Pattern) then app1
-        else {
+        else
           val elemTpes = elems
             .lazyZip(pts)
             .map((elem, pt) =>
@@ -3579,10 +3563,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
             )
           val resTpe = TypeOps.nestedPairs(elemTpes)
           app1.cast(resTpe)
-        }
-      }
       end if
-    }
     end if
   end typedTuple
 
@@ -3981,11 +3962,10 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
     if nestedCtx.reporter.hasErrors && !nestedCtx.reporter.hasStickyErrors then
       record("tryEither.fallBack")
       fallBack(result, nestedCtx.typerState)
-    else {
+    else
       record("tryEither.commit")
       nestedCtx.typerState.commit()
       result
-    }
 
   /** Try `op1`, if there are errors, try `op2`, if `op2` also causes errors,
     * fall back to errors and result of `op1`.
@@ -4766,14 +4746,13 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
             )
               .withType(tree.tpe)
               .withSpan(tree.span)
-          else {
+          else
             report.error(
               em"""Scala 2 macro cannot be used in Dotty. See https://docs.scala-lang.org/scala3/reference/dropped-features/macros.html
                   |To turn this error into a warning, pass -Xignore-scala2-macros to the compiler""",
               tree.srcPos.startPos
             )
             tree
-          }
         else
           TypeComparer.testSubType(tree.tpe.widenExpr, pt) match
             case CompareResult.Fail =>
@@ -4991,7 +4970,7 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
       val tree1 =
         if (pt eq AnyTypeConstructorProto) || tp.typeParamSymbols.isEmpty then
           tree
-        else {
+        else
           val tp1 =
             if ctx.isJava then
               // Cook raw type
@@ -5003,7 +4982,6 @@ class Typer(@constructorOnly nestingLevel: Int = 0)
               // Eta-expand higher-kinded type
               tree.tpe.EtaExpand(tp.typeParamSymbols)
           tree.withType(tp1)
-        }
       if ctx.mode.is(Mode.Pattern) || ctx.mode.is(
           Mode.QuotedPattern
         ) || tree1.tpe <:< pt

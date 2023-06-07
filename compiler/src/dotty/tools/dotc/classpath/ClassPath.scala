@@ -36,14 +36,13 @@ case class PackageName(dottedString: String):
 
   def entryName(entry: String): String =
     if isRoot then entry
-    else {
+    else
       val builder =
         new java.lang.StringBuilder(dottedString.length + 1 + entry.length)
       builder.append(dottedString)
       builder.append('.')
       builder.append(entry)
       builder.toString
-    }
 
 trait PackageEntry:
   def name: String

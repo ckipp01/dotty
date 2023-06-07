@@ -35,3 +35,4 @@ object MacroClassLoader:
       ) // to find classes in case of suspended compilation
       new java.net.URLClassLoader(urls ++ out.toList, getClass.getClassLoader)
     }
+end MacroClassLoader

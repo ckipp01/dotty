@@ -335,12 +335,11 @@ class SyntheticMembers(thisPhase: DenotTransformer):
       ) // case _ => false
       val matchExpr = Match(that, List(matchingCase, defaultCase))
       if isDerivedValueClass(clazz) then matchExpr
-      else {
+      else
         val eqCompare = This(clazz)
           .select(defn.Object_eq)
           .appliedTo(that.cast(defn.ObjectType))
         eqCompare or matchExpr
-      }
     end equalsBody
 
     /** The class
@@ -728,7 +727,7 @@ class SyntheticMembers(thisPhase: DenotTransformer):
     lazy val monoType =
       val existing = clazz.info.member(tpnme.MirroredMonoType).symbol
       if existing.exists && !existing.is(Deferred) then existing
-      else {
+      else
         val monoType =
           newSymbol(
             clazz,
@@ -739,7 +738,6 @@ class SyntheticMembers(thisPhase: DenotTransformer):
           )
         newBody = newBody :+ TypeDef(monoType).withSpan(ctx.owner.span.focus)
         monoType.enteredAfter(thisPhase)
-      }
     def makeSingletonMirror() =
       addParent(defn.Mirror_SingletonClass.typeRef)
     def makeProductMirror(cls: Symbol, optInfo: Option[MirrorImpl.OfProduct]) =

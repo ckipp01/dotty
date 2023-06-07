@@ -219,10 +219,9 @@ object JavaParsers:
         val name = in.name
         in.nextToken()
         name
-      else {
+      else
         accept(IDENTIFIER)
         nme.ERROR
-      }
 
     def repsep[T <: Tree](p: () => T, sep: Int): List[T] =
       val buf = ListBuffer[T](p())
@@ -346,12 +345,10 @@ object JavaParsers:
     /** Annotation ::= TypeName [`(` [AnnotationArgument {`,`
       * AnnotationArgument}] `)`] AnnotationArgument ::= ElementValuePair |
       * ELementValue ElementValuePair ::= Identifier `=` ElementValue
-      * ElementValue ::= ConstExpressionSubset
-      * \| ElementValueArrayInitializer
+      * ElementValue ::= ConstExpressionSubset \| ElementValueArrayInitializer
       * \| Annotation ElementValueArrayInitializer ::= `{` [ElementValue {`,`
-      * ElementValue}] [`,`] `}` ConstExpressionSubset ::= Literal
-      * \| QualifiedName
-      * \| ClassLiteral
+      * ElementValue}] [`,`] `}` ConstExpressionSubset ::= Literal \|
+      * QualifiedName \| ClassLiteral
       *
       * We support only subset of const expressions expected in this context by
       * java. If we encounter expression that we cannot parse, we do not raise
@@ -611,7 +608,7 @@ object JavaParsers:
          */
         methodBody()
         Nil
-      else {
+      else
         var mods1 = mods
         if mods.is(Flags.Abstract) then mods1 = mods &~ Flags.Abstract
         nameOffset = in.offset
@@ -642,10 +639,9 @@ object JavaParsers:
               skipTo(SEMI)
               accept(SEMI)
               unimplemented
-            else {
+            else
               accept(SEMI)
               EmptyTree
-            }
           // if (inInterface) mods1 |= Flags.Deferred
           List {
             atSpan(start, nameOffset) {
@@ -657,14 +653,12 @@ object JavaParsers:
               ).withMods(mods1 | Flags.Method)
             }
           }
-        else {
+        else
           if inInterface then mods1 |= Flags.Final | Flags.JavaStatic
           val result = fieldDecls(start, nameOffset, mods1, rtpt, name)
           accept(SEMI)
           result
-        }
         end if
-      }
       end if
     end termDecl
 
@@ -704,16 +698,14 @@ object JavaParsers:
             maybe += atSpan(start, nextNameOffset) {
               varDecl(mods, tpt, name.toTermName)
             }
-          else { // ... if there's something else we were still in the initializer of the
+          else // ... if there's something else we were still in the initializer of the
             // previous var def; skip to next comma or semicolon.
             skipTo(COMMA, SEMI)
             maybe.clear()
-          }
-        else { // ... if there's no ident following the comma we were still in the initializer of the
+        else // ... if there's no ident following the comma we were still in the initializer of the
           // previous var def; skip to next comma or semicolon.
           skipTo(COMMA, SEMI)
           maybe.clear()
-        }
       if in.token == SEMI then
         buf ++= maybe // every potential vardef that survived until here is real.
       buf.toList
@@ -730,7 +722,7 @@ object JavaParsers:
 
         def forConst(const: Constant): Tree =
           if in.token != SEMI then tpt1
-          else {
+          else
             def isStringTyped = tpt1 match
               case Ident(n: TypeName) => "String" == n.toString
               case _                  => false
@@ -746,7 +738,6 @@ object JavaParsers:
                     else constantTpe(converted)
                   else tpt1
                 case _ => tpt1
-          }
 
         in.nextToken() // EQUALS
         if mods.is(Flags.JavaStatic) && mods.is(Flags.Final) then
@@ -805,14 +796,13 @@ object JavaParsers:
           in.nextToken()
           buf += nme.WILDCARD
           starOffset
-        else {
+        else
           val nameOffset = in.offset
           buf += ident()
           if in.token == DOT then
             in.nextToken()
             collectIdents()
           else nameOffset
-        }
       if in.token == STATIC then in.nextToken()
       else buf += nme.ROOTPKG
       val lastnameOffset = collectIdents()
@@ -821,7 +811,7 @@ object JavaParsers:
       if names.length < 2 then
         syntaxError(start, em"illegal import", skipIt = false)
         List()
-      else {
+      else
         val qual =
           names.tail.init.foldLeft(Ident(names.head): Tree)(Select(_, _))
         val lastname = names.last
@@ -832,7 +822,6 @@ object JavaParsers:
 //        }
         val imp = atSpan(start) { Import(qual, ImportSelector(ident) :: Nil) }
         imp :: Nil
-      }
     end importDecl
 
     def interfacesOpt(): List[Tree] =
@@ -960,7 +949,7 @@ object JavaParsers:
           skipAhead() // skip init block, we just assume we have seen only static
           accept(RBRACE)
         else if in.token == SEMI then in.nextToken()
-        else {
+        else
           adaptRecordIdentifier()
           if in.token == ENUM || in.token == RECORD || definesInterface(
               in.token
@@ -972,7 +961,6 @@ object JavaParsers:
              ) || inInterface && !(decls exists (_.isInstanceOf[DefDef]))
            then statics
            else members) ++= decls
-        }
       (statics.toList, members.toList)
     end typeBodyDecls
     def annotationParents: List[Tree] = List(
@@ -1100,10 +1088,9 @@ object JavaParsers:
         case STRINGLIT => in.strVal
         case _         => null
       if l == null then None
-      else {
+      else
         in.nextToken()
         Some(Constant(l))
-      }
 
     /** CompilationUnit ::= [package QualId semi] TopStatSeq
       */

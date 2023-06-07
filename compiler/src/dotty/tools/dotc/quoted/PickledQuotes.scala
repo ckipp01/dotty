@@ -33,13 +33,12 @@ object PickledQuotes:
   /** Pickle the tree of the quote into strings */
   def pickleQuote(tree: Tree)(using Context): List[String] =
     if ctx.reporter.hasErrors then Nil
-    else {
+    else
       assert(
         !tree.isInstanceOf[Hole]
       ) // Should not be pickled as it represents `'{$x}` which should be optimized to `x`
       val pickled = pickle(tree)
       TastyString.pickle(pickled)
-    }
 
   /** Transform the expression into its fully spliced Tree */
   def quotedExprToTree[T](expr: quoted.Expr[T])(using Context): Tree =

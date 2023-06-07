@@ -520,7 +520,7 @@ private sealed trait WarningSettings:
          |  - silence deprecations: -Wconf:cat=deprecation:s
          |
          |Note: on the command-line you might need to quote configurations containing `*` or `&`
-         |to prevent the shell from expanding patterns.""".stripMargin,
+         |to prevent the shell from expanding patterns.""".stripMargin
   )
 end WarningSettings
 

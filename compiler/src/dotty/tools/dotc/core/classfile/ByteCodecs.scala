@@ -25,10 +25,9 @@ object ByteCodecs:
         dst(j) = (0xc0).toByte
         dst(j + 1) = (0x80).toByte
         j += 2
-      else {
+      else
         dst(j) = (in + 1).toByte
         j += 1
-      }
       i += 1
     dst
 
@@ -44,10 +43,9 @@ object ByteCodecs:
       else if in == 0 then
         src(j) = 0x7f
         i += 1
-      else {
+      else
         src(j) = (in - 1).toByte
         i += 1
-      }
       j += 1
     j
 

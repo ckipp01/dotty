@@ -247,7 +247,7 @@ class SemanticdbInputStream private (buffer: Array[Byte], input: InputStream):
     * upper bits.
     */
   @throws[InvalidProtocolBufferException]
-  def readRawVarint32(): Int = {
+  def readRawVarint32(): Int =
     var pos: Int = bufferPos
     if bufferSize == pos then return readRawVarint64SlowPath().toInt
     val buffer: Array[Byte] = this.buffer
@@ -279,7 +279,7 @@ class SemanticdbInputStream private (buffer: Array[Byte], input: InputStream):
         })) << 21); x
       })) < 0
     then x ^= (~0 << 7) ^ (~0 << 14) ^ (~0 << 21)
-    else {
+    else
       val y: Int = buffer(({
         pos += 1; pos - 1
       }))
@@ -297,11 +297,11 @@ class SemanticdbInputStream private (buffer: Array[Byte], input: InputStream):
           pos += 1; pos - 1
         })) < 0
       then return readRawVarint64SlowPath().toInt
-    }
     end if
     bufferPos = pos
     return x
-  } // todo: labels is not supported
+  end readRawVarint32
+  // todo: labels is not supported
 
   private def skipRawVarint(): Unit =
     if bufferSize - bufferPos >= 10 then
@@ -381,11 +381,10 @@ class SemanticdbInputStream private (buffer: Array[Byte], input: InputStream):
       bytes = buffer;
       bufferPos = pos + size;
     else if size == 0 then return "";
-    else {
+    else
       // Slow path:  Build a byte array first then copy it.
       bytes = readRawBytesSlowPath(size);
       pos = 0;
-    }
     // TODO(martinrb): We could save a pass by validating while decoding.
     // if (!Utf8.isValidUtf8(bytes, pos, pos + size)) {
     //   throw InvalidProtocolBufferException.invalidUtf8();
@@ -521,7 +520,7 @@ class SemanticdbInputStream private (buffer: Array[Byte], input: InputStream):
       })) < 0L
     then
       x ^= (~0L << 7) ^ (~0L << 14) ^ (~0L << 21) ^ (~0L << 28) ^ (~0L << 35) ^ (~0L << 42) ^ (~0L << 49)
-    else {
+    else
       x ^= (buffer(({
         pos += 1; pos - 1
       })).toLong << 56)
@@ -531,7 +530,6 @@ class SemanticdbInputStream private (buffer: Array[Byte], input: InputStream):
             pos += 1; pos - 1
           })) < 0L
         then return readRawVarint64SlowPath()
-    }
     end if
     bufferPos = pos
     x
@@ -617,7 +615,7 @@ class SemanticdbInputStream private (buffer: Array[Byte], input: InputStream):
       System.arraycopy(buffer, 0, bytes, pos, size - pos)
       bufferPos = size - pos
       bytes
-    else {
+    else
       val originalBufferPos: Int = bufferPos
       val originalBufferSize: Int = bufferSize
       totalBytesRetired += bufferSize
@@ -632,7 +630,7 @@ class SemanticdbInputStream private (buffer: Array[Byte], input: InputStream):
         var pos: Int = 0
         while pos < chunk.length do
           val n: Int =
-            if (input == null) then -1
+            if input == null then -1
             else input.read(chunk, pos, chunk.length - pos)
           if n == -1 then
             throw InvalidProtocolBufferException.truncatedMessage()
@@ -647,7 +645,6 @@ class SemanticdbInputStream private (buffer: Array[Byte], input: InputStream):
         System.arraycopy(chunk, 0, bytes, pos, chunk.length)
         pos += chunk.length
       bytes
-    }
     end if
   end readRawBytesSlowPath
 

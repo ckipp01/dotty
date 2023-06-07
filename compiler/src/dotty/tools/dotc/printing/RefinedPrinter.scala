@@ -146,11 +146,10 @@ class RefinedPrinter(_ctx: Context) extends PlainPrinter(_ctx):
   override protected def refinementNameString(tp: RefinedType): String =
     if tp.parent.isInstanceOf[WildcardType] || tp.refinedName == nme.WILDCARD
     then super.refinementNameString(tp)
-    else {
+    else
       val tsym = tp.parent.member(tp.refinedName).symbol
       if !tsym.exists then super.refinementNameString(tp)
       else simpleNameString(tsym)
-    }
 
   private def arrow(isGiven: Boolean, isPure: Boolean): String =
     (if isGiven then "?" else "") + (if isPure then "->" else "=>")
@@ -759,7 +758,7 @@ class RefinedPrinter(_ctx: Context) extends PlainPrinter(_ctx):
         def argToText(arg: Tree, isErased: Boolean) = arg match
           case arg @ ValDef(name, tpt, _) =>
             val implicitText =
-              if (arg.mods.is(Given)) then
+              if arg.mods.is(Given) then
                 isGiven = true; ""
               else if (arg.mods.is(Implicit)) && !implicitSeen then
                 implicitSeen = true; keywordStr("implicit ")
@@ -1129,7 +1128,7 @@ class RefinedPrinter(_ctx: Context) extends PlainPrinter(_ctx):
     val prefix: Text =
       if constr.trailingParamss.isEmpty || primaryConstrs.nonEmpty then
         tparamsTxt
-      else {
+      else
         var modsText = modText(constr.mods, constr.symbol, "", isType = false)
         if !modsText.isEmpty then modsText = " " ~ modsText
         if constr.mods.hasAnnotations && !constr.mods.hasFlags then
@@ -1137,7 +1136,6 @@ class RefinedPrinter(_ctx: Context) extends PlainPrinter(_ctx):
         withEnclosingDef(constr) {
           addParamssText(tparamsTxt ~~ modsText, constr.trailingParamss)
         }
-      }
     val parentsText = Text(
       impl.parents.map(constrText),
       if ofNew then keywordStr(" with ") else ", "
@@ -1306,11 +1304,10 @@ class RefinedPrinter(_ctx: Context) extends PlainPrinter(_ctx):
 
   override def toTextFlags(sym: Symbol): Text =
     if ctx.settings.YdebugFlags.value then super.toTextFlags(sym)
-    else {
+    else
       var flags = sym.flagsUNSAFE
       if flags.is(TypeParam) then flags = flags &~ Protected
       toTextFlags(sym, flags & PrintableFlags(sym.isType))
-    }
 
   override def toText(denot: Denotation): Text = denot match
     case denot: MultiDenotation =>

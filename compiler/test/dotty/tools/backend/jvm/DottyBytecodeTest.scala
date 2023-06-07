@@ -224,7 +224,7 @@ trait DottyBytecodeTest:
 
     if ms1.length != ms2.length then
       (false, s"Different member counts in $name1 and $name2")
-    else {
+    else
       val msg = new StringBuilder
       val success = ms1.lazyZip(ms2) forall { (m1, m2) =>
         val c1 = f(m1)
@@ -236,7 +236,6 @@ trait DottyBytecodeTest:
       }
 
       (success, msg.toString)
-    }
 
   def correctNumberOfNullChecks(expectedChecks: Int, insnList: InsnList) =
     /** Is given instruction a null check?

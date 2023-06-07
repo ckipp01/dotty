@@ -113,11 +113,10 @@ object Phases:
               )
               prevPhases ++= filteredPhaseBlock.map(_.phaseName)
               superPhase
-            else { // block of a single phase, no fusion
+            else // block of a single phase, no fusion
               val phase = filteredPhaseBlock.head
               prevPhases += phase.phaseName
               phase
-            }
           fusedPhases += phaseToAdd
           val shouldAddYCheck = filteredPhases(i).exists(
             _.isCheckable

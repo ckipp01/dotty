@@ -39,13 +39,12 @@ abstract class CharArrayReader:
     lastCharOffset = idx
     charOffset = idx + 1
     if idx >= buf.length then ch = SU
-    else {
+    else
       val c = buf(idx)
       ch = c
       if c == '\\' then potentialUnicode()
       else if c < ' ' then
         skipCR(); potentialLineEnd()
-    }
 
   def getc(): Char =
     nextChar(); ch
@@ -58,11 +57,10 @@ abstract class CharArrayReader:
     lastCharOffset = idx
     charOffset = idx + 1
     if idx >= buf.length then ch = SU
-    else {
+    else
       val c = buf(idx)
       ch = c
       if c == '\\' then potentialUnicode()
-    }
 
   /** Interpret \\uxxxx escapes */
   private def potentialUnicode(): Unit =
@@ -77,12 +75,11 @@ abstract class CharArrayReader:
         // we are one past EOF.  This happens with e.g. val x = \ u 1 <EOF>
         error("incomplete unicode escape", charOffset - 1)
         SU
-      else {
+      else
         val d = digit2int(buf(charOffset), 16)
         if d >= 0 then charOffset += 1
         else error("error in unicode escape", charOffset)
         d
-      }
     if charOffset < buf.length && buf(
         charOffset
       ) == 'u' && decodeUni && evenSlashPrefix

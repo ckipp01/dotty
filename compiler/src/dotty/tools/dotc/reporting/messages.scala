@@ -34,10 +34,9 @@ import scala.util.matching.Regex
 import java.util.regex.Matcher.quoteReplacement
 import cc.CaptureSet.IdentityCaptRefMap
 
-/** Messages
-  * \======== The role of messages is to provide the necessary details for a
-  * simple to understand diagnostic event. Each message can be turned into a
-  * message container (one of the above) by calling the appropriate method on
+/** Messages \======== The role of messages is to provide the necessary details
+  * for a simple to understand diagnostic event. Each message can be turned into
+  * a message container (one of the above) by calling the appropriate method on
   * them. For instance:
   *
   * ```scala

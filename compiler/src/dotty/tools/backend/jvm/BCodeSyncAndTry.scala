@@ -322,7 +322,6 @@ trait BCodeSyncAndTry extends BCodeBodyBuilder:
 
           }
         end for
-
         // Need to save the state of `shouldEmitCleanup` at this point: while emitting the first
         // version of the `finally` block below, the variable may become true. But this does not mean
         // that we need a cleanup version for the current block, only for the enclosing ones.

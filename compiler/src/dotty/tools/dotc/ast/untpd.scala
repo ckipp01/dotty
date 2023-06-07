@@ -390,7 +390,7 @@ object untpd extends Trees.Instance[Untyped] with UntypedTreeInfo:
       */
     def withMods(ms: List[Mod]): Modifiers =
       if mods eq ms then this
-      else {
+      else
         if ms.nonEmpty then
           for m <- ms do
             assert(
@@ -401,7 +401,6 @@ object untpd extends Trees.Instance[Untyped] with UntypedTreeInfo:
               s"unaccounted modifier: $m in $this with flags ${flags.flagsString} when adding $ms"
             )
         copy(mods = ms)
-      }
 
     def withAddedAnnotation(annot: Tree): Modifiers =
       if annotations.exists(_ eq annot) then this
@@ -631,8 +630,7 @@ object untpd extends Trees.Instance[Untyped] with UntypedTreeInfo:
 
   // ------ Additional creation methods for untyped only -----------------
 
-  /** new T(args1)...(args_n)
-    * \==> new T.<init>[Ts](args1)...(args_n)
+  /** new T(args1)...(args_n) \==> new T.<init>[Ts](args1)...(args_n)
     *
     * where `Ts` are the class type arguments of `T` or its class type alias.
     * Note: we also keep any type arguments as parts of `T`. This is necessary

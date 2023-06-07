@@ -40,6 +40,7 @@ trait QuoteMatching:
     def unapply[TypeBindings, Tup <: Tuple](scrutinee: Expr[Any])(using
         pattern: Expr[Any]
     ): Option[Tup]
+  end ExprMatchModule
 
   val TypeMatch: TypeMatchModule
 

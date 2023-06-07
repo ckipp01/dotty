@@ -88,7 +88,7 @@ class LazyVals extends MiniPhase with IdentityDenotTransformer:
       (sym.isStatic && sym.is(Module, butNot = Method))
     then // static module vals are implemented in the JVM by lazy loading
       tree
-    else {
+    else
       val isField = sym.owner.isClass
       if isField then
         if sym.isAllOf(SyntheticModule)
@@ -115,7 +115,6 @@ class LazyVals extends MiniPhase with IdentityDenotTransformer:
           else transformMemberDefThreadUnsafe(tree)
         else transformMemberDefThreadSafe(tree)
       else transformLocalDef(tree)
-    }
     end if
   end transformLazyVal
 
@@ -312,7 +311,7 @@ class LazyVals extends MiniPhase with IdentityDenotTransformer:
         containerTree,
         mkDefThreadUnsafeNonNullable(x.symbol, containerSymbol, x.rhs)
       )
-    else {
+    else
       val flagName = LazyBitMapName.fresh(x.name.asTermName)
       val flagSymbol = newSymbol(
         x.symbol.owner,
@@ -326,7 +325,6 @@ class LazyVals extends MiniPhase with IdentityDenotTransformer:
         flag,
         mkThreadUnsafeDef(x.symbol, flagSymbol, containerSymbol, x.rhs)
       )
-    }
   end transformMemberDefThreadUnsafe
 
   /** Create a threadsafe lazy accessor and function that computes the field's
@@ -774,7 +772,7 @@ class LazyVals extends MiniPhase with IdentityDenotTransformer:
             .suchThat(sym => sym.is(Synthetic) && sym.isTerm)
             .symbol
             .asTerm
-        else { // need to create a new flag
+        else // need to create a new flag
           offsetSymbol = newSymbol(claz, offsetById, Synthetic, defn.LongType)
             .enteredAfter(this)
           offsetSymbol.nn.addAnnotation(
@@ -791,7 +789,6 @@ class LazyVals extends MiniPhase with IdentityDenotTransformer:
           val offsetTree =
             ValDef(offsetSymbol.nn, getOffsetStatic.appliedTo(fieldTree))
           info.defs = offsetTree :: info.defs
-        }
 
       case None =>
         offsetSymbol = newSymbol(claz, offsetName(0), Synthetic, defn.LongType)

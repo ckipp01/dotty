@@ -97,7 +97,7 @@ class CheckRealizable(using Context):
       val sym = tp.symbol
       lazy val tpInfoRealizable = realizability(tp.info)
       if sym.is(StableRealizable) then realizability(tp.prefix)
-      else {
+      else
         val r =
           if sym.isStableMember && !isLateInitialized(sym) then
             // it's realizable because we know that a value of type `tp` has been created at run-time
@@ -122,7 +122,6 @@ class CheckRealizable(using Context):
             Realizable
           else r
         }
-      }
     case _: SingletonType | NoPrefix =>
       Realizable
     case tp =>
@@ -206,10 +205,9 @@ class CheckRealizable(using Context):
           // if field is lazy or erased it does not need to be initialized when the owning object is
           // so in all cases the field does not influence realizability of the enclosing object.
           Realizable
-        else {
+        else
           checkedFields += fld.symbol
           realizability(fld.info).mapError(r => new HasProblemField(fld, r))
-        }
       }
     if sourceVersion.isAtLeast(future) then
       // check fields only from version 3.x.

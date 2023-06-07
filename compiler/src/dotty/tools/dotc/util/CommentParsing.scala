@@ -51,14 +51,13 @@ object CommentParsing:
     */
   def skipLineLead(str: String, start: Int): Int =
     if start == str.length then start
-    else {
+    else
       val idx = skipWhitespace(str, start + 1)
       if idx < str.length && (str charAt idx) == '*' then
         skipWhitespace(str, idx + 1)
       else if idx + 2 < str.length && (str charAt idx) == '/' && (str charAt (idx + 1)) == '*' && (str charAt (idx + 2)) == '*'
       then skipWhitespace(str, idx + 3)
       else idx
-    }
 
   /** Skips to next occurrence of `\n` or to the position after the `/``**`
     * sequence following index `start`.
@@ -190,10 +189,9 @@ object CommentParsing:
       } do
         ()
         if idx < str.length then idx + 1 else start
-    else {
+    else
       while idx < str.length && isVarPart(str charAt idx) do idx += 1
       idx
-    }
 
   /** A map from the section tag to section parameters */
   def sectionTagMap(

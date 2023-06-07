@@ -70,7 +70,7 @@ class ClassfileWriter(frontendAccess: PostProcessorFrontendAccess):
       suffix: String
   ): AbstractFile =
     if base.file != null then fastGetFile(base, clsName, suffix)
-    else {
+    else
       def ensureDirectory(dir: AbstractFile): AbstractFile =
         if dir.isDirectory then dir
         else
@@ -83,7 +83,6 @@ class ClassfileWriter(frontendAccess: PostProcessorFrontendAccess):
       for part <- pathParts.init do
         dir = ensureDirectory(dir) subdirectoryNamed part
       ensureDirectory(dir) fileNamed pathParts.last + suffix
-    }
 
   private def fastGetFile(base: AbstractFile, clsName: String, suffix: String) =
     val index = clsName.lastIndexOf('/')
@@ -102,11 +101,10 @@ class ClassfileWriter(frontendAccess: PostProcessorFrontendAccess):
         case _: java.nio.file.NoSuchFileException =>
           Files.createDirectories(outPath.getParent)
           Files.write(outPath, bytes)
-    else {
+    else
       val out = new DataOutputStream(outFile.bufferedOutput)
       try out.write(bytes, 0, bytes.length)
       finally out.close()
-    }
 
   def writeClass(
       className: InternalName,

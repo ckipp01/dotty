@@ -110,6 +110,7 @@ class Driver:
         (files, fromTastySetup(files))
       }
     }
+  end setup
 
   /** Setup extra classpath of tasty and jar files */
   protected def fromTastySetup(
@@ -174,6 +175,7 @@ class Driver:
     val reporter =
       if simple == null then null else Reporter.fromSimpleReporter(simple)
     process(args, reporter, callback)
+  end process
 
   /** Principal entry point to the compiler.
     *

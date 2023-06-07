@@ -114,9 +114,8 @@ object MarkupParsers:
       xEmbeddedBlock
 
     /** parse attribute and add it to listmap [41] Attributes ::= { S Name Eq
-      * AttValue } AttValue ::= `'` { _ } `'`
-      * \| `"` { _ } `"`
-      * \| `{` scalablock `}`
+      * AttValue } AttValue ::= `'` { _ } `'` \| `"` { _ } `"` \| `{` scalablock
+      * `}`
       */
     def xAttributes: mutable.LinkedHashMap[String, Tree] =
       val aMap = mutable.LinkedHashMap[String, Tree]()
@@ -190,7 +189,7 @@ object MarkupParsers:
       def append(t: String) = ts append handle.text(span, t)
 
       if preserveWS then append(txt)
-      else {
+      else
         val sb = new StringBuilder()
 
         txt foreach { c =>
@@ -200,7 +199,6 @@ object MarkupParsers:
 
         val trimmed = sb.toString.trim
         if !trimmed.isEmpty then append(trimmed)
-      }
 
     /** adds entity/character to ts as side-effect
       * @precond
@@ -255,7 +253,7 @@ object MarkupParsers:
       val ts = new ArrayBuffer[Tree]
       while true do
         if xEmbeddedBlock then ts append xEmbeddedExpr
-        else {
+        else
           tmppos = Span(curOffset)
           ch match
             // end tag, cdata, comment, pi or child node
@@ -267,11 +265,10 @@ object MarkupParsers:
             case SU  => return ts
             // text content - here xEmbeddedBlock might be true
             case _ => appendText(tmppos, ts, xText)
-        }
       unreachable
 
-    /** '<' element ::= xmlTag1 '>' { xmlExpr | '{' simpleExpr '}' } ETag
-      * \| xmlTag1 '/' '>'
+    /** '<' element ::= xmlTag1 '>' { xmlExpr | '{' simpleExpr '}' } ETag \|
+      * xmlTag1 '/' '>'
       */
     def element: Tree =
       val start = curOffset
@@ -285,7 +282,7 @@ object MarkupParsers:
           true,
           new ListBuffer[Tree]
         )
-      else { // handle content
+      else // handle content
         xToken('>')
         if qname == "xml:unparsed" then return xUnparsed
 
@@ -297,7 +294,6 @@ object MarkupParsers:
         qname match
           case "xml:group" => handle.group(span, ts)
           case _           => handle.element(span, qname, attrMap, false, ts)
-      }
 
     /** parse character data. precondition: xEmbeddedBlock == false (we are not
       * in a scala block)
@@ -377,10 +373,9 @@ object MarkupParsers:
             charComingAfter(xSpaceOpt()) == '<'
           } do ()
           handle.makeXMLseq(Span(start, curOffset, start), ts)
-        else {
+        else
           assert(ts.length == 1, "Require one tree")
           ts(0)
-        }
       ,
       msg => parser.incompleteInputError(msg.toMessage)
     )
@@ -431,8 +426,8 @@ object MarkupParsers:
       reportSyntaxError(curOffset, "in XML literal: " + str)
       nextch()
 
-    /** '<' xPattern ::= Name [S] { xmlPattern | '{' pattern3 '}' } ETag
-      * \| Name [S] '/' '>'
+    /** '<' xPattern ::= Name [S] { xmlPattern | '{' pattern3 '}' } ETag \| Name
+      * [S] '/' '>'
       */
     def xPattern: Tree =
       var start = curOffset

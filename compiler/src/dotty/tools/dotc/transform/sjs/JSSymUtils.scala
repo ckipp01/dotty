@@ -57,7 +57,7 @@ object JSSymUtils:
 
       if isJSBracketAccess(sym) then BracketAccess
       else if isJSBracketCall(sym) then BracketCall
-      else {
+      else
         def default =
           val jsName = sym.jsName
           if sym.isJSProperty then Property(jsName)
@@ -72,7 +72,6 @@ object JSSymUtils:
             case JSBinaryOpMethodName(code) if pc == 1 => BinaryOp(code)
             case _                                     => default
         else default
-      }
 
   /** Info about a Scala method param when called as JS method.
     *

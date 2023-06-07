@@ -174,11 +174,10 @@ object Texts:
       */
     def apply(xs: Iterable[Text], sep: String = " "): Text =
       if sep == "\n" then lines(xs)
-      else {
+      else
         val ys = xs.filterNot(_.isEmpty)
         if ys.isEmpty then Str("")
         else ys.reduceRight((a, b) => (a ~ sep).close ~ b)
-      }
 
     /** The given texts `xs`, each on a separate line */
     def lines(xs: Iterable[Text]): Vertical = Vertical(xs.toList.reverse)

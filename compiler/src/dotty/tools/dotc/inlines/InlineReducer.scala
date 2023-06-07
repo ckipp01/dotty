@@ -123,7 +123,7 @@ class InlineReducer(inliner: Inliner)(using Context):
             if isElideableExpr(arg) then finish(arg)
             else
               tree // nothing we can do here, projection would duplicate side effect
-          else {
+          else
             // newInstance is evaluated in place, need to reflect side effects of
             // arguments in the order they were written originally
             def collectImpure(from: Int, end: Int) =
@@ -145,7 +145,6 @@ class InlineReducer(inliner: Inliner)(using Context):
               .map(_.span)
               .foldLeft(argInPlace.span)(_.union(_))
             finish(seq(prefix, seq(leading, argInPlace)).withSpan(blockSpan))
-          }
         else tree
         end if
       case Block(stats, expr) if stats.forall(isPureBinding) =>
@@ -164,10 +163,9 @@ class InlineReducer(inliner: Inliner)(using Context):
         val rhs1 = reduceProjection(binding.rhs)
         binding.symbol.defTree = rhs1
         if rhs1 `eq` binding.rhs then binding
-        else {
+        else
           binding.symbol.info = rhs1.tpe
           cpy.ValDef(binding)(tpt = TypeTree(rhs1.tpe), rhs = rhs1)
-        }
       case _ =>
         binding
     binding1.withSpan(call.span)

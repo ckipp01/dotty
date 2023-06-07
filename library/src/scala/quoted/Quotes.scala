@@ -325,6 +325,7 @@ trait Quotes:
         /** Changes the owner of the symbols in the tree */
         def changeOwner(newOwner: Symbol): ThisTree
       end extension
+    end TreeMethods
 
     /** Tree representing a package clause in the source code
       *

@@ -204,7 +204,7 @@ trait Deriving:
           val derivedParams = clsParams.dropRight(instanceArity)
           val instanceType =
             if instanceArity == clsArity then clsType.EtaExpand(clsParams)
-            else {
+            else
               val derivedParamTypes = derivedParams.map(_.typeRef)
 
               HKTypeLambda(typeClassParamInfos.map(_.paramName))(
@@ -214,7 +214,6 @@ trait Deriving:
                     derivedParamTypes ++ tl.paramRefs.takeRight(clsArity)
                   )
               )
-            }
 
           addInstance(derivedParams, Nil, List(instanceType))
         else if instanceArity == 0 && !clsParams.exists(_.info.isLambdaSub) then

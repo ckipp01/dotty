@@ -91,7 +91,7 @@ class TryCatchPatterns extends MiniPhase:
       span: Span
   )(implicit ctx: Context): Option[CaseDef] =
     if patternMatchCases.isEmpty then None
-    else {
+    else
       val exName = ExceptionBinderName.fresh()
       val fallbackSelector =
         newSymbol(
@@ -113,7 +113,6 @@ class TryCatchPatterns extends MiniPhase:
           transformFollowing(Match(sel, patternMatchCases ::: rethrow :: Nil))
         )
       )
-    }
 end TryCatchPatterns
 
 object TryCatchPatterns:

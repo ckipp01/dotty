@@ -495,7 +495,7 @@ private class ExtractAPICollector(using Context) extends ThunkHolder:
         typeParams,
         apiType(tpe.bounds.hi)
       )
-    else {
+    else
       assert(sym.isAbstractType)
       api.TypeDeclaration.of(
         name,
@@ -506,7 +506,6 @@ private class ExtractAPICollector(using Context) extends ThunkHolder:
         apiType(tpe.bounds.lo),
         apiType(tpe.bounds.hi)
       )
-    }
   end apiTypeMember
 
   // Hack to represent dotty types which don't have an equivalent in xsbti
@@ -551,11 +550,10 @@ private class ExtractAPICollector(using Context) extends ThunkHolder:
                 defn.AnyClass
               )
             then Constants.emptyType
-            else {
+            else
               val name = "_"
               val ref = api.ParameterRef.of(name)
               api.Existential.of(ref, Array(apiTypeParameter(name, 0, lo, hi)))
-            }
           case _ =>
             apiType(arg)
 
@@ -726,13 +724,12 @@ private class ExtractAPICollector(using Context) extends ThunkHolder:
       Constants.public
     else if sym.isAllOf(PrivateLocal) then Constants.privateLocal
     else if sym.isAllOf(ProtectedLocal) then Constants.protectedLocal
-    else {
+    else
       val qualifier =
         if sym.privateWithin eq NoSymbol then Constants.unqualified
         else api.IdQualifier.of(sym.privateWithin.fullName.toString)
       if sym.is(Protected) then api.Protected.of(qualifier)
       else api.Private.of(qualifier)
-    }
 
   def apiModifiers(sym: Symbol): api.Modifiers =
     val absOver = sym.is(AbsOverride)

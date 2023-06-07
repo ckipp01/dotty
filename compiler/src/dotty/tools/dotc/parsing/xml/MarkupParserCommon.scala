@@ -141,8 +141,8 @@ private[dotty] trait MarkupParserCommon:
 
     buf.toString
 
-  /** CharRef ::= "&#" '0'..'9' {'0'..'9'} ";"
-    * \| "&#x" '0'..'9'|'A'..'F'|'a'..'f' { hexdigit } ";"
+  /** CharRef ::= "&#" '0'..'9' {'0'..'9'} ";" \| "&#x"
+    * '0'..'9'|'A'..'F'|'a'..'f' { hexdigit } ";"
     *
     * see [66]
     */

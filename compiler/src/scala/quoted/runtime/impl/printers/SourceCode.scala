@@ -630,13 +630,12 @@ object SourceCode:
         case _             => true
       }
       if stats2.isEmpty then printTree(expr1)
-      else {
+      else
         this += "{"
         indented {
           printStats(stats2, expr1)
         }
         this += lineBreak() += "}"
-      }
 
     private def printStats(stats: List[Tree], expr: Tree)(using
         eliseThis: Option[Symbol]

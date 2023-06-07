@@ -1072,7 +1072,7 @@ object Parsers:
         )
       def recur(top: Tree): Tree =
         if opStack == base then top
-        else {
+        else
           val opInfo = opStack.head
           val opPrec = precedence(opInfo.operator.name)
           if prec < opPrec || leftAssoc && prec == opPrec then
@@ -1085,7 +1085,6 @@ object Parsers:
               }
             }
           else top
-        }
       recur(top)
     end reduceStack
 
@@ -1171,10 +1170,9 @@ object Parsers:
           )
         in.nextToken()
         name
-      else {
+      else
         syntaxErrorOrIncomplete(ExpectedTokenButFound(IDENTIFIER, in.token))
         nme.ERROR
-      }
 
     /** Accept identifier and return Ident with its name as a term name. */
     def termIdent(): Ident =
@@ -1215,9 +1213,8 @@ object Parsers:
 
     private val id: Tree => Tree = x => x
 
-    /** SimpleRef ::= id
-      * \| [id ‘.’] ‘this’
-      * \| [id ‘.’] ‘super’ [ClassQualifier] ‘.’ id
+    /** SimpleRef ::= id \| [id ‘.’] ‘this’ \| [id ‘.’] ‘super’ [ClassQualifier]
+      * ‘.’ id
       */
     def simpleRef(): Tree =
       val start = in.offset
@@ -1260,9 +1257,7 @@ object Parsers:
       */
     def qualId(): Tree = dotSelectors(termIdent())
 
-    /** Singleton ::= SimpleRef
-      * \| SimpleLiteral
-      * \| Singleton ‘.’ id
+    /** Singleton ::= SimpleRef \| SimpleLiteral \| Singleton ‘.’ id
       * -- not yet | Singleton ‘(’ Singletons ‘)’
       * -- not yet | Singleton ‘[’ Types ‘]’
       */
@@ -1270,11 +1265,8 @@ object Parsers:
       if isSimpleLiteral then simpleLiteral()
       else dotSelectors(simpleRef())
 
-    /** SimpleLiteral ::= [‘-’] integerLiteral
-      * \| [‘-’] floatingPointLiteral
-      * \| booleanLiteral
-      * \| characterLiteral
-      * \| stringLiteral
+    /** SimpleLiteral ::= [‘-’] integerLiteral \| [‘-’] floatingPointLiteral \|
+      * booleanLiteral \| characterLiteral \| stringLiteral
       */
     def simpleLiteral(): Tree =
       if isIdent(nme.raw.MINUS) then
@@ -1283,10 +1275,8 @@ object Parsers:
         literal(negOffset = start, inTypeOrSingleton = true)
       else literal(inTypeOrSingleton = true)
 
-    /** Literal ::= SimpleLiteral
-      * \| processedStringLiteral
-      * \| symbolLiteral
-      * \| ‘null’
+    /** Literal ::= SimpleLiteral \| processedStringLiteral \| symbolLiteral \|
+      * ‘null’
       *
       * @param negOffset
       *   The offset of a preceding `-' sign, if any. If the literal is not
@@ -1376,11 +1366,10 @@ object Parsers:
                   patch(source, Span(in.charOffset - 1), "\")")
               atSpan(in.skipToken()) { SymbolLit(in.strVal) }
           else if in.token == INTERPOLATIONID then interpolatedString(inPattern)
-          else {
+          else
             val t = literalOf(in.token)
             in.nextToken()
             t
-          }
         }
       end if
     end literal
@@ -1412,13 +1401,12 @@ object Parsers:
               else if in.token == LBRACE then
                 if inPattern then Block(Nil, inBraces(pattern()))
                 else expr()
-              else {
+              else
                 report.error(
                   InterpolatedStringError(),
                   source.atSpan(Span(in.offset))
                 )
                 EmptyTree
-              }
             }
           )
 
@@ -1589,18 +1577,14 @@ object Parsers:
       then CapturesAndResult(captureSet(), core())
       else core()
 
-    /** Type ::= FunType
-      * \| HkTypeParamClause ‘=>>’ Type
-      * \| FunParamClause ‘=>>’ Type
-      * \| MatchType
-      * \| InfixType FunType ::= (MonoFunType | PolyFunType) MonoFunType ::=
-      * FunTypeArgs (‘=>’ | ‘?=>’) Type
-      * \| (‘->’ | ‘?->’ ) [CaptureSet] Type -- under pureFunctions PolyFunType
-      * ::= HKTypeParamClause '=>' Type
-      * \| HKTypeParamClause ‘->’ [CaptureSet] Type -- under pureFunctions
-      * FunTypeArgs ::= InfixType
-      * \| `(' [ [ ‘[using]’ ‘['erased'] FunArgType {`,' FunArgType } ] `)'
-      * \| '(' [ ‘[using]’ ‘['erased'] TypedFunParam {',' TypedFunParam } ')'
+    /** Type ::= FunType \| HkTypeParamClause ‘=>>’ Type \| FunParamClause ‘=>>’
+      * Type \| MatchType \| InfixType FunType ::= (MonoFunType | PolyFunType)
+      * MonoFunType ::= FunTypeArgs (‘=>’ | ‘?=>’) Type \| (‘->’ | ‘?->’ )
+      * [CaptureSet] Type -- under pureFunctions PolyFunType ::=
+      * HKTypeParamClause '=>' Type \| HKTypeParamClause ‘->’ [CaptureSet] Type
+      * -- under pureFunctions FunTypeArgs ::= InfixType \| `(' [ [ ‘[using]’
+      * ‘['erased'] FunArgType {`,' FunArgType } ] `)' \| '(' [ ‘[using]’
+      * ‘['erased'] TypedFunParam {',' TypedFunParam } ')'
       */
     def typ(): Tree =
       val start = in.offset
@@ -1665,7 +1649,7 @@ object Parsers:
           if in.token == RPAREN then
             in.nextToken()
             functionRest(Nil)
-          else {
+          else
             val paramStart = in.offset
             def addErased() =
               erasedArgs.addOne(isErasedKw)
@@ -1705,7 +1689,6 @@ object Parsers:
                   withTypeRest(annotTypeRest(simpleTypeRest(tuple)))
                 )
               )
-          }
           end if
         else if in.token == LBRACKET then
           val start = in.offset
@@ -1729,7 +1712,8 @@ object Parsers:
                   )
                   Ident(nme.ERROR.toTypeName)
             }
-          else { accept(TLARROW); typ() }
+          else
+            accept(TLARROW); typ()
         else if in.token == INDENT then enclosed(INDENT, typ())
         else infixType()
 
@@ -1813,8 +1797,7 @@ object Parsers:
     def funParamClauses(): List[List[ValDef]] =
       if in.token == LPAREN then funParamClause() :: funParamClauses() else Nil
 
-    /** InfixType ::= RefinedType {id [nl] RefinedType}
-      * \| RefinedType `^`
+    /** InfixType ::= RefinedType {id [nl] RefinedType} \| RefinedType `^`
       */
     def infixType(): Tree = infixTypeRest(refinedType())
 
@@ -1892,12 +1875,11 @@ object Parsers:
     /** The block in a quote or splice */
     def stagedBlock() = inBraces(block(simplify = true))
 
-    /** ExprSplice ::= ‘$’ spliceId -- if inside quoted block
-      * \| ‘$’ ‘{’ Block ‘}’ -- unless inside quoted pattern
-      * \| ‘$’ ‘{’ Pattern ‘}’ -- when inside quoted pattern TypeSplice ::= ‘$’
-      * spliceId -- if inside quoted type
-      * \| ‘$’ ‘{’ Block ‘}’ -- unless inside quoted type pattern
-      * \| ‘$’ ‘{’ Pattern ‘}’ -- when inside quoted type pattern
+    /** ExprSplice ::= ‘$’ spliceId -- if inside quoted block \| ‘$’ ‘{’ Block
+      * ‘}’ -- unless inside quoted pattern \| ‘$’ ‘{’ Pattern ‘}’ -- when
+      * inside quoted pattern TypeSplice ::= ‘$’ spliceId -- if inside quoted
+      * type \| ‘$’ ‘{’ Block ‘}’ -- unless inside quoted type pattern \| ‘$’
+      * ‘{’ Pattern ‘}’ -- when inside quoted type pattern
       */
     def splice(isType: Boolean): Tree =
       val start = in.offset
@@ -1929,12 +1911,9 @@ object Parsers:
       }
     end splice
 
-    /** SimpleType ::= SimpleLiteral
-      * \| ‘?’ SubtypeBounds
-      * \| SimpleType1
-      * \| SimpleType ‘(’ Singletons ‘)’ -- under
-      * language.experimental.dependent, checked in Typer Singletons ::=
-      * Singleton {‘,’ Singleton}
+    /** SimpleType ::= SimpleLiteral \| ‘?’ SubtypeBounds \| SimpleType1 \|
+      * SimpleType ‘(’ Singletons ‘)’ -- under language.experimental.dependent,
+      * checked in Typer Singletons ::= Singleton {‘,’ Singleton}
       */
     def simpleType(): Tree =
       if isSimpleLiteral then SingletonTypeTree(simpleLiteral())
@@ -1973,14 +1952,9 @@ object Parsers:
           else t
         singletonArgs(simpleType1())
 
-    /** SimpleType1 ::= id
-      * \| Singleton `.' id
-      * \| Singleton `.' type
-      * \| ‘(’ ArgTypes ‘)’
-      * \| Refinement
-      * \| TypeSplice -- deprecated syntax (since 3.0.0)
-      * \| SimpleType1 TypeArgs
-      * \| SimpleType1 `#' id
+    /** SimpleType1 ::= id \| Singleton `.' id \| Singleton `.' type \| ‘(’
+      * ArgTypes ‘)’ \| Refinement \| TypeSplice -- deprecated syntax (since
+      * 3.0.0) \| SimpleType1 TypeArgs \| SimpleType1 `#' id
       */
     def simpleType1() = simpleTypeRest {
       if in.token == LPAREN then
@@ -2056,8 +2030,8 @@ object Parsers:
       val id = typeIdent()
       atSpan(startOffset(t), startOffset(id)) { Select(t, id.name) }
 
-    /** ArgTypes ::= Type {`,' Type}
-      * \| NamedTypeArg {`,' NamedTypeArg} NamedTypeArg ::= id `=' Type
+    /** ArgTypes ::= Type {`,' Type} \| NamedTypeArg {`,' NamedTypeArg}
+      * NamedTypeArg ::= id `=' Type
       */
     def argTypes(namedOK: Boolean, wildOK: Boolean): List[Tree] =
 
@@ -2100,15 +2074,12 @@ object Parsers:
       then atSpan(in.skipToken()) { Into(tp()) }
       else tp()
 
-    /** FunArgType ::= Type
-      * \| `=>' Type
-      * \| `->' [CaptureSet] Type
+    /** FunArgType ::= Type \| `=>' Type \| `->' [CaptureSet] Type
       */
     val funArgType: () => Tree = () => paramTypeOf(typ)
 
-    /** ParamType ::= ParamValueType
-      * \| `=>' ParamValueType
-      * \| `->' [CaptureSet] ParamValueType
+    /** ParamType ::= ParamValueType \| `=>' ParamValueType \| `->' [CaptureSet]
+      * ParamValueType
       */
     def paramType(): Tree = paramTypeOf(paramValueType)
 
@@ -2227,32 +2198,20 @@ object Parsers:
       accept(altToken)
       t
 
-    /** Expr ::= [`implicit'] FunParams (‘=>’ | ‘?=>’) Expr
-      * \| HkTypeParamClause ‘=>’ Expr
-      * \| Expr1 FunParams ::= Bindings
-      * \| id
-      * \| `_' ExprInParens ::= PostfixExpr `:' Type
-      * \| Expr BlockResult ::= [‘implicit’] FunParams (‘=>’ | ‘?=>’) Block
-      * \| HkTypeParamClause ‘=>’ Block
-      * \| Expr1 Expr1 ::= [‘inline’] `if' `(' Expr `)' {nl} Expr [[semi] else
-      * Expr]
-      * \| [‘inline’] `if' Expr `then' Expr [[semi] else Expr]
-      * \| `while' `(' Expr `)' {nl} Expr
-      * \| `while' Expr `do' Expr
-      * \| `try' Expr Catches [`finally' Expr]
-      * \| `try' Expr [`finally' Expr]
-      * \| `throw' Expr
-      * \| `return' [Expr]
-      * \| ForExpr
-      * \| [SimpleExpr `.'] id `=' Expr
-      * \| PrefixOperator SimpleExpr `=' Expr
-      * \| SimpleExpr1 ArgumentExprs `=' Expr
-      * \| PostfixExpr [Ascription]
+    /** Expr ::= [`implicit'] FunParams (‘=>’ | ‘?=>’) Expr \| HkTypeParamClause
+      * ‘=>’ Expr \| Expr1 FunParams ::= Bindings \| id \| `_' ExprInParens ::=
+      * PostfixExpr `:' Type \| Expr BlockResult ::= [‘implicit’] FunParams
+      * (‘=>’ | ‘?=>’) Block \| HkTypeParamClause ‘=>’ Block \| Expr1 Expr1 ::=
+      * [‘inline’] `if' `(' Expr `)' {nl} Expr [[semi] else Expr] \| [‘inline’]
+      * `if' Expr `then' Expr [[semi] else Expr] \| `while' `(' Expr `)' {nl}
+      * Expr \| `while' Expr `do' Expr \| `try' Expr Catches [`finally' Expr] \|
+      * `try' Expr [`finally' Expr] \| `throw' Expr \| `return' [Expr] \|
+      * ForExpr \| [SimpleExpr `.'] id `=' Expr \| PrefixOperator SimpleExpr `='
+      * Expr \| SimpleExpr1 ArgumentExprs `=' Expr \| PostfixExpr [Ascription]
       * \| ‘inline’ InfixExpr MatchClause Bindings ::= `(' [Binding {`,'
       * Binding}] `)' Binding ::= (id | `_') [`:' Type] Ascription ::= `:'
-      * InfixType
-      * \| `:' Annotation {Annotation}
-      * \| `:' `_' `*' Catches ::= ‘catch’ (Expr | ExprCaseClause)
+      * InfixType \| `:' Annotation {Annotation} \| `:' `_' `*' Catches ::=
+      * ‘catch’ (Expr | ExprCaseClause)
       */
     val exprInParens: () => Tree = () => expr(Location.InParens)
 
@@ -2371,14 +2330,13 @@ object Parsers:
               val expr = subExpr()
               if expr.span.exists then expr
               else Literal(Constant(())) // finally without an expression
-            else {
+            else
               if handler.isEmpty then
                 report.warning(
                   EmptyCatchAndFinallyBlock(body),
                   source.atSpan(Span(tryOffset, endOffset(body)))
                 )
               EmptyTree
-            }
           ParsedTry(body, handler, finalizer)
         }
       case THROW =>
@@ -2493,9 +2451,8 @@ object Parsers:
         )
       }
 
-    /** FunParams ::= Bindings
-      * \| id
-      * \| `_' Bindings ::= `(' [[‘erased’] Binding {`,' Binding}] `)'
+    /** FunParams ::= Bindings \| id \| `_' Bindings ::= `(' [[‘erased’] Binding
+      * {`,' Binding}] `)'
       */
     def funParams(mods: Modifiers, location: Location): List[Tree] =
       if in.token == LPAREN then
@@ -2564,10 +2521,9 @@ object Parsers:
         Function(params, body)
       }
 
-    /** PostfixExpr ::= InfixExpr [id [nl]] InfixExpr ::= PrefixExpr
-      * \| InfixExpr id [nl] InfixExpr
-      * \| InfixExpr id ColonArgument
-      * \| InfixExpr MatchClause
+    /** PostfixExpr ::= InfixExpr [id [nl]] InfixExpr ::= PrefixExpr \|
+      * InfixExpr id [nl] InfixExpr \| InfixExpr id ColonArgument \| InfixExpr
+      * MatchClause
       */
     def postfixExpr(location: Location = Location.ElseWhere): Tree =
       val t = postfixExprRest(prefixExpr(location), location)
@@ -2599,26 +2555,16 @@ object Parsers:
         else atSpan(start) { PrefixOp(op, simpleExpr(location)) }
       else simpleExpr(location)
 
-    /** SimpleExpr ::= ‘new’ ConstrApp {`with` ConstrApp} [TemplateBody]
-      * \| ‘new’ TemplateBody
-      * \| BlockExpr
-      * \| ExprSplice
-      * \| Quoted
-      * \| quoteId
-      * \| SimpleExpr1 [`_`] SimpleExpr1 ::= literal
-      * \| xmlLiteral
-      * \| SimpleRef
-      * \| `(` [ExprsInParens] `)`
-      * \| SimpleExpr `.` id
-      * \| SimpleExpr `.` MatchClause
-      * \| SimpleExpr (TypeArgs | NamedTypeArgs)
-      * \| SimpleExpr1 ArgumentExprs
-      * \| SimpleExpr1 ColonArgument ColonArgument ::= colon [LambdaStart]
-      * indent (CaseClauses | Block) outdent LambdaStart ::= FunParams (‘=>’ |
-      * ‘?=>’)
-      * \| HkTypeParamClause ‘=>’ ColonArgBody ::= indent (CaseClauses | Block)
-      * outdent Quoted ::= ‘'’ ‘{’ Block ‘}’
-      * \| ‘'’ ‘[’ Type ‘]’
+    /** SimpleExpr ::= ‘new’ ConstrApp {`with` ConstrApp} [TemplateBody] \|
+      * ‘new’ TemplateBody \| BlockExpr \| ExprSplice \| Quoted \| quoteId \|
+      * SimpleExpr1 [`_`] SimpleExpr1 ::= literal \| xmlLiteral \| SimpleRef \|
+      * `(` [ExprsInParens] `)` \| SimpleExpr `.` id \| SimpleExpr `.`
+      * MatchClause \| SimpleExpr (TypeArgs | NamedTypeArgs) \| SimpleExpr1
+      * ArgumentExprs \| SimpleExpr1 ColonArgument ColonArgument ::= colon
+      * [LambdaStart] indent (CaseClauses | Block) outdent LambdaStart ::=
+      * FunParams (‘=>’ | ‘?=>’) \| HkTypeParamClause ‘=>’ ColonArgBody ::=
+      * indent (CaseClauses | Block) outdent Quoted ::= ‘'’ ‘{’ Block ‘}’ \| ‘'’
+      * ‘[’ Type ‘]’
       */
     def simpleExpr(location: Location): Tree =
       var canApply = true
@@ -2730,8 +2676,8 @@ object Parsers:
       end match
     end simpleExprRest
 
-    /** SimpleExpr ::= ‘new’ ConstrApp {`with` ConstrApp} [TemplateBody]
-      * \| ‘new’ TemplateBody
+    /** SimpleExpr ::= ‘new’ ConstrApp {`with` ConstrApp} [TemplateBody] \|
+      * ‘new’ TemplateBody
       */
     def newExpr(): Tree =
       val start = in.skipToken()
@@ -2767,8 +2713,8 @@ object Parsers:
           commaSeparatedRest(exprOrBinding(), exprOrBinding)
         }
 
-    /** ParArgumentExprs ::= `(' [‘using’] [ExprsInParens] `)'
-      * \| `(' [ExprsInParens `,'] PostfixExpr `*' ')'
+    /** ParArgumentExprs ::= `(' [‘using’] [ExprsInParens] `)' \| `('
+      * [ExprsInParens `,'] PostfixExpr `*' ')'
       */
     def parArgumentExprs(): (List[Tree], Boolean) = inParens {
       if in.token == RPAREN then (Nil, false)
@@ -2778,8 +2724,7 @@ object Parsers:
       else (commaSeparated(argumentExpr), false)
     }
 
-    /** ArgumentExprs ::= ParArgumentExprs
-      * \| [nl] BlockExpr
+    /** ArgumentExprs ::= ParArgumentExprs \| [nl] BlockExpr
       */
     def argumentExprs(): (List[Tree], Boolean) =
       if in.isNestedStart then (blockExpr() :: Nil, false)
@@ -2875,19 +2820,16 @@ object Parsers:
       else if in.token == IF then guard() :: enumeratorsRest()
       else Nil
 
-    /** Enumerator ::= Generator
-      * \| Guard {Guard}
-      * \| Pattern1 `=' Expr
+    /** Enumerator ::= Generator \| Guard {Guard} \| Pattern1 `=' Expr
       */
     def enumerator(): Tree =
       if in.token == IF then guard()
       else if in.token == CASE then generator()
-      else {
+      else
         val pat = pattern1()
         if in.token == EQUALS then
           atSpan(startOffset(pat), in.skipToken()) { GenAlias(pat, subExpr()) }
         else generatorRest(pat, casePat = false)
-      }
 
     /** Generator ::= [‘case’] Pattern `<-' Expr
       */
@@ -2909,9 +2851,9 @@ object Parsers:
         GenFrom(pat, subExpr(), checkMode)
       }
 
-    /** ForExpr ::= ‘for’ ‘(’ Enumerators ‘)’ {nl} [‘do‘ | ‘yield’] Expr
-      * \| ‘for’ ‘{’ Enumerators ‘}’ {nl} [‘do‘ | ‘yield’] Expr
-      * \| ‘for’ Enumerators (‘do‘ | ‘yield’) Expr
+    /** ForExpr ::= ‘for’ ‘(’ Enumerators ‘)’ {nl} [‘do‘ | ‘yield’] Expr \|
+      * ‘for’ ‘{’ Enumerators ‘}’ {nl} [‘do‘ | ‘yield’] Expr \| ‘for’
+      * Enumerators (‘do‘ | ‘yield’) Expr
       */
     def forExpr(): Tree =
       atSpan(in.skipToken()) {
@@ -2925,7 +2867,7 @@ object Parsers:
             in.nextToken()
             val res =
               if leading == LBRACE || in.token == CASE then enumerators()
-              else {
+              else
                 val pats = patternsOpt()
                 val pat =
                   if in.token == RPAREN || pats.length > 1 then
@@ -2936,7 +2878,6 @@ object Parsers:
                     } // note: alternatives `|' need to be weeded out by typer.
                   else pats.head
                 generatorRest(pat, casePat = false) :: enumeratorsRest()
-              }
             if wrappedEnums then
               val closingOnNewLine = in.isAfterLineEnd
               accept(leading + 1)
@@ -2955,24 +2896,21 @@ object Parsers:
                 )
             in.observeIndented()
             res
-          else {
+          else
             wrappedEnums = false
 
             if in.token == INDENT then inBracesOrIndented(enumerators())
-            else {
+            else
               val ts = inSepRegion(InFor)(enumerators())
               if rewriteToOldSyntax(Span(start)) && ts.nonEmpty then
                 if ts.head.sourcePos.startLine != ts.last.sourcePos.startLine
                 then
                   patch(source, Span(forEnd), " {")
                   patch(source, Span(in.offset), "} ")
-                else {
+                else
                   patch(source, ts.head.span.startPos, "(")
                   patch(source, ts.last.span.endPos, ")")
-                }
               ts
-            }
-          }
         newLinesOpt()
         if in.token == YIELD then
           in.nextToken()
@@ -2981,11 +2919,10 @@ object Parsers:
           if rewriteToOldSyntax() then dropTerminator()
           in.nextToken()
           ForDo(enums, subExpr())
-        else {
+        else
           if !wrappedEnums then
             syntaxErrorOrIncomplete(YieldOrDoExpectedInForComprehension())
           ForDo(enums, expr())
-        }
       }
 
     /** CaseClauses ::= CaseClause {CaseClause} TypeCaseClauses ::=
@@ -3060,10 +2997,8 @@ object Parsers:
         in.nextToken(); pattern1(location) :: patternAlts(location)
       else Nil
 
-    /** Pattern1 ::= PatVar Ascription
-      * \| [‘-’] integerLiteral Ascription
-      * \| [‘-’] floatingPointLiteral Ascription
-      * \| Pattern2
+    /** Pattern1 ::= PatVar Ascription \| [‘-’] integerLiteral Ascription \|
+      * [‘-’] floatingPointLiteral Ascription \| Pattern2
       */
     def pattern1(location: Location = Location.InPattern): Tree =
       val p = pattern2()
@@ -3083,8 +3018,7 @@ object Parsers:
         ascription(p, location)
       else p
 
-    /** Pattern3 ::= InfixPattern
-      * \| PatVar ‘*’
+    /** Pattern3 ::= InfixPattern \| PatVar ‘*’
       */
     def pattern3(): Tree =
       val p = infixPattern()
@@ -3133,15 +3067,10 @@ object Parsers:
         isOperator = in.name != nme.raw.BAR && !followingIsVararg()
       )
 
-    /** SimplePattern ::= PatVar
-      * \| Literal
-      * \| Quoted
-      * \| XmlPattern
-      * \| `(' [Patterns] `)'
-      * \| SimplePattern1 [TypeArgs] [ArgumentPatterns] SimplePattern1 ::=
-      * SimpleRef
-      * \| SimplePattern1 `.' id PatVar ::= id
-      * \| `_'
+    /** SimplePattern ::= PatVar \| Literal \| Quoted \| XmlPattern \| `('
+      * [Patterns] `)' \| SimplePattern1 [TypeArgs] [ArgumentPatterns]
+      * SimplePattern1 ::= SimpleRef \| SimplePattern1 `.' id PatVar ::= id \|
+      * `_'
       */
     def simplePattern(): Tree = in.token match
       case IDENTIFIER | BACKQUOTED_IDENT | THIS | SUPER =>
@@ -3165,11 +3094,10 @@ object Parsers:
         }
       case _ =>
         if isLiteral then literal(inPattern = true)
-        else {
+        else
           val start = in.lastOffset
           syntaxErrorOrIncomplete(IllegalStartOfSimplePattern(), expectedOffset)
           errorTermTree(start)
-        }
 
     val simplePatternFn: Location => Tree = _ => simplePattern()
 
@@ -3195,8 +3123,8 @@ object Parsers:
     def patternsOpt(location: Location = Location.InPattern): List[Tree] =
       if in.token == RPAREN then Nil else patterns(location)
 
-    /** ArgumentPatterns ::= ‘(’ [Patterns] ‘)’
-      * \| ‘(’ [Patterns ‘,’] PatVar ‘*’ ‘)’
+    /** ArgumentPatterns ::= ‘(’ [Patterns] ‘)’ \| ‘(’ [Patterns ‘,’] PatVar ‘*’
+      * ‘)’
       */
     def argumentPatterns(): List[Tree] =
       inParens(patternsOpt(Location.InPatternArgs))
@@ -3270,11 +3198,9 @@ object Parsers:
 
     /** {Annotation} {Modifier} Modifiers ::= {Modifier} LocalModifiers ::=
       * {LocalModifier} AccessModifier ::= (private | protected)
-      * [AccessQualifier] Modifier ::= LocalModifier
-      * \| AccessModifier
-      * \| override
-      * \| opaque LocalModifier ::= abstract | final | sealed | open | implicit
-      * \| lazy | erased | inline | transparent
+      * [AccessQualifier] Modifier ::= LocalModifier \| AccessModifier \|
+      * override \| opaque LocalModifier ::= abstract | final | sealed | open |
+      * implicit \| lazy | erased | inline | transparent
       */
     def modifiers(
         allowed: BitSet = modifierTokens,
@@ -3337,9 +3263,7 @@ object Parsers:
 
     /** DefParamClauses ::= DefParamClause { DefParamClause } -- and two
       * DefTypeParamClause cannot be adjacent DefParamClause ::=
-      * DefTypeParamClause
-      * \| DefTermParamClause
-      * \| UsingParamClause
+      * DefTypeParamClause \| DefTermParamClause \| UsingParamClause
       */
     def typeOrTermParamClauses(
         ownerKind: ParamOwner,
@@ -3468,8 +3392,7 @@ object Parsers:
       * ContextTypes) ‘)’ ClsParams ::= ClsParam {‘,’ ClsParam} ClsParam ::=
       * {Annotation}
       *
-      * TypelessClause ::= DefTermParamClause
-      * \| UsingParamClause
+      * TypelessClause ::= DefTermParamClause \| UsingParamClause
       *
       * DefTermParamClause::= [nl] ‘(’ [DefTermParams] ‘)’ UsingParamClause ::=
       * ‘(’ ‘using’ (DefTermParams | ContextTypes) ‘)’ DefImplicitClause ::=
@@ -3517,11 +3440,10 @@ object Parsers:
             then syntaxError(em"`val` or `var` expected")
             if firstClause && ofCaseClass then mods
             else mods | PrivateLocal
-        else {
+        else
           if isIdent(nme.inline) && in.isSoftModifierInParamModifierPosition
           then mods = addModifier(mods)
           mods |= Param
-        }
         atSpan(start, nameStart) {
           val name = ident()
           acceptColon()
@@ -3701,13 +3623,11 @@ object Parsers:
         end match
         imp
 
-    /** ImportExpr ::= SimpleRef {‘.’ id} ‘.’ ImportSpec
-      * \| SimpleRef ‘as’ id ImportSpec ::= NamedSelector
-      * \| WildcardSelector
-      * \| ‘{’ ImportSelectors ‘}’ ImportSelectors ::= NamedSelector [‘,’
-      * ImportSelectors]
-      * \| WildCardSelector {‘,’ WildCardSelector} NamedSelector ::= id [‘as’
-      * (id | ‘_’)] WildCardSelector ::= ‘*' | ‘given’ [InfixType]
+    /** ImportExpr ::= SimpleRef {‘.’ id} ‘.’ ImportSpec \| SimpleRef ‘as’ id
+      * ImportSpec ::= NamedSelector \| WildcardSelector \| ‘{’ ImportSelectors
+      * ‘}’ ImportSelectors ::= NamedSelector [‘,’ ImportSelectors] \|
+      * WildCardSelector {‘,’ WildCardSelector} NamedSelector ::= id [‘as’ (id |
+      * ‘_’)] WildCardSelector ::= ‘*' | ‘given’ [InfixType]
       */
     def importExpr(mkTree: ImportConstr): () => Tree =
 
@@ -3814,15 +3734,10 @@ object Parsers:
       () => atSpan(in.offset) { importSelection(simpleRef()) }
     end importExpr
 
-    /** Def ::= val PatDef
-      * \| var VarDef
-      * \| def DefDef
-      * \| type {nl} TypeDcl
-      * \| TmplDef Dcl ::= val ValDcl
-      * \| var ValDcl
-      * \| def DefDcl
-      * \| type {nl} TypeDcl EnumCase ::= `case' (id ClassConstr [`extends'
-      * ConstrApps]] | ids)
+    /** Def ::= val PatDef \| var VarDef \| def DefDef \| type {nl} TypeDcl \|
+      * TmplDef Dcl ::= val ValDcl \| var ValDcl \| def DefDcl \| type {nl}
+      * TypeDcl EnumCase ::= `case' (id ClassConstr [`extends' ConstrApps]] |
+      * ids)
       */
     def defOrDcl(start: Int, mods: Modifiers): Tree = in.token match
       case VAL =>
@@ -3841,10 +3756,9 @@ object Parsers:
       case _ =>
         tmplDef(start, mods)
 
-    /** PatDef ::= ids [‘:’ Type] ‘=’ Expr
-      * \| Pattern2 [‘:’ Type] ‘=’ Expr VarDef ::= PatDef
-      * \| id {`,' id} `:' Type `=' `_' (deprecated in 3.x) ValDcl ::= id {`,'
-      * id} `:' Type VarDcl ::= id {`,' id} `:' Type
+    /** PatDef ::= ids [‘:’ Type] ‘=’ Expr \| Pattern2 [‘:’ Type] ‘=’ Expr
+      * VarDef ::= PatDef \| id {`,' id} `:' Type `=' `_' (deprecated in 3.x)
+      * ValDcl ::= id {`,' id} `:' Type VarDcl ::= id {`,' id} `:' Type
       */
     def patDefOrDcl(start: Offset, mods: Modifiers): Tree =
       atSpan(start, nameStart) {
@@ -3897,9 +3811,9 @@ object Parsers:
             PatDef(mods, lhs, tpt, rhs2)
       }
 
-    /** DefDef ::= DefSig [‘:’ Type] ‘=’ Expr
-      * \| this TypelessClauses [DefImplicitClause] `=' ConstrExpr DefDcl ::=
-      * DefSig `:' Type DefSig ::= id [DefTypeParamClause] DefTermParamClauses
+    /** DefDef ::= DefSig [‘:’ Type] ‘=’ Expr \| this TypelessClauses
+      * [DefImplicitClause] `=' ConstrExpr DefDcl ::= DefSig `:' Type DefSig ::=
+      * id [DefTypeParamClause] DefTermParamClauses
       *
       * if clauseInterleaving is enabled: DefSig ::= id [DefParamClauses]
       * [DefImplicitClause]
@@ -3945,7 +3859,7 @@ object Parsers:
         makeConstructor(Nil, vparamss, rhs)
           .withMods(mods)
           .setComment(in.getDocComment(start))
-      else {
+      else
         val mods1 = addFlag(mods, Method)
         val ident = termIdent()
         var name = ident.name.asTermName
@@ -3982,12 +3896,10 @@ object Parsers:
         val ddef = DefDef(name, paramss, tpt, rhs)
         if isBackquoted(ident) then ddef.pushAttachment(Backquoted, ())
         finalizeDef(ddef, mods1, start)
-      }
       end if
     }
 
-    /** ConstrExpr ::= SelfInvocation
-      * \| `{' SelfInvocation {semi BlockStat} `}'
+    /** ConstrExpr ::= SelfInvocation \| `{' SelfInvocation {semi BlockStat} `}'
       */
     val constrExpr: () => Tree = () =>
       if in.isNestedStart then
@@ -4056,10 +3968,8 @@ object Parsers:
       }
     end typeDefOrDcl
 
-    /** TmplDef ::= ([‘case’] ‘class’ | ‘trait’) ClassDef
-      * \| [‘case’] ‘object’ ObjectDef
-      * \| ‘enum’ EnumDef
-      * \| ‘given’ GivenDef
+    /** TmplDef ::= ([‘case’] ‘class’ | ‘trait’) ClassDef \| [‘case’] ‘object’
+      * ObjectDef \| ‘enum’ EnumDef \| ‘given’ GivenDef
       */
     def tmplDef(start: Int, mods: Modifiers): Tree =
       in.token match
@@ -4152,7 +4062,7 @@ object Parsers:
           in.nextToken()
           val ids = commaSeparated(() => termIdent())
           PatDef(mods1, id :: ids, TypeTree(), EmptyTree)
-        else {
+        else
           val caseDef =
             if in.token == LBRACKET || in.token == LPAREN || in.token == AT || isModifier
             then
@@ -4161,7 +4071,6 @@ object Parsers:
               TypeDef(clsName, caseTemplate(constr))
             else ModuleDef(id.name.toTermName, caseTemplate(emptyConstructor))
           finalizeDef(caseDef, mods1, start)
-        }
       }
 
     /** [`extends' ConstrApps] */
@@ -4300,8 +4209,7 @@ object Parsers:
       result
     end extension
 
-    /** ExtMethod ::= {Annotation [nl]} {Modifier} ‘def’ DefDef
-      * \| Export
+    /** ExtMethod ::= {Annotation [nl]} {Modifier} ‘def’ DefDef \| Export
       */
     def extMethod(numLeadParams: Int): DefDef =
       val start = in.offset
@@ -4453,13 +4361,9 @@ object Parsers:
       val stats = inDefScopeBraces(topStatSeq(), rewriteWithColon = true)
       makePackaging(start, pkg, stats)
 
-    /** TopStatSeq ::= TopStat {semi TopStat} TopStat ::= Import
-      * \| Export
-      * \| Annotations Modifiers Def
-      * \| Packaging
-      * \| package object objectDef
-      * \| Extension
-      * \|
+    /** TopStatSeq ::= TopStat {semi TopStat} TopStat ::= Import \| Export \|
+      * Annotations Modifiers Def \| Packaging \| package object objectDef \|
+      * Extension \|
       */
     def topStatSeq(outermost: Boolean = false): List[Tree] =
       val stats = new ListBuffer[Tree]
@@ -4482,8 +4386,7 @@ object Parsers:
       do ()
       stats.toList
 
-    /** SelfType ::= id [‘:’ InfixType] ‘=>’
-      * \| ‘this’ ‘:’ InfixType ‘=>’
+    /** SelfType ::= id [‘:’ InfixType] ‘=>’ \| ‘this’ ‘:’ InfixType ‘=>’
       */
     def selfType(): ValDef =
       if (in.isIdent || in.token == THIS)
@@ -4512,14 +4415,9 @@ object Parsers:
       else EmptyValDef
 
     /** TemplateStatSeq ::= [SelfType] TemplateStat {semi TemplateStat}
-      * TemplateStat ::= Import
-      * \| Export
-      * \| Annotations Modifiers Def
-      * \| Annotations Modifiers Dcl
-      * \| Extension
-      * \| Expr1
-      * \| EnumStat ::= TemplateStat
-      * \| Annotations Modifiers EnumCase
+      * TemplateStat ::= Import \| Export \| Annotations Modifiers Def \|
+      * Annotations Modifiers Dcl \| Extension \| Expr1 \| EnumStat ::=
+      * TemplateStat \| Annotations Modifiers EnumCase
       */
     def templateStatSeq(): (ValDef, List[Tree]) = checkNoEscapingPlaceholders {
       val stats = new ListBuffer[Tree]
@@ -4540,10 +4438,8 @@ object Parsers:
     }
 
     /** RefineStatSeq ::= RefineStat {semi RefineStat} RefineStat ::= ‘val’
-      * VarDcl
-      * \| ‘def’ DefDcl
-      * \| ‘type’ {nl} TypeDcl (in reality we admit Defs and vars and filter
-      * them out afterwards in `checkLegal`)
+      * VarDcl \| ‘def’ DefDcl \| ‘type’ {nl} TypeDcl (in reality we admit Defs
+      * and vars and filter them out afterwards in `checkLegal`)
       */
     def refineStatSeq(): List[Tree] =
       val stats = new ListBuffer[Tree]
@@ -4592,12 +4488,9 @@ object Parsers:
         tmplDef(start, mods)
       else defOrDcl(start, mods)
 
-    /** BlockStatSeq ::= { BlockStat semi } [Expr] BlockStat ::= Import
-      * \| Annotations [implicit] [lazy] Def
-      * \| Annotations LocalModifiers TmplDef
-      * \| Extension
-      * \| Expr1
-      * \|
+    /** BlockStatSeq ::= { BlockStat semi } [Expr] BlockStat ::= Import \|
+      * Annotations [implicit] [lazy] Def \| Annotations LocalModifiers TmplDef
+      * \| Extension \| Expr1 \|
       */
     def blockStatSeq(): List[Tree] = checkNoEscapingPlaceholders {
       val stats = new ListBuffer[Tree]

@@ -34,7 +34,7 @@ private[repl] class Rendering(parentClassLoader: Option[ClassLoader] = None):
   private[repl] def classLoader()(using Context) =
     if myClassLoader != null && myClassLoader.root == ctx.settings.outputDir.value
     then myClassLoader
-    else {
+    else
       val parent = Option(myClassLoader).orElse(parentClassLoader).getOrElse {
         val compilerClasspath = ctx.platform.classPath(using ctx).asURLs
         // We can't use the system classloader as a parent because it would
@@ -91,7 +91,6 @@ private[repl] class Rendering(parentClassLoader: Option[ClassLoader] = None):
             s"$maybeTruncated ... large output truncated, print value to show all"
 
       myClassLoader
-    }
 
   private[repl] def truncate(str: String, maxPrintCharacters: Int)(using
       ctx: Context

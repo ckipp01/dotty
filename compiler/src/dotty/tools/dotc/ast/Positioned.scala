@@ -66,7 +66,7 @@ abstract class Positioned(implicit @constructorOnly src: SourceFile)
     */
   def withSpan(span: Span): this.type =
     if span == mySpan then this
-    else {
+    else
       val newpd: this.type =
         if !mySpan.exists then
           if span.exists then
@@ -75,7 +75,6 @@ abstract class Positioned(implicit @constructorOnly src: SourceFile)
         else cloneIn(source)
       newpd.span = span
       newpd
-    }
 
   /** The union of startSpan and the spans of all positioned children that have
     * the same source as this node, except that Inlined nodes only consider

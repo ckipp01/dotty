@@ -935,7 +935,7 @@ object TypeOps:
             else if symbol.is(Module) then
               TermRef(this(tref.prefix), symbol.sourceModule)
             else if prefixTVar != null then this(tref)
-            else {
+            else
               prefixTVar =
                 WildcardType // prevent recursive call from assigning it
               // e.g. tests/pos/i15029.more.scala, create a TypeVar for `Instances`' B, so we can disregard `Ints`
@@ -951,7 +951,6 @@ object TypeOps:
                 DepParamName.fresh(tref.name)
               )
               prefixTVar.uncheckedNN
-            }
           case tp => mapOver(tp)
 
       val inferThisMap = new InferPrefixMap
@@ -981,12 +980,11 @@ object TypeOps:
         wildApprox(protoTp1)
 
       if protoTp1 <:< tp2 then instantiate()
-      else {
+      else
         val approxTp2 = approximateParent(tp2)
         if protoTp1 <:< approxTp2 || parentQualify(protoTp1, approxTp2) then
           instantiate()
         else NoType
-      }
     }
 
   def nestedPairs(ts: List[Type])(using Context): Type =

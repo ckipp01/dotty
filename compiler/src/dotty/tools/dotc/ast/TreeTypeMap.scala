@@ -90,7 +90,7 @@ class TreeTypeMap(
 
   private def updateDecls(prevStats: List[Tree], newStats: List[Tree]): Unit =
     if prevStats.isEmpty then assert(newStats.isEmpty)
-    else {
+    else
       prevStats.head match
         case pdef: MemberDef =>
           val prevSym = pdef.symbol
@@ -99,7 +99,6 @@ class TreeTypeMap(
           if prevSym != newSym then newCls.replace(prevSym, newSym)
         case _ =>
       updateDecls(prevStats.tail, newStats.tail)
-    }
 
   def transformInlined(tree: Inlined)(using Context): Tree =
     val Inlined(call, bindings, expanded) = tree
@@ -206,7 +205,7 @@ class TreeTypeMap(
   /** The current tree map composed with a substitution [from -> to] */
   def withSubstitution(from: List[Symbol], to: List[Symbol]): TreeTypeMap =
     if from eq to then this
-    else {
+    else
       // assert that substitution stays idempotent, assuming its parts are
       // TODO: It might be better to cater for the asserted-away conditions, by
       // setting up a proper substitution abstraction with a compose operator that
@@ -224,7 +223,6 @@ class TreeTypeMap(
         from ++ substFrom,
         to ++ substTo
       )
-    }
 
   /** Apply `typeMap` and `ownerMap` to given symbols `syms` and return a
     * treemap that contains the substitution between original and mapped

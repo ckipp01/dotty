@@ -520,18 +520,16 @@ object Scanners:
           k: IndentWidth => IndentWidth
       ): IndentWidth =
         if idx < 0 then k(Run(ch, n))
-        else {
+        else
           val nextChar = buf(idx)
           if nextChar == LF then k(Run(ch, n))
           else if nextChar == ' ' || nextChar == '\t' then
             if nextChar == ch then recur(idx - 1, ch, n + 1, k)
-            else {
+            else
               val k1: IndentWidth => IndentWidth =
                 if n == 0 then k else Conc(_, Run(ch, n))
               recur(idx - 1, nextChar, 1, k1)
-            }
           else recur(idx - 1, ' ', 0, identity)
-        }
       recur(offset - 1, ' ', 0, identity)
     end indentWidth
 
@@ -945,10 +943,9 @@ object Scanners:
           getOperatorRest()
         case '/' =>
           if skipComment() then fetchToken()
-          else {
+          else
             putChar('/')
             getOperatorRest()
-          }
         case '0' =>
           def fetchLeadingZero(): Unit =
             nextChar()
@@ -977,25 +974,22 @@ object Scanners:
                   nextRawChar()
                   nextRawChar()
                   stringPart(multiLine = true)
-                else {
+                else
                   nextChar()
                   token = STRINGLIT
                   strVal = ""
-                }
               else stringPart(multiLine = false)
-            else {
+            else
               nextChar()
               if ch == '\"' then
                 nextChar()
                 if ch == '\"' then
                   nextRawChar()
                   getRawStringLit()
-                else {
+                else
                   token = STRINGLIT
                   strVal = ""
-                }
               else getStringLit()
-            }
           fetchDoubleQuote()
         case '\'' =>
           def fetchSingleQuote(): Unit =
@@ -1050,10 +1044,9 @@ object Scanners:
           nextChar(); token = RBRACKET
         case SU =>
           if isAtEnd then token = EOF
-          else {
+          else
             error(em"illegal character")
             nextChar()
-          }
         case _ =>
           def fetchOther() =
             if ch == '\u21D2' then
@@ -1108,7 +1101,8 @@ object Scanners:
           if ch == '/' then nextChar()
           else skipComment()
         else if ch == SU then incompleteInputError(em"unclosed comment")
-        else { nextChar(); skipComment() }
+        else
+          nextChar(); skipComment()
       def nestedComment() =
         nextChar(); skipComment()
       val start = lastCharOffset
@@ -1130,11 +1124,10 @@ object Scanners:
         skipLine(); finishComment()
       else if ch == '*' then
         nextChar(); skipComment(); finishComment()
-      else {
+      else
         // This was not a comment, remove the `/` from the buffer
         commentBuf.clear()
         false
-      }
     end skipComment
 
 // Lookahead ---------------------------------------------------------------
@@ -1274,11 +1267,10 @@ object Scanners:
         else getRawStringLit()
       else if ch == SU then
         incompleteInputError(em"unclosed multi-line string literal")
-      else {
+      else
         putChar(ch)
         nextRawChar()
         getRawStringLit()
-      }
 
     // for interpolated strings
     @tailrec private def getStringPart(multiLine: Boolean): Unit =
@@ -1289,11 +1281,10 @@ object Scanners:
             setStrVal()
             token = STRINGLIT
           else getStringPart(multiLine)
-        else {
+        else
           nextChar()
           setStrVal()
           token = STRINGLIT
-        }
       else if ch == '\\' && !multiLine then
         putChar(ch)
         nextRawChar()
@@ -1342,19 +1333,17 @@ object Scanners:
           )
           putChar('$')
           getStringPart(multiLine)
-      else {
+      else
         val isUnclosedLiteral =
           !isUnicodeEscape && (ch == SU || (!multiLine && (ch == CR || ch == LF)))
         if isUnclosedLiteral then
           if multiLine then
             incompleteInputError(em"unclosed multi-line string literal")
           else error(em"unclosed string literal")
-        else {
+        else
           putChar(ch)
           nextRawChar()
           getStringPart(multiLine)
-        }
-      }
     end getStringPart
 
     private def fetchStringPart(multiLine: Boolean) =
@@ -1370,15 +1359,13 @@ object Scanners:
             putChar('"')
             nextChar()
           true
-        else {
+        else
           putChar('"')
           putChar('"')
           false
-        }
-      else {
+      else
         putChar('"')
         false
-      }
 
     /** Copy current character into cbuf, interpreting any escape sequences, and
       * advance to next character. Surrogate pairs are consumed (see check at
@@ -1529,11 +1516,10 @@ object Scanners:
       putChar(ch)
       nextChar()
       if ch == '\'' then finishCharLit()
-      else {
+      else
         token = op
         strVal = Objects.toString(name)
         litBuf.clear()
-      }
 
     override def toString: String =
       showTokenDetailed(token) + {

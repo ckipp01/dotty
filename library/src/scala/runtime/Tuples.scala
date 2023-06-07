@@ -791,7 +791,7 @@ object Tuples:
                 .toArray
                 .asInstanceOf[IArray[Object]]
             )
-          // TODO use Iterator.toIArray
+        // TODO use Iterator.toIArray
       ).asInstanceOf[Tuple]
   )
 
@@ -1650,11 +1650,10 @@ object Tuples:
         elems(21),
         elems(22)
       )
-    else {
+    else
       val arr = new Array[Object](xxl.elems.length - 1)
       System.arraycopy(xxl.elems, 1, arr, 0, xxl.elems.length - 1)
       TupleXXL.fromIArray(arr.asInstanceOf[IArray[Object]]).asInstanceOf[Tuple]
-    }
 
   def tail(self: NonEmptyTuple): Tuple = (self: Any) match
     case xxl: TupleXXL => xxlTail(xxl)
@@ -2112,11 +2111,10 @@ object Tuples:
         elems(20),
         elems(21)
       )
-    else {
+    else
       val arr = new Array[Object](xxl.elems.length - 1)
       System.arraycopy(xxl.elems, 0, arr, 0, xxl.elems.length - 1)
       TupleXXL.fromIArray(arr.asInstanceOf[IArray[Object]]).asInstanceOf[Tuple]
-    }
 
   // Init for Tuple1 to Tuple22
   private def specialCaseInit(self: Tuple): Tuple =
@@ -2541,7 +2539,7 @@ object Tuples:
     val actualN = Math.min(n, selfSize)
 
     if actualN == 0 then EmptyTuple
-    else {
+    else
       val arr = (self: Any) match
         case xxl: TupleXXL =>
           xxl.elems.asInstanceOf[Array[Object]].take(actualN)
@@ -2553,7 +2551,6 @@ object Tuples:
           arr
 
       fromIArray(arr.asInstanceOf[IArray[Object]])
-    }
 
   def drop(self: Tuple, n: Int): Tuple =
     if n < 0 then throw new IndexOutOfBoundsException(n.toString)
@@ -2562,7 +2559,7 @@ object Tuples:
     val rem = size - actualN
 
     if rem == 0 then EmptyTuple
-    else {
+    else
       val arr = (self: Any) match
         case xxl: TupleXXL =>
           xxl.elems.asInstanceOf[Array[Object]].drop(actualN)
@@ -2575,7 +2572,6 @@ object Tuples:
           arr
 
       fromIArray(arr.asInstanceOf[IArray[Object]])
-    }
 
   def splitAt(self: Tuple, n: Int): (Tuple, Tuple) =
     if n < 0 then throw new IndexOutOfBoundsException(n.toString)

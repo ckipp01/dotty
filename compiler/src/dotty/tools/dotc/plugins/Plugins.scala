@@ -74,10 +74,9 @@ trait Plugins:
         fail("[skipping a repeated plugin: %s]")
       else if ctx.settings.disable.value contains plug.name then
         fail("[disabling plugin: %s]")
-      else {
+      else
         note("[loaded plugin %s]")
         withPlug
-      }
 
     val plugs =
       pick(roughPluginsList, ctx.base.phasePlan.flatten.map(_.phaseName).toSet)
@@ -215,19 +214,17 @@ object Plugins:
         if beforePhase == phase.phaseName then
           throw new Exception(constraintConflict(phase))
         else if isInserted(beforePhase) then Set(beforePhase)
-        else {
+        else
           val (_, runsBefore) = orderRequirements(beforePhase)
           runsBefore.flatMap(propagateRunsBefore) + beforePhase
-        }
 
       def propagateRunsAfter(afterPhase: String): Set[String] =
         if afterPhase == phase.phaseName then
           throw new Exception(constraintConflict(phase))
         else if isInserted(afterPhase) then Set(afterPhase)
-        else {
+        else
           val (runsAfter, _) = orderRequirements(afterPhase)
           runsAfter.flatMap(propagateRunsAfter) + afterPhase
-        }
 
       var (runsAfter, runsBefore) = orderRequirements(phase.phaseName)
 

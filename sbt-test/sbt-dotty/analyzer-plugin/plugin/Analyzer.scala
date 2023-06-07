@@ -47,7 +47,7 @@ class InitChecker extends PluginPhase:
 
   private def checkRef(tree: Tree)(implicit ctx: Context): Tree =
     if !checkable(tree.symbol) then tree
-    else {
+    else
       val helloPkgSym = requiredPackage("hello").moduleClass
       val libPkgSym = requiredPackage("lib").moduleClass
       val enclosingPkg = tree.symbol.enclosingPackageClass
@@ -67,7 +67,6 @@ class InitChecker extends PluginPhase:
           tree.sourcePos
         )
       tree
-    }
 
   override def transformValDef(tree: ValDef)(implicit ctx: Context): Tree =
     checkDef(tree)

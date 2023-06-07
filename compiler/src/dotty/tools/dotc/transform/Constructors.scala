@@ -331,7 +331,7 @@ class Constructors extends MiniPhase with IdentityDenotTransformer:
       then // It may happen for unit fields, tests/run/i6987.scala
         dropped += acc.field
         Nil
-      else {
+      else
         val param = acc.subst(accessors, paramSyms)
         if param.hasAnnotation(defn.ConstructorOnlyAnnot) then
           report.error(
@@ -341,11 +341,11 @@ class Constructors extends MiniPhase with IdentityDenotTransformer:
         val target = if acc.is(Method) then acc.field else acc
         if !target.exists then
           Nil // this case arises when the parameter accessor is an alias
-        else {
+        else
           val assigns =
             Assign(ref(target), ref(param)).withSpan(tree.span) :: Nil
           if acc.name != nme.OUTER then assigns
-          else {
+          else
             // insert test: if ($outer eq null) throw new NullPointerException
             val nullTest =
               If(
@@ -354,9 +354,6 @@ class Constructors extends MiniPhase with IdentityDenotTransformer:
                 unitLiteral
               )
             nullTest :: assigns
-          }
-        }
-      }
     }
 
     // Drop accessors that are not retained from class scope

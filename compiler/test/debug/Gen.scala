@@ -50,7 +50,7 @@ object Gen:
       // simple command
       if command == "break" then Break(lineNo)
       else Command(command)
-    else {
+    else
       val Seq(cmd, rhs) = command.split(":", 2).toSeq.map(_.trim)
       if rhs.startsWith("\"") then
         // regex match
@@ -64,7 +64,6 @@ object Gen:
       else
         // literal match
         Command(cmd, LitExpect(rhs))
-    }
 
   def parse(file: String): Program =
     val lines = Using(Source.fromFile(file))(_.getLines().toBuffer).get

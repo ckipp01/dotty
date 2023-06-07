@@ -260,7 +260,7 @@ class HoistSuperArgs extends MiniPhase with IdentityDenotTransformer:
           hoist.hoistSuperArgsFromCall(superCall, cdef, new mutable.ListBuffer)
         val hoistedBody = impl.body.mapconserve(hoist.hoistSuperArgsFromConstr)
         if hoist.superArgDefs.isEmpty then tdef
-        else {
+        else
           val (staticSuperArgDefs, enclSuperArgDefs) =
             hoist.superArgDefs.toList.partition(_.symbol.is(JavaStatic))
           flatTree(
@@ -272,7 +272,6 @@ class HoistSuperArgs extends MiniPhase with IdentityDenotTransformer:
             ) ::
               enclSuperArgDefs
           )
-        }
       case _ =>
         tdef
 end HoistSuperArgs

@@ -43,11 +43,10 @@ final class ReusableDataReader() extends DataReader:
           while !endOfInput do
             val remaining = data.length - this.size
             if remaining == 0 then endOfInput = true
-            else {
+            else
               val read = input.read(data, this.size, remaining)
               if read < 0 then endOfInput = true
               else this.size += read
-            }
           bb = ByteBuffer.wrap(data, 0, size)
         finally input.close()
       case None =>

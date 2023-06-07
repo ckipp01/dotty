@@ -180,12 +180,11 @@ object Settings:
                 s"'$arg' does not exist or is not a directory or .jar file",
                 args
               )
-            else {
+            else
               val output =
                 if isJar then JarArchive.create(path)
                 else new PlainDirectory(path)
               update(output, args)
-            }
           case (IntTag, args) if argRest.nonEmpty =>
             setInt(argRest, args)
           case (IntTag, arg2 :: args2) =>

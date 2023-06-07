@@ -305,13 +305,12 @@ object JSEncoding:
   def encodeClassType(sym: Symbol)(using Context): jstpe.Type =
     if sym == defn.ObjectClass then jstpe.AnyType
     else if sym.isJSType then jstpe.AnyType
-    else {
+    else
       assert(
         sym != defn.ArrayClass,
         "encodeClassType() cannot be called with ArrayClass"
       )
       jstpe.ClassType(encodeClassName(sym))
-    }
 
   def encodeClassRef(sym: Symbol)(using Context): jstpe.ClassRef =
     jstpe.ClassRef(encodeClassName(sym))

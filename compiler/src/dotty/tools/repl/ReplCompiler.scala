@@ -135,7 +135,7 @@ class ReplCompiler extends Compiler:
         case ValDef(_, _, Block(stats, _)) if stats.nonEmpty =>
           val stat = stats.last.asInstanceOf[tpd.Tree]
           if stat.tpe.isError then stat.tpe.show
-          else {
+          else
             val symbols = extractSymbols(stat)
             val doc = for
               sym <- symbols
@@ -144,7 +144,6 @@ class ReplCompiler extends Compiler:
 
             if doc.hasNext then doc.next()
             else s"// No doc for `$expr`"
-          }
 
         case _ =>
           """Couldn't display the documentation for your expression, so sorry :(

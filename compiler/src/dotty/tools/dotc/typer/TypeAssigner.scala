@@ -274,11 +274,10 @@ trait TypeAssigner:
           if mixinClass.exists then mixinClass.typeRef
           else if !mix.isEmpty then findMixinSuper(cls.info)
           else if ctx.erasedTypes then cls.info.firstParent.typeConstructor
-          else {
+          else
             val ps = cls.classInfo.parents
             if ps.isEmpty then defn.AnyType
             else ps.reduceLeft((x: Type, y: Type) => x & y)
-          }
         SuperType(cls.thisType, owntype)
 
   def assignType(tree: untpd.Super, qual: Tree, mixinClass: Symbol = NoSymbol)(
@@ -385,15 +384,14 @@ trait TypeAssigner:
                 case _                       => mapOver(t)
             val resultType1 = transform(pt.resultType)
             if gapBuf.isEmpty then resultType1
-            else {
+            else
               val gaps = gapBuf.toList
               pt.derivedLambdaType(
                 gaps.map(paramNames),
                 gaps.map(idx => transform(pt.paramInfos(idx)).bounds),
                 resultType1
               )
-            }
-          else {
+          else
             // Make sure arguments don't contain the type `pt` itself.
             // make a copy of the argument if that's the case.
             // This is done to compensate for the fact that normally every
@@ -410,7 +408,6 @@ trait TypeAssigner:
             if argTypes.hasSameLengthAs(paramNames) then
               pt.instantiate(argTypes)
             else wrongNumberOfTypeArgs(fn.tpe, pt.typeParams, args, tree.srcPos)
-          }
           end if
         }
       case err: ErrorType =>

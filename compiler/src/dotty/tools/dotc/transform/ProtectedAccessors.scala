@@ -29,7 +29,7 @@ object ProtectedAccessors:
         JavaStatic
       ) || // Java's static protected definitions are treated as public
       ctx.owner.enclosingPackageClass == sym.enclosingPackageClass
-    else {
+    else
       // For Scala-defined symbols we currently allow private and protected accesses
       // from inner packages, and compensate by widening accessibility of such symbols to public.
       // It would be good if we could revisit this at some point.
@@ -37,7 +37,6 @@ object ProtectedAccessors:
       ctx.owner.isContainedIn(boundary) || ctx.owner.isContainedIn(
         boundary.linkedClass
       )
-    }
 
   /** Do we need a protected accessor if the current context's owner is not in a
     * subclass or subtrait of `sym`?

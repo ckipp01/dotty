@@ -57,7 +57,7 @@ object MainProxies:
       if mt.isImplicitMethod then
         report.error(em"@main method cannot have implicit parameters", pos)
         call
-      else {
+      else
         val args = mt.paramInfos.zipWithIndex map { (formal, n) =>
           val (parserSym, formalElem) =
             if formal.isRepeatedParam then
@@ -80,12 +80,11 @@ object MainProxies:
             addArgs(call1, restpe, idx + args.length)
           case _ =>
             call1
-      }
 
     var result: List[TypeDef] = Nil
     if !mainFun.owner.isStaticOwner then
       report.error(em"@main method is not statically accessible", pos)
-    else {
+    else
       var call = ref(mainFun.termRef)
       mainFun.info match
         case _: ExprType =>
@@ -131,7 +130,6 @@ object MainProxies:
 
       if !ctx.reporter.hasErrors then
         result = mainCls.withSpan(mainAnnotSpan.toSynthetic) :: Nil
-    }
     end if
     result
   end mainProxy

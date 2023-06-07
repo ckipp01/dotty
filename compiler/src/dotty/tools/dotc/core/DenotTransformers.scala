@@ -38,7 +38,7 @@ object DenotTransformers:
     def transform(ref: SingleDenotation)(using Context): SingleDenotation =
       val sym = ref.symbol
       if sym.exists && !infoMayChange(sym) then ref
-      else {
+      else
         val info1 = transformInfo(ref.info, ref.symbol)
         if info1 eq ref.info then ref
         else
@@ -49,7 +49,6 @@ object DenotTransformers:
                 .copyCaches(ref, ctx.phase.next)
             case _ =>
               ref.derivedSingleDenotation(ref.symbol, info1)
-      }
 
     /** Denotations with a symbol where `infoMayChange` is false are guaranteed
       * to be unaffected by this transform, so `transformInfo` need not be run.

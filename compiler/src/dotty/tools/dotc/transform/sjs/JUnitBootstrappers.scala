@@ -387,14 +387,13 @@ class JUnitBootstrappers extends MiniPhase:
       )
     else if resultType.isRef(junitdefn.FutureClass) then
       instance.select(testMethod).appliedToNone
-    else {
+    else
       // We lie in the error message to not expose that we support async testing.
       report.error(
         "JUnit test must have Unit return type",
         testMethod.sourcePos
       )
       EmptyTree
-    }
 
   private def genNewInstance(owner: ClassSymbol, testClass: ClassSymbol)(using
       Context

@@ -393,10 +393,9 @@ object Trees:
             Synthetic
           ) || span.isSynthetic || name.toTermName == nme.ERROR
         then Span(point)
-        else {
+        else
           val realName = srcName.stripModuleClassSuffix.lastPart
           Span(point, point + realName.length, point)
-        }
       else span
 
     /** The source position of the name defined by this definition. This is a
@@ -2066,7 +2065,7 @@ object Trees:
       def foldOver(x: X, tree: Tree)(using Context): X =
         if tree.source != ctx.source && tree.source.exists then
           foldOver(x, tree)(using ctx.withSource(tree.source))
-        else {
+        else
           Stats.record(s"TreeAccumulator.foldOver/$getClass")
           tree match
             case Ident(name) =>
@@ -2176,7 +2175,6 @@ object Trees:
             case _ =>
               foldMoreCases(x, tree)
           end match
-        }
 
       def foldMoreCases(x: X, tree: Tree)(using Context): X =
         assert(

@@ -832,10 +832,9 @@ trait TypedTreeInfo extends TreeInfo[Type]:
         def apply(x: List[Tree], tree: Tree)(using Context): List[Tree] =
           if tree.span.contains(sym.span) then
             if definedSym(tree) == sym then tree :: x
-            else {
+            else
               val x1 = foldOver(x, tree)
               if x1 ne x then tree :: x1 else x1
-            }
           else x
       accum(Nil, root)
     }
@@ -1079,3 +1078,4 @@ object TreeInfo:
 
   /** A stable path that is also idempotent */
   val IdempotentPath: PurityLevel = new PurityLevel(Idempotent.x | Path.x)
+end TreeInfo

@@ -1001,7 +1001,7 @@ object ProtoTypes:
         if mt.isImplicitMethod then
           normalize(resultTypeApprox(mt, wildcardOnly = true), pt)
         else if mt.isResultDependent then tp
-        else {
+        else
           val rt = normalize(mt.resultType, pt)
           pt match
             case pt: IgnoredProto =>
@@ -1012,7 +1012,6 @@ object ProtoTypes:
             case _ =>
               val ft = defn.FunctionOf(mt.paramInfos, rt)
               if mt.paramInfos.nonEmpty || (ft frozen_<:< pt) then ft else rt
-        }
       case et: ExprType =>
         normalize(et.resultType, pt)
       case wtp =>

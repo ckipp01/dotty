@@ -361,7 +361,7 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
           else decls.filter(isExposedModule)
 
         if innerJSClasses.isEmpty && innerObjectsForAdHocExposed.isEmpty then tp
-        else {
+        else
           def addAnnots(sym: Symbol, symForName: Symbol): Unit =
             val jsNameAnnot =
               symForName.getAnnotation(jsdefn.JSNameAnnot).getOrElse {
@@ -410,7 +410,6 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
             decls1.enter(getter)
 
           tp.derivedClassInfo(decls = decls1)
-        }
         end if
 
       case _ =>
@@ -431,10 +430,10 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
             ref1.copySymDenotation(initFlags = ref1.flags &~ NoInits)
           else ref1
         else
-          // JS traits never have an initializer, no matter what dotc thinks
-          if isJSType then
-            ref1.copySymDenotation(initFlags = ref1.flags | NoInits)
-          else ref1
+        // JS traits never have an initializer, no matter what dotc thinks
+        if isJSType then
+          ref1.copySymDenotation(initFlags = ref1.flags | NoInits)
+        else ref1
       case ref1 =>
         ref1
 
@@ -485,7 +484,7 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
     if !mayNeedJSClassOrJSObjectFields(cls) then
       if fixedParents eq tree.parents then tree
       else cpy.Template(tree)(parents = fixedParents)
-    else {
+    else
       val newStats = List.newBuilder[Tree]
       for stat <- tree.body do
         stat match
@@ -496,18 +495,16 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
             val rhs =
               if cls.hasAnnotation(jsdefn.JSNativeAnnot) then
                 ref(jsdefn.JSPackage_native)
-              else {
+              else
                 val clazzValue = clsOf(innerClassSym.typeRef)
                 if cls.isStaticOwner then
                   // scala-js/scala-js#4086
                   ref(jsdefn.Runtime_constructorOf).appliedTo(clazzValue)
-                else {
+                else
                   val parentTpe = extractSuperTypeConstructor(stat.rhs)
                   val superClassCtor = genJSConstructorOf(tree, parentTpe)
                   ref(jsdefn.Runtime_createInnerJSClass)
                     .appliedTo(clazzValue, superClassCtor)
-                }
-              }
 
             newStats += ValDef(jsclassAccessor, rhs)
 
@@ -533,7 +530,6 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
         tree.self,
         newStats.result()
       )
-    }
     end if
   end transformTemplate
 
@@ -573,7 +569,7 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
       val jsclassVal = myState.localClass2jsclassVal(sym)
       if myState.notYetReferencedLocalClasses.remove(cls) then
         Thicket(List(tree, ValDef(jsclassVal, rhs)))
-      else {
+      else
         /* We are using `jsclassVal` inside the definition of the class.
          * We need to declare it as var before and initialize it after the class definition.
          */
@@ -585,7 +581,6 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
             Assign(ref(jsclassVal), rhs)
           )
         )
-      }
     else tree
     end if
   end transformTypeDef
@@ -593,7 +588,7 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
   // This method, together with transformTypeApply and transformSelect, implements step (E)
   override def transformApply(tree: Apply)(using Context): Tree =
     if !isFullyApplied(tree) then tree
-    else {
+    else
       val sym = tree.symbol
 
       if sym.isConstructor then
@@ -618,13 +613,12 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
             )(tree)
         else tree
       else maybeWrapSuperCallWithContextualJSClassValue(tree)
-    }
 
   // This method, together with transformApply and transformSelect, implements step (E)
   // It also implements step (D) and (F)
   override def transformTypeApply(tree: TypeApply)(using Context): Tree =
     if !isFullyApplied(tree) then tree
-    else {
+    else
       val sym = tree.symbol
 
       def isTypeTreeForInnerOrLocalJSClass(tpeArg: Tree): Boolean =
@@ -647,7 +641,6 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
 
         case _ =>
           maybeWrapSuperCallWithContextualJSClassValue(tree)
-    }
 
   // This method, together with transformApply and transformTypeApply, implements step (E)
   override def transformSelect(tree: Select)(using Context): Tree =
@@ -705,13 +698,12 @@ class ExplicitJSClasses extends MiniPhase with InfoTransformer:
       if prefix.isStable then
         val jsclassAccessor = jsclassAccessorFor(cls)
         ref(NamedType(prefix, jsclassAccessor.name, jsclassAccessor.denot))
-      else {
+      else
         report.error(
           em"stable reference to a JS class required but $tpe found",
           tree
         )
         ref(defn.Predef_undefined)
-      }
     else if isLocalJSClass(cls) then
       // Use the local `val` that stores the JS class value
       val state = myState

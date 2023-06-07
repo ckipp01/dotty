@@ -825,7 +825,7 @@ object DottyLanguageServer:
   )(implicit ctx: Context): Option[lsp4j.Diagnostic] =
     if !dia.pos.exists then
       None // diagnostics without positions are not supported: https://github.com/Microsoft/language-server-protocol/issues/249
-    else {
+    else
       def severity(level: Int): lsp4j.DiagnosticSeverity =
         import interfaces.{Diagnostic as D}
         import lsp4j.{DiagnosticSeverity as DS}
@@ -850,7 +850,6 @@ object DottyLanguageServer:
           )
         )
       else None
-    }
 
   /** Check whether `message` should be displayed in the IDE.
     *

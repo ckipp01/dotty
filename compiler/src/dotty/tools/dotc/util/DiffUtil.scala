@@ -16,7 +16,7 @@ object DiffUtil:
       acc: List[String] = Nil
   ): List[String] =
     if str == "" then acc.reverse
-    else {
+    else
       val head = str.charAt(0)
       val (token, rest) =
         if head == ansiColorToken then // ansi color token
@@ -38,7 +38,6 @@ object DiffUtil:
             ) && c != ansiColorToken
           }
       splitTokens(rest, token :: acc)
-    }
 
   /** @return
     *   a tuple of the (found, expected, changedPercentage) diffs as strings
@@ -149,13 +148,12 @@ object DiffUtil:
   private def deleted(str: String) = bgColored(str, Console.RED)
   private def bgColored(str: String, color: String): String =
     if str.isEmpty then ""
-    else {
+    else
       val (spaces, rest) = str.span(_ == '\n')
       if spaces.isEmpty then
         val (text, rest2) = str.span(_ != '\n')
         Console.BOLD + color + text + Console.RESET + bgColored(rest2, color)
       else spaces + bgColored(rest, color)
-    }
   private def eof() = "\u001B[51m" + "EOF" + Console.RESET
 
   private sealed trait Patch
@@ -173,7 +171,7 @@ object DiffUtil:
       if x.isEmpty then builder += Inserted(y.mkString)
       else if y.isEmpty then builder += Deleted(x.mkString)
       else if x.length == 1 || y.length == 1 then needlemanWunsch(x, y, builder)
-      else {
+      else
         val xlen = x.length
         val xmid = xlen / 2
         val ylen = y.length
@@ -190,7 +188,6 @@ object DiffUtil:
         val (y1, y2) = y.splitAt(ymid)
         build(x1, y1, builder)
         build(x2, y2, builder)
-      }
     val builder = Array.newBuilder[Patch]
     build(a, b, builder)
     builder.result()
@@ -249,10 +246,9 @@ object DiffUtil:
       else if i > 0 && score(i)(j) == score(i - 1)(j) + d then
         alignment = Deleted(x(i - 1)) :: alignment
         i = i - 1
-      else {
+      else
         alignment = Inserted(y(j - 1)) :: alignment
         j = j - 1
-      }
     builder ++= alignment
   end needlemanWunsch
 end DiffUtil

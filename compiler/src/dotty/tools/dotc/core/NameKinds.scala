@@ -280,7 +280,7 @@ object NameKinds:
       override def unmangle(name: SimpleName): TermName =
         var i = name.lastIndexOfSlice(str.EXPAND_SEPARATOR)
         if i < 0 then name
-        else {
+        else
           // Hack to make super accessors from traits work. They would otherwise fail because of #765
           // The problem is that in `x$$super$$plus` the expansion prefix needs to be `x`
           // instead of `x$$super`.
@@ -294,7 +294,6 @@ object NameKinds:
             name.take(i).asTermName,
             name.drop(i + str.EXPAND_SEPARATOR.length).asSimpleName
           )
-        }
 
   /** Expanded names of the form `prefix $_setter_$ name`. These only occur in
     * Scala2.

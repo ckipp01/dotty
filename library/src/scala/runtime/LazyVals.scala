@@ -84,13 +84,13 @@ object LazyVals:
       val cur = get(t, offset)
       if STATE(cur, ord) == 1 then retry = !CAS(t, offset, cur, v, ord)
       else
-        // cur == 2, somebody is waiting on monitor
-        if CAS(t, offset, cur, v, ord) then
-          val monitor = getMonitor(t, ord)
-          monitor.synchronized {
-            monitor.notifyAll()
-          }
-          retry = false
+      // cur == 2, somebody is waiting on monitor
+      if CAS(t, offset, cur, v, ord) then
+        val monitor = getMonitor(t, ord)
+        monitor.synchronized {
+          monitor.notifyAll()
+        }
+        retry = false
 
   def wait4Notification(t: Object, offset: Long, cur: Long, ord: Int): Unit =
     if debug then println(s"wait4Notification($t, $offset, $cur, $ord)")

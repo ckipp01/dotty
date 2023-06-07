@@ -783,7 +783,7 @@ class TypeErasure(
       this(tp.resultType)
     case tp @ ClassInfo(pre, cls, parents, decls, _) =>
       if cls.is(Package) then tp
-      else {
+      else
         def eraseParent(tp: Type) =
           tp.dealias match // note: can't be opaque, since it's a class parent
             case tp: AppliedType if tp.tycon.isRef(defn.PairClass) =>
@@ -817,7 +817,6 @@ class TypeErasure(
           if cls.is(Module) then cls.sourceModule.termRef else NoType
         tp.derivedClassInfo(NoPrefix, erasedParents, erasedDecls, selfType1)
         // can't replace selftype by NoType because this would lose the sourceModule link
-      }
     case _: ErrorType | JavaArrayType(_) =>
       tp
     case tp: WildcardType if wildcardOK =>

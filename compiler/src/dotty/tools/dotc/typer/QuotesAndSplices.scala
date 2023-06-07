@@ -435,7 +435,7 @@ trait QuotesAndSplices:
     )
     val shape2 =
       if freshTypeBindings.isEmpty then shape1
-      else {
+      else
         val isFreshTypeBindings = freshTypeBindings.map(_.symbol).toSet
         val typeMap = new TypeMap():
           def apply(tp: Type): Type = tp match
@@ -445,7 +445,6 @@ trait QuotesAndSplices:
               else tp
             case tp => mapOver(tp)
         new TreeTypeMap(typeMap = typeMap).transform(shape1)
-      }
 
     (typeBindings.toMap, shape2, patterns)
   end splitQuotePattern

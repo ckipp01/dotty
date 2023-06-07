@@ -39,3 +39,4 @@ trait UniqueMessagePositions extends Reporter:
           case Some(dia1) if dia1.hides(dia) =>
           case _ => positions((ctx.source, pos)) = dia
     super.markReported(dia)
+end UniqueMessagePositions

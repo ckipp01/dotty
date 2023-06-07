@@ -418,7 +418,7 @@ trait ConstraintHandling:
     def description = i"ordering $p1 <: $p2 to\n$constraint"
     val res =
       if constraint.isLess(p2, p1) then unify(p2, p1)
-      else {
+      else
         val down1 = p1 :: constraint.exclusiveLower(p1, p2)
         val up2 = p2 :: constraint.exclusiveUpper(p2, p1)
         val lo1 = constraint.nonParamBounds(p1).lo
@@ -429,7 +429,6 @@ trait ConstraintHandling:
         constraint = constraint.addLess(p1, p2)
         down1.forall(addOneBound(_, hi2, isUpper = true)) &&
         up2.forall(addOneBound(_, lo1, isUpper = false))
-      }
     constr.println(i"added $description = $res$location")
     res
 
@@ -835,7 +834,7 @@ trait ConstraintHandling:
   ): Boolean =
     if c2 eq pre then true
     else if c1 eq pre then false
-    else {
+    else
       val saved = constraint
       try
         // We iterate over params of `pre`, instead of `c2` as the documentation may suggest.
@@ -849,7 +848,6 @@ trait ConstraintHandling:
             && isSubTypeWhenFrozen(c1.nonParamBounds(p), c2.nonParamBounds(p))
         )
       finally constraint = saved
-    }
 
   /** The current bounds of type parameter `param` */
   def bounds(param: TypeParamRef)(using Context): TypeBounds =

@@ -299,7 +299,7 @@ class PlainPrinter(_ctx: Context) extends Printer:
         def toTextCaret(tp: Type) =
           if printDebug then toTextLocal(tp) ~ Str("^") else toText(tp)
         if tp.isInstantiated then toTextCaret(tp.instanceOpt)
-        else {
+        else
           val constr = ctx.typerState.constraint
           val bounds =
             if constr.contains(tp) then
@@ -309,7 +309,6 @@ class PlainPrinter(_ctx: Context) extends Printer:
           else if ctx.settings.YshowVarBounds.value then
             "(" ~ toText(tp.origin) ~ "?" ~ toText(bounds) ~ ")"
           else toText(tp.origin)
-        }
       case tp: LazyRef =>
         def refTxt =
           try toTextGlobal(tp.ref)
@@ -601,18 +600,17 @@ class PlainPrinter(_ctx: Context) extends Printer:
 
   def locationText(sym: Symbol): Text =
     if !sym.exists then ""
-    else {
+    else
       val ownr = sym.effectiveOwner
       if ownr.isClass && !isEmptyPrefix(ownr) then " in " ~ toText(ownr)
       else Text()
-    }
 
   def locatedText(sym: Symbol): Text =
     (toText(sym) ~ locationText(sym)).close
 
   def extendedLocationText(sym: Symbol): Text =
     if !sym.exists then ""
-    else {
+    else
       def recur(ownr: Symbol, innerLocation: String): Text =
         def nextOuter(innerKind: String): Text =
           recur(
@@ -631,7 +629,6 @@ class PlainPrinter(_ctx: Context) extends Printer:
           showLocation(ownr, "in the initializer of")
         else showLocation(ownr, "in")
       recur(sym.owner, "")
-    }
 
   def toText(denot: Denotation): Text = toText(denot.symbol) ~ "/D"
 

@@ -191,7 +191,7 @@ object SimpleIdentityMap:
             for j <- 0 until bindings.length by 2 do
               if j != i then m = m.updated(key(j), value(j))
             m
-          else {
+          else
             val bindings1 = new Array[AnyRef](bindings.length - 2)
             System.arraycopy(bindings, 0, bindings1, 0, i)
             System.arraycopy(
@@ -202,7 +202,6 @@ object SimpleIdentityMap:
               bindings1.length - i
             )
             new MapMore(bindings1)
-          }
         i += 2
       this
 
@@ -211,11 +210,10 @@ object SimpleIdentityMap:
       while i < bindings.length do
         if bindings(i) eq k then
           return if v eq bindings(i + 1) then this
-          else {
+          else
             val bindings1 = bindings.clone
             bindings1(i + 1) = v
             new MapMore(bindings1)
-          }
         i += 2
       val bindings2 = new Array[AnyRef](bindings.length + 2)
       System.arraycopy(bindings, 0, bindings2, 0, bindings.length)

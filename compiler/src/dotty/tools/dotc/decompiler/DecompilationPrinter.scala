@@ -25,7 +25,7 @@ class DecompilationPrinter extends Phase:
 
   override def run(using Context): Unit =
     if ctx.settings.outputDir.isDefault then printToOutput(System.out)
-    else {
+    else
       val outputDir = ctx.settings.outputDir.value
       var os: OutputStream = null
       var ps: PrintStream = null
@@ -40,7 +40,6 @@ class DecompilationPrinter extends Phase:
       finally
         if os ne null then os.close()
         if ps ne null then ps.close()
-    }
 
   private def printToOutput(out: PrintStream)(using Context): Unit =
     val unit = ctx.compilationUnit

@@ -121,11 +121,10 @@ object Comments:
     )(using Context): UseCase =
       def subPos(start: Int, end: Int) =
         if span == NoSpan then NoSpan
-        else {
+        else
           val start1 = span.start + start
           val end1 = span.end + end
           span withStart start1 withPoint start1 withEnd end1
-        }
 
       val codeStart = skipWhitespace(body, start + "@usecase".length)
       val codeEnd = skipToEol(body, codeStart)
@@ -303,10 +302,9 @@ object Comments:
        */
 
       if out.length == 0 then dst
-      else {
+      else
         out append dst.substring(copied)
         out.toString
-      }
     end merge
 
     /** Expand inheritdoc tags
@@ -331,7 +329,7 @@ object Comments:
       */
     def expandInheritdoc(parent: String, child: String, sym: Symbol): String =
       if child.indexOf("@inheritdoc") == -1 then child
-      else {
+      else
         val parentSections = tagIndex(parent)
         val childSections = tagIndex(child)
         val parentTagMap = sectionTagMap(parent, parentSections)
@@ -406,7 +404,6 @@ object Comments:
 
         out.append("*/")
         out.toString
-      }
 
     protected def expandVariables(
         initialStr: String,
@@ -425,7 +422,7 @@ object Comments:
         def isEscaped = idx > 0 && str.charAt(idx - 1) == '\\'
         while idx < str.length do
           if (str charAt idx) != '$' || isEscaped then idx += 1
-          else {
+          else
             val vstart = idx
             idx = skipVariable(str, idx + 1)
             def replaceWith(repl: String) =
@@ -449,12 +446,10 @@ object Comments:
                     scaladoc.println(
                       s"Variable $vname undefined in comment for $sym in $site"
                     )
-          }
         if out.length == 0 then str
-        else {
+        else
           out append str.substring(copied)
           expandInternal(out.toString, depth + 1)
-        }
       end expandInternal
 
       // We suppressed expanding \$ throughout the recursion, and now we

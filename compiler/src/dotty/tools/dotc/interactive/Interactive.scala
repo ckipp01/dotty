@@ -115,7 +115,7 @@ object Interactive:
           && funSym.is(Synthetic)
           && funSym.owner.is(CaseClass)
         then List(funSym.owner.info.member(name).symbol)
-        else {
+        else
           val classTree = funSym.topLevelClass.asClass.rootTree
           val paramSymbol =
             for
@@ -125,7 +125,6 @@ object Interactive:
               param <- paramss.flatten.find(_.name == name)
             yield param.symbol
           List(paramSymbol.getOrElse(fn.symbol))
-        }
 
       // For constructor calls, return the `<init>` that was selected
       case _ :: (_: New) :: (select: Select) :: _ =>
@@ -361,7 +360,6 @@ object Interactive:
             outer
       catch case ex: CyclicReference => outer
       end try
-
   /** The first tree in the path that is a definition. */
   def enclosingDefinitionInPath(path: List[Tree])(using Context): Tree =
     path.find(_.isInstanceOf[DefTree]).getOrElse(EmptyTree)
@@ -420,6 +418,7 @@ object Interactive:
         else driver.sourceTreesContaining(name)
       findTreesMatching(trees, include | includeLocal, sym)
     }
+  end findDefinitions
 
   /** Given `sym`, originating from `sourceDriver`, find its representation in
     * `targetDriver`.
@@ -443,7 +442,7 @@ object Interactive:
       fn(using driver.currentCtx)
 
     if sourceDriver == targetDriver then symbol
-    else {
+    else
       val owners = in(sourceDriver) {
         symbol.ownersIterator.toList.reverse.map(_.name)
       }
@@ -454,7 +453,6 @@ object Interactive:
           else NoSymbol
         }
       }
-    }
   end localize
 
   /** Return a predicate function that determines whether a given `NameTree` is

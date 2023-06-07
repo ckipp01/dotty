@@ -252,7 +252,7 @@ trait BCodeSkelBuilder extends BCodeHelpers:
                   annot.tree.sourcePos
                 )
                 None
-              else {
+              else
                 val vuid = annot.argumentConstant(0).map(_.longValue)
                 if vuid.isEmpty then
                   report.error(
@@ -260,7 +260,6 @@ trait BCodeSkelBuilder extends BCodeHelpers:
                     annot.argument(0).getOrElse(annot.tree).sourcePos
                   )
                 vuid
-              }
           }
         if optSerial.isDefined then addSerialVUID(optSerial.get, cnode)
 

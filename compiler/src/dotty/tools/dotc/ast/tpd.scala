@@ -434,7 +434,7 @@ object tpd extends Trees.Instance[Type] with TypedTreeInfo:
     val firstParent :: otherParents = cls.info.parents: @unchecked
     val superRef =
       if cls.is(Trait) then TypeTree(firstParent)
-      else {
+      else
         def isApplicable(ctpe: Type): Boolean = ctpe match
           case ctpe: PolyType =>
             isApplicable(ctpe.instantiate(firstParent.argTypes))
@@ -446,7 +446,6 @@ object tpd extends Trees.Instance[Type] with TypedTreeInfo:
           .decl(nme.CONSTRUCTOR)
           .suchThat(constr => isApplicable(constr.info))
         New(firstParent, constr.symbol.asTerm, superArgs)
-      }
     ClassDefWithParents(
       cls,
       constr,
@@ -1598,12 +1597,11 @@ object tpd extends Trees.Instance[Type] with TypedTreeInfo:
     if conversion.symbol.exists then
       tree.select(conversion.symbol.termRef).ensureApplied
     else if tree.tpe.widen isRef numericCls then tree
-    else {
+    else
       report.warning(
         em"conversion from ${tree.tpe.widen} to ${numericCls.typeRef} will always fail at runtime."
       )
       Throw(New(defn.ClassCastExceptionClass.typeRef, Nil)).withSpan(tree.span)
-    }
 
   /** A tree that corresponds to `Predef.classOf[$tp]` in source */
   def clsOf(tp: Type)(using Context): Tree =
@@ -1631,10 +1629,9 @@ object tpd extends Trees.Instance[Type] with TypedTreeInfo:
       within: Tree => Tree
   )(using Context): Tree =
     if exprPurity(tree) >= level then within(tree)
-    else {
+    else
       val vdef = SyntheticValDef(TempResultName.fresh(), tree)
       Block(vdef :: Nil, within(Ident(vdef.namedType)))
-    }
 
   /** Let bind `tree` unless `tree` is at least idempotent */
   def evalOnce(tree: Tree)(within: Tree => Tree)(using Context): Tree =

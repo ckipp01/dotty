@@ -485,7 +485,7 @@ class Scala2Unpickler(
       name =
         if name == nme.TRAIT_CONSTRUCTOR then nme.CONSTRUCTOR
         else name.asTermName.unmangle(Scala2MethodNameKinds)
-    if (flags.is(Scala2ExpandedName)) then
+    if flags.is(Scala2ExpandedName) then
       name = name.unmangle(ExpandedName)
       flags = flags &~ Scala2ExpandedName
     if flags.is(Scala2SuperAccessor) then
@@ -568,10 +568,9 @@ class Scala2Unpickler(
     val (privateWithin, infoRef) =
       val ref = readNat()
       if !isSymbolRef(ref) then (NoSymbol, ref)
-      else {
+      else
         val pw = at(ref, () => readSymbol())
         (pw, readNat())
-      }
 
     finishSym(tag match
       case TYPEsym | ALIASsym =>
@@ -604,7 +603,7 @@ class Scala2Unpickler(
             ),
             privateWithin
           )
-        else {
+        else
           def completer(cls: Symbol) =
             val unpickler = new ClassUnpickler(infoRef) withDecls symScope(cls)
             if flags.is(ModuleClass) then
@@ -623,7 +622,6 @@ class Scala2Unpickler(
             privateWithin,
             coord = start
           )
-        }
       case VALsym =>
         newSymbol(
           owner,
@@ -706,7 +704,7 @@ class Scala2Unpickler(
               denot.owner.setStableConstructor()
               addConstructorTypeParams(denot)
             if atEnd then assert(!denot.symbol.isSuperAccessor, denot)
-            else {
+            else
               assert(
                 denot.is(ParamAccessor) || denot.symbol.isSuperAccessor,
                 denot
@@ -720,7 +718,6 @@ class Scala2Unpickler(
                 }
               val alias = readDisambiguatedSymbolRef(disambiguate).asTerm
               if alias.name == denot.name then denot.setFlag(SuperParamAlias)
-            }
         end match
         // println(s"unpickled ${denot.debugString}, info = ${denot.info}") !!! DEBUG
       end parseToCompletion
@@ -768,6 +765,7 @@ class Scala2Unpickler(
         Context
     ): List[TypeSymbol] =
       init()
+  end ClassUnpickler
 
   def rootClassUnpickler(
       start: Coord,
@@ -946,14 +944,13 @@ class Scala2Unpickler(
         val parents = until(end, () => readTypeRef())
         val parent = parents.reduceLeft(AndType(_, _))
         if decls.isEmpty then parent
-        else {
+        else
           def subst(info: Type, rt: RecType) =
             info.substThis(clazz.asClass, rt.recThis)
           def addRefinement(tp: Type, sym: Symbol) =
             RefinedType(tp, sym.name, sym.info)
           val refined = decls.toList.foldLeft(parent)(addRefinement)
           RecType.closeOver(rt => refined.substThis(clazz, rt.recThis))
-        }
       case CLASSINFOtpe =>
         val clazz = readSymbolRef()
         TempClassInfoType(

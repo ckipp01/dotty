@@ -58,6 +58,7 @@ import dotty.tools.dotc.util.SourceFile
     rootSrc.resolve("metac.expect"),
     metacSb.toString.getBytes(StandardCharsets.UTF_8)
   )
+end metac
 
 @Category(Array(classOf[BootstrappedOnlyTests]))
 class SemanticdbTests:

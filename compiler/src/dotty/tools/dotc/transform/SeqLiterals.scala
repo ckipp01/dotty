@@ -36,6 +36,7 @@ class SeqLiterals extends MiniPhase:
         // println(i"trans seq $tree, arr = $arr: ${arr.tpe} ${arr.tpe.elemType}")
         val elemtp = tree.elemtpt.tpe
         wrapArray(arr, elemtp).withSpan(tree.span).ensureConforms(tree.tpe)
+end SeqLiterals
 
 object SeqLiterals:
   val name: String = "seqLiterals"

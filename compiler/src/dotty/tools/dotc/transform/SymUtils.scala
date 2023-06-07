@@ -187,7 +187,7 @@ object SymUtils:
     def whyNotGenericSum(pre: Type)(using Context): String =
       if !self.is(Sealed) then s"it is not a sealed ${self.kindString}"
       else if !self.isOneOf(AbstractOrTrait) then "it is not an abstract class"
-      else {
+      else
         val children = self.children
         val companionMirror = self.useCompanionAsSumMirror
         val ownerScope =
@@ -221,7 +221,7 @@ object SymUtils:
           else if !childAccessible.isEmpty then
             i"its child $child is not accessible $childAccessible"
           else if !child.isClass then "" // its a singleton enum value
-          else {
+          else
             val s = child.whyNotGenericProduct
             if s.isEmpty then s
             else if child.is(Sealed) then
@@ -229,11 +229,9 @@ object SymUtils:
               if s.isEmpty then s
               else i"its child $child is not a generic sum because $s"
             else i"its child $child is not a generic product because $s"
-          }
         end problem
         if children.isEmpty then "it does not have subclasses"
         else children.map(problem).find(!_.isEmpty).getOrElse("")
-      }
 
     def isGenericSum(pre: Type)(using Context): Boolean = whyNotGenericSum(
       pre

@@ -605,6 +605,7 @@ object Signatures:
     if params.nonEmpty then
       Some(Signature("", Nil, List(params), None, None, Some(denot)))
     else None
+  end toUnapplySignature
 
   /** The number of parameters before `tree` application. It is necessary to
     * properly show parameter number for erroneous applications before current

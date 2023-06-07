@@ -106,7 +106,7 @@ trait Dynamic:
           tree,
           em"applyDynamicNamed does not support passing a vararg parameter"
         )
-      else {
+      else
         def namedArgTuple(name: String, arg: untpd.Tree) =
           untpd.Tuple(List(Literal(Constant(name)), arg))
         def namedArgs = args.map {
@@ -118,7 +118,6 @@ trait Dynamic:
           untpd.Apply(coreDynamic(qual, dynName, name, selSpan, targs), args1),
           pt
         )
-      }
     end typedDynamicApply
 
     if isInsertedApply then
@@ -220,9 +219,8 @@ trait Dynamic:
     * If this call resolves to an `applyDynamic` method that takes a `Class[?]*`
     * as second parameter, we further rewrite this call to scala```
     * x1.applyDynamic("a", c11, ..., c1n, ..., cN1, ... cNn) (a11, ..., a1n,
-    * ..., aN1, ..., aNn) .asInstanceOf[R]
-    * \``` where c11, ..., cNn are the classOf constants representing the
-    * erasures of T11, ..., TNn.
+    * ..., aN1, ..., aNn) .asInstanceOf[R] \``` where c11, ..., cNn are the
+    * classOf constants representing the erasures of T11, ..., TNn.
     *
     * It's an error if U is neither a value nor a method type, or a dependent
     * method type
@@ -327,7 +325,7 @@ trait Dynamic:
 
         if isDependentMethod(tpe) then
           fail(i"has a method type with inter-parameter dependencies")
-        else {
+        else
           def classOfs =
             if tpe.paramInfoss.nestedExists(!TypeErasure.hasStableErasure(_))
             then fail(i"has a parameter type with an unstable erasure") :: Nil
@@ -340,7 +338,6 @@ trait Dynamic:
           structuralCall(nme.applyDynamic, classOfs).maybeBoxingCast(
             tpe.finalResultType
           )
-        }
 
       // (@allanrenucci) I think everything below is dead code
       case _: PolyType =>

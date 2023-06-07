@@ -247,7 +247,7 @@ object Implicits:
                 Candidate.Value
 
         if ckind == Candidate.None then record("discarded eligible")
-        else {
+        else
           val ptNorm = normalize(
             pt,
             pt
@@ -259,7 +259,6 @@ object Implicits:
           Stats.record("eligible check matches")
           if !NoViewsAllowed.isCompatible(refNorm, ptNorm) then
             ckind = Candidate.None
-        }
         ckind
       end candidateKind
 
@@ -387,19 +386,17 @@ object Implicits:
         Stats.record(i"compute eligible not cached ${tp.getClass}")
         Stats.record("compute eligible not cached")
         computeEligible(tp)
-      else {
+      else
         val eligibles = eligibleCache.lookup(tp)
         if eligibles != null then
           Stats.record("cached eligible")
           eligibles
         else if irefCtx eq NoContext then Nil
-        else {
+        else
           Stats.record(i"compute eligible cached")
           val result = computeEligible(tp)
           eligibleCache(tp) = result
           result
-        }
-      }
 
     private def computeEligible(tp: Type): List[Candidate] = /*>|>*/ trace(
       i"computeEligible $tp in $refs%, %",
@@ -423,12 +420,11 @@ object Implicits:
       */
     def exclude(root: Symbol): ContextualImplicits =
       if this == NoContext.implicits then this
-      else {
+      else
         val outerExcluded = outerImplicits.nn exclude root
         if irefCtx.importInfo.nn.site.termSymbol == root then outerExcluded
         else if outerExcluded eqn outerImplicits then this
         else new ContextualImplicits(refs, outerExcluded, isImport)(irefCtx)
-      }
   end ContextualImplicits
 
   /** The result of an implicit search */
@@ -2144,7 +2140,7 @@ final class SearchRoot extends SearchHistory:
           if pruned.isEmpty then result
           else if pruned.exists(_._2 == EmptyTree) then
             NoMatchingImplicitsFailure
-          else {
+          else
             // If there are any dictionary entries remaining after pruning, construct a dictionary
             // class of the form,
             //
@@ -2218,7 +2214,6 @@ final class SearchRoot extends SearchHistory:
             val blk = Block(classDef :: inst :: Nil, res).withSpan(span)
 
             success.copy(tree = blk)(success.tstate, success.gstate)
-          }
           end if
 end SearchRoot
 

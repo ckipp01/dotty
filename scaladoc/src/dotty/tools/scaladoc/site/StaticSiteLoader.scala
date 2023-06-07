@@ -163,7 +163,7 @@ class StaticSiteLoader(val root: File, val args: Scaladoc.Args)(using
 
     type Date = (String, String, String)
     if !Files.exists(rootPath) || blogConfig.hidden then None
-    else {
+    else
       val indexPageOpt = Seq(
         rootPath.resolve("index.md"),
         rootPath.resolve("index.html")
@@ -222,7 +222,6 @@ class StaticSiteLoader(val root: File, val args: Scaladoc.Args)(using
         .map(_._2)
 
       Some(LoadedTemplate(indexPage, posts, indexDest.toFile))
-    }
     end if
   end loadBlog
 

@@ -26,14 +26,13 @@ class Parser extends Phase:
     val unit = ctx.compilationUnit
     unit.untpdTree =
       if unit.isJava then new JavaParsers.JavaParser(unit.source).parse()
-      else {
+      else
         val p = new Parsers.Parser(unit.source)
         //  p.in.debugTokenStream = true
         val tree = p.parse()
         if p.firstXmlPos.exists && !firstXmlPos.exists then
           firstXmlPos = p.firstXmlPos
         tree
-      }
     if Config.checkPositions then
       unit.untpdTree.checkPos(nonOverlapping =
         !unit.isJava && !ctx.reporter.hasErrors

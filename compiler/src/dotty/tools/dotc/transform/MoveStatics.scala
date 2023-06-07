@@ -89,7 +89,7 @@ class MoveStatics extends MiniPhase with SymTransformer:
       def move(module: TypeDef, companion: TypeDef): List[Tree] =
         assert(companion != module)
         if !module.symbol.is(Flags.Module) then move(companion, module)
-        else {
+        else
           val moduleTmpl = module.rhs.asInstanceOf[Template]
           val companionTmpl = companion.rhs.asInstanceOf[Template]
           val (staticDefs, remainingDefs) = moduleTmpl.body.partition {
@@ -101,7 +101,6 @@ class MoveStatics extends MiniPhase with SymTransformer:
             module,
             remainingDefs
           ) :: Nil
-        }
       val newPairs =
         for ((name, classes) <- pairs)
           yield

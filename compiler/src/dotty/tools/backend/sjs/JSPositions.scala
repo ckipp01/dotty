@@ -40,14 +40,13 @@ class JSPositions()(using Context):
 
   private def sourceAndSpan2irPos(source: SourceFile, span: Span): ir.Position =
     if !span.exists then ir.Position.NoPosition
-    else {
+    else
       // dotty positions and IR positions are both 0-based
       val irSource = span2irPosCache.toIRSource(source)
       val point = span.point
       val line = source.offsetToLine(point)
       val column = source.column(point)
       ir.Position(irSource, line, column)
-    }
 
   /** Implicit conversion from dotty Span to ir.Position. */
   implicit def span2irPos(span: Span): ir.Position =

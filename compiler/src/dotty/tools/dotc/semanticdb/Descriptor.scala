@@ -22,11 +22,10 @@ class DescriptorParser(s: String):
         currChar = BOF
         currChar
       else fail()
-    else {
+    else
       i -= 1
       currChar = s(i)
       currChar
-    }
 
   def parseValue(): String =
     if currChar == '`' then
@@ -34,12 +33,11 @@ class DescriptorParser(s: String):
       while readChar() != '`' do {}
       readChar()
       s.substring(i + 2, end)
-    else {
+    else
       val end = i + 1
       if !Character.isJavaIdentifierPart(currChar) then fail()
       while Character.isJavaIdentifierPart(readChar()) && currChar != BOF do {}
       s.substring(i + 1, end)
-    }
 
   def parseDisambiguator(): String =
     val end = i + 1

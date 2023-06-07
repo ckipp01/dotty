@@ -605,7 +605,7 @@ trait BCodeHelpers extends BCodeIdiomatic:
           )
         else if m.accessBoundary(defn.RootClass) ne defn.RootClass then
           report.log(s"No forwarder for non-public member $m")
-        else {
+        else
           report.log(
             s"Adding static forwarder for '$m' from $jclassName to '$moduleClass'"
           )
@@ -621,7 +621,6 @@ trait BCodeHelpers extends BCodeIdiomatic:
                 Bridge
               ) && m0.initial.validFor.firstPhaseId == erasurePhase.next.id
           addForwarder(jclass, moduleClass, m, isSynthetic)
-        }
         end if
       end for
     end addForwarders
@@ -933,13 +932,12 @@ trait BCodeHelpers extends BCodeIdiomatic:
         // Suppress signatures for symbols whose types erase in the end to primitive
         // value types. This is needed to fix #7416.
         None
-      else {
+      else
         val jsOpt = GenericSignatures.javaSig(sym, memberTpe)
         if ctx.settings.XverifySignatures.value then
           jsOpt.foreach(verifySignature(sym, _))
 
         jsOpt
-      }
     else None
 
   private def verifySignature(sym: Symbol, sig: String)(using Context): Unit =

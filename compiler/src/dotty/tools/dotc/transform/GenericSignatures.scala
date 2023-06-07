@@ -389,7 +389,7 @@ object GenericSignatures:
   private def minimizeParents(cls: Symbol, parents: List[Type])(using
       Context
   ): List[Type] = if parents.isEmpty then parents
-  else {
+  else
     // val requiredDirect: Symbol => Boolean = requiredDirectInterfaces.getOrElse(cls, Set.empty)
     var rest = parents.tail
     var leaves = collection.mutable.ListBuffer.empty[Type] += parents.head
@@ -409,7 +409,6 @@ object GenericSignatures:
         leaves += candidate
       rest = rest.tail
     leaves.toList
-  }
 
   private def hiBounds(bounds: TypeBounds)(using Context): List[Type] =
     bounds.hi.widenDealias match

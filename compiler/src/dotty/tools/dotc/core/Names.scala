@@ -212,10 +212,9 @@ object Names:
       val thatKind = info.kind
       if thisKind.tag < thatKind.tag || thatKind.definesNewName then add(info)
       else if thisKind.tag > thatKind.tag then rewrap(underlying.derived(info))
-      else {
+      else
         assert(info == this.info)
         this
-      }
 
     /** Is it impossible that names of kind `kind` also qualify as names of kind
       * `shadowed`?
@@ -394,7 +393,7 @@ object Names:
 
     protected def computeToString: String =
       if length == 0 then ""
-      else {
+      else
         if Config.checkBackendNames then
           if !toStringOK then
             // We print the stacktrace instead of doing an assert directly,
@@ -407,7 +406,6 @@ object Names:
             Thread.dumpStack()
             assert(false)
         new String(chrs, start, length)
-      }
 
     /** It's OK to take a toString if the stacktrace does not contain a method
       * from GenBCode or it also contains one of the whitelisted methods below.

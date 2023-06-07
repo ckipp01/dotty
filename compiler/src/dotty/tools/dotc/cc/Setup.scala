@@ -191,8 +191,8 @@ class Setup(
             CapturingType(tp.derivedRecType(parent1), refs, parent.isBoxed)
           case _ =>
             tp // can return `tp` here since unlike RefinedTypes, RecTypes are never created
-        // by `mapInferred`. Hence if the underlying type admits capture variables
-        // a variable was already added, and the first case above would apply.
+      // by `mapInferred`. Hence if the underlying type admits capture variables
+      // a variable was already added, and the first case above would apply.
       case AndType(
             tp1 @ CapturingType(parent1, refs1),
             tp2 @ CapturingType(parent2, refs2)

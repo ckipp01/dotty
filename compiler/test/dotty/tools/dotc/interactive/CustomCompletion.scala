@@ -110,7 +110,7 @@ object CustomCompletion:
     def maybeQuote(name: Name, recurse: Boolean): String =
       if recurse && name.isTermName then
         name.asTermName.qualToString(maybeQuote(_, true), maybeQuote(_, false))
-      else {
+      else
         // initially adapted from
         // https://github.com/scala/scala/blob/decbd53f1bde4600c8ff860f30a79f028a8e431d/src/reflect/scala/reflect/internal/Printers.scala#L573-L584
         val decName = name.decode.toString
@@ -129,7 +129,6 @@ object CustomCompletion:
 
         if needsBackTicks then s"`$decName`"
         else decName
-      }
 
     maybeQuote(name, true)
 end CustomCompletion

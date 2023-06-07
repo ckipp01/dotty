@@ -47,7 +47,7 @@ class TupleOptimizations extends MiniPhase with IdentityDenotTransformer:
             val elements = head :: tupleSelectors(tup, size - 1)
             knownTupleFromElements(tpes, elements)
           }
-        else {
+        else
           // val it = Iterator.single(head) ++ tail.asInstanceOf[Product].productIterator
           // TupleN+1(it.next(), ..., it.next())
           val fullIterator = ref(defn.RuntimeTuples_consIterator)
@@ -55,7 +55,6 @@ class TupleOptimizations extends MiniPhase with IdentityDenotTransformer:
           evalOnce(fullIterator) { it =>
             knownTupleFromIterator(tpes.length, it).asInstance(tree.tpe)
           }
-        }
       case _ =>
         // No optimization, keep:
         // scala.runtime.Tuples.cons(tail, head)
@@ -132,7 +131,7 @@ class TupleOptimizations extends MiniPhase with IdentityDenotTransformer:
               knownTupleFromElements(types, elements)
             }
           }
-        else {
+        else
           // val it = self.asInstanceOf[Product].productIterator ++ that.asInstanceOf[Product].productIterator
           // TupleN+M(it.next(), ..., it.next())
           val fullIterator =
@@ -140,7 +139,6 @@ class TupleOptimizations extends MiniPhase with IdentityDenotTransformer:
           evalOnce(fullIterator) { it =>
             knownTupleFromIterator(n + m, it).asInstance(tree.tpe)
           }
-        }
       case _ =>
         // No optimization, keep:
         // scala.runtime.Tuples.cons(self, that)

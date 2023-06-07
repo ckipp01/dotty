@@ -1215,10 +1215,10 @@ final case class ThisType(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = symbol
     if !__v.isEmpty then _output__.writeString(1, __v)
-  };
+  ;
   def withSymbol(__v: _root_.scala.Predef.String): ThisType = copy(symbol = __v)
 
   // @@protoc_insertion_point(GeneratedMessage[dotty.tools.dotc.semanticdb.ThisType])
@@ -1412,14 +1412,14 @@ final case class ConstantType(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = dotty.tools.dotc.semanticdb.ConstantType._typemapper_constant
       .toBase(constant)
     if __v.serializedSize != 0 then
       _output__.writeTag(1, 2)
       _output__.writeUInt32NoTag(__v.serializedSize)
       __v.writeTo(_output__)
-  };
+  ;
   def withConstant(__v: dotty.tools.dotc.semanticdb.Constant): ConstantType =
     copy(constant = __v)
 
@@ -2344,13 +2344,13 @@ final case class ByNameType(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v = dotty.tools.dotc.semanticdb.ByNameType._typemapper_tpe.toBase(tpe)
     if __v.serializedSize != 0 then
       _output__.writeTag(1, 2)
       _output__.writeUInt32NoTag(__v.serializedSize)
       __v.writeTo(_output__)
-  };
+  ;
   def withTpe(__v: dotty.tools.dotc.semanticdb.Type): ByNameType =
     copy(tpe = __v)
 
@@ -2439,14 +2439,14 @@ final case class RepeatedType(
       __serializedSizeMemoized = __size
     __size - 1
 
-  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit = {
+  def writeTo(`_output__`: SemanticdbOutputStream): _root_.scala.Unit =
     val __v =
       dotty.tools.dotc.semanticdb.RepeatedType._typemapper_tpe.toBase(tpe)
     if __v.serializedSize != 0 then
       _output__.writeTag(1, 2)
       _output__.writeUInt32NoTag(__v.serializedSize)
       __v.writeTo(_output__)
-  };
+  ;
   def withTpe(__v: dotty.tools.dotc.semanticdb.Type): RepeatedType =
     copy(tpe = __v)
 

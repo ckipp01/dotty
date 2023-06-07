@@ -150,10 +150,9 @@ class SourceFile(val file: AbstractFile, computeContent: => Array[Char])
       indices(i + 1) =
         indices(i) + sizes(i) + 1 // `+1` for the '\n' at the end of the line
       i += 1
-    indices(lines) =
-      indices(penultimate) + sizes(
-        penultimate
-      ) // last line does not end with '\n'
+    indices(lines) = indices(penultimate) + sizes(
+      penultimate
+    ) // last line does not end with '\n'
     lineIndicesCache = indices
 
   /** Map line to offset of first character in line */

@@ -129,7 +129,7 @@ class SymbolInformationPrinter(symtab: PrinterSymtab):
           if tparams.infos.nonEmpty then
             sb.append(tparams.infos.map(pprintDef).mkString("[", ", ", "]"))
           if lo == hi then sb.append(s" = ${pprint(lo)}")
-          else {
+          else
             lo match
               case TypeRef(Type.Empty, "scala/Nothing#", Nil) => ()
               case lo => sb.append(s" >: ${pprint(lo)}")
@@ -137,7 +137,6 @@ class SymbolInformationPrinter(symtab: PrinterSymtab):
               case TypeRef(Type.Empty, "scala/Any#", Nil)        => ()
               case TypeRef(Type.Empty, "java/lang/Object#", Nil) => ()
               case hi => sb.append(s" <: ${pprint(hi)}")
-          }
           sb.toString
         case ValueSignature(tpe) =>
           pprint(tpe)

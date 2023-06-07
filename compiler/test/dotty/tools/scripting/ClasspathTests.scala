@@ -75,8 +75,10 @@ class ClasspathTests:
         if packlibJars.size > hashbangClasspathJars.size then
           (packlibJars.toSet -- hashbangJars.toSet, "only in packlib classpath")
         else
-          (hashbangJars.toSet -- packlibJars.toSet, "only in hashbang classpath"
-        )
+          (
+            hashbangJars.toSet -- packlibJars.toSet,
+            "only in hashbang classpath"
+          )
       // verify that the script hasbang classpath setting was effective at supplementing the classpath
       // (a minimal subset of jars below dist/target/pack/lib are always be in the classpath)
       val missingClasspathEntries =

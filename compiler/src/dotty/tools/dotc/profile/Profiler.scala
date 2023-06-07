@@ -29,7 +29,7 @@ import annotation.internal.sharable
 object Profiler:
   def apply()(using Context): Profiler =
     if !ctx.settings.YprofileEnabled.value then NoOpProfiler
-    else {
+    else
       val reporter =
         if ctx.settings.YprofileDestination.value != "" then
           new StreamProfileReporter(
@@ -39,7 +39,6 @@ object Profiler:
           )
         else ConsoleProfileReporter
       new RealProfiler(reporter)
-    }
 
   private[profile] val emptySnap: ProfileSnap =
     ProfileSnap(0, "", 0, 0, 0, 0, 0, 0)

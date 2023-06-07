@@ -120,14 +120,13 @@ object SimpleIdentitySet:
     def size = 3
     def +[E >: Elem <: AnyRef](x: E): SimpleIdentitySet[E] =
       if contains(x) then this
-      else {
+      else
         val xs = new Array[AnyRef](4)
         xs(0) = x0
         xs(1) = x1
         xs(2) = x2
         xs(3) = x
         new SetN[E](xs)
-      }
     def -[E >: Elem <: AnyRef](x: E): SimpleIdentitySet[Elem] =
       if x `eq` x0 then new Set2(x1, x2)
       else if x `eq` x1 then new Set2(x0, x2)
@@ -162,12 +161,11 @@ object SimpleIdentitySet:
     def size = xs.length
     def +[E >: Elem <: AnyRef](x: E): SimpleIdentitySet[E] =
       if contains(x) then this
-      else {
+      else
         val xs1 = new Array[AnyRef](size + 1)
         System.arraycopy(xs, 0, xs1, 0, size)
         xs1(size) = x
         new SetN[E](xs1)
-      }
     def -[E >: Elem <: AnyRef](x: E): SimpleIdentitySet[Elem] =
       var i = 0
       while i < size && (xs(i) `ne` x) do i += 1
@@ -177,12 +175,11 @@ object SimpleIdentitySet:
         else if i == 1 then new Set3(xs(0), xs(2), xs(3))
         else if i == 2 then new Set3(xs(0), xs(1), xs(3))
         else new Set3(xs(0), xs(1), xs(2))
-      else {
+      else
         val xs1 = new Array[AnyRef](size - 1)
         System.arraycopy(xs, 0, xs1, 0, i)
         System.arraycopy(xs, i + 1, xs1, i, size - (i + 1))
         new SetN(xs1)
-      }
     def contains[E >: Elem <: AnyRef](x: E): Boolean =
       var i = 0
       while i < size && (xs(i) `ne` x) do i += 1
@@ -217,7 +214,7 @@ object SimpleIdentitySet:
               toAdd += elem
             i += 1
           if toAdd == null then this
-          else {
+          else
             val numAdded = toAdd.size
             val xs1 = new Array[AnyRef](size + numAdded)
             System.arraycopy(xs, 0, xs1, 0, size)
@@ -226,7 +223,6 @@ object SimpleIdentitySet:
               xs1(i + size) = toAdd(i)
               i += 1
             new SetN[E](xs1)
-          }
         case _ => super.++(that)
     override def --[E >: Elem <: AnyRef](
         that: SimpleIdentitySet[E]

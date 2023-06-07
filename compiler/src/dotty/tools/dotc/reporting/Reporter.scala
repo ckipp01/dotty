@@ -164,7 +164,7 @@ abstract class Reporter extends interfaces.ReporterResult:
             if ctx.typerState.isGlobalCommittable then
               ctx.base.errorsToBeReported = true
           case _: Info => // nothing to do here
-          // match error if d is something else
+        // match error if d is something else
   end issueUnconfigured
 
   def issueIfNotSuppressed(dia: Diagnostic)(using Context): Unit =

@@ -832,7 +832,7 @@ object Checking:
           ValueClassesMayNotWrapAnotherValueClass(clazz),
           clazz.srcPos
         )
-      else {
+      else
         val clParamAccessors = clazz.asClass.paramAccessors.filter { param =>
           param.isTerm && !param.is(Flags.Accessor)
         }
@@ -861,7 +861,6 @@ object Checking:
                 )
           case Nil =>
             report.error(ValueClassNeedsOneValParam(clazz), clazz.srcPos)
-      }
       end if
       stats.foreach(checkValueClassMember)
     end if
@@ -1291,6 +1290,7 @@ trait Checking:
         )
       case _ =>
         tp
+  end checkFeasibleParent
 
   /** A hook to exclude selected symbols from double declaration check */
   def excludeFromDoubleDeclCheck(sym: Symbol)(using Context): Boolean = false

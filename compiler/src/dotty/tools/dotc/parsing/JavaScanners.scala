@@ -300,20 +300,18 @@ object JavaScanners:
 
             case SU =>
               if isAtEnd then token = EOF
-              else {
+              else
                 error(em"illegal character")
                 nextChar()
-              }
 
             case _ =>
               if Character.isUnicodeIdentifierStart(ch) then
                 putChar(ch)
                 nextChar()
                 getIdentRest()
-              else {
+              else
                 error(em"illegal character: ${ch.toInt}")
                 nextChar()
-              }
       end match
     end fetchToken
 
@@ -357,10 +355,9 @@ object JavaScanners:
             if Character.isUnicodeIdentifierPart(ch) then
               putChar(ch)
               nextChar()
-            else {
+            else
               finishNamed()
               return
-            }
 
     // Literals -----------------------------------------------------------------
 
@@ -472,10 +469,9 @@ object JavaScanners:
         then // extend white space prefix
           in.nextChar()
           lineWhiteSpacePrefix += 1
-        else {
+        else
           lineIsOnlyWhitespace = false
           in.getlitch(scanOnly = true, inTextBlock = true)
-        }
 
       // Bail out if the block never did have an end
       if !blockClosed then
@@ -568,7 +564,7 @@ object JavaScanners:
     def intVal(negated: Boolean): Long =
       if token == CHARLIT && !negated then
         if strVal.length > 0 then strVal.charAt(0).toLong else 0
-      else {
+      else
         var value: Long = 0
         val divider = if base == 10 then 1 else 2
         val limit: Long =
@@ -590,7 +586,6 @@ object JavaScanners:
           value = value * base + d
           i += 1
         if negated then -value else value
-      }
 
     /** convert name, base to double value
       */

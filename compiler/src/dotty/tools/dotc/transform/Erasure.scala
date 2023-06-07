@@ -85,7 +85,7 @@ class Erasure extends Phase with DenotTransformer:
               ClassInfo(pre, defn.ObjectClass, ps, extendedScope, selfInfo)
             )
           )
-        else {
+        else
           val oldSymbol = ref.symbol
           val newSymbol =
             if (oldSymbol.owner eq defn.AnyClass) && oldSymbol.isConstructor
@@ -138,7 +138,6 @@ class Erasure extends Phase with DenotTransformer:
               info = newInfo,
               annotations = newAnnotations
             )
-        }
         end if
       case ref: JointRefDenotation =>
         new UniqueRefDenotation(
@@ -317,15 +316,13 @@ object Erasure:
               constant(tree, ref(defn.BoxedUnit_UNIT))
             else if cls eq defn.NothingClass then
               tree // a non-terminating expression doesn't need boxing
-            else {
+            else
               assert(cls ne defn.ArrayClass)
               val arg = safelyRemovableUnboxArg(tree)
               if arg.isEmpty then ref(boxMethod(cls.asClass)).appliedTo(tree)
-              else {
+              else
                 report.log(s"boxing an unbox: ${tree.symbol} -> ${arg.tpe}")
                 arg
-              }
-            }
       }
 
     def unbox(tree: Tree, pt: Type)(using Context): Tree =
@@ -361,10 +358,9 @@ object Erasure:
           case _ =>
             val cls = pt.classSymbol
             if cls eq defn.UnitClass then constant(tree, Literal(Constant(())))
-            else {
+            else
               assert(cls ne defn.ArrayClass)
               ref(unboxMethod(cls.asClass)).appliedTo(tree)
-            }
       }
 
     /** Generate a synthetic cast operation from tree.tpe to pt. Does not do any
@@ -399,14 +395,13 @@ object Erasure:
               if tp1 <:< underlying2 then
                 // Cast EVT(tycon1, underlying1) to EVT(tycon2, EVT(tycon1, underlying1))
                 wrap(tycon2)
-              else {
+              else
                 assert(
                   underlying1 <:< tp2,
                   i"Non-sensical cast between unrelated types $tp1 and $tp2"
                 )
                 // Cast EVT(tycon1, EVT(tycon2, underlying2)) to EVT(tycon2, underlying2)
                 unwrap(tycon1)
-              }
 
             // When only one type is an EVT then we already know that the other one is the underlying
             case (_, ErasedValueType(tycon2, _)) =>
@@ -857,7 +852,7 @@ object Erasure:
           recur(unbox(qual, sym.owner.typeRef))
         else if sym.owner eq defn.ArrayClass then
           selectArrayMember(qual, originalQual)
-        else {
+        else
           val qual1 = adaptIfSuper(qual)
           if qual1.tpe.derivesFrom(sym.owner) || qual1.isInstanceOf[Super] then
             select(qual1, sym)
@@ -877,7 +872,6 @@ object Erasure:
                   )
                 tp
             recur(cast(qual1, castTarget))
-        }
       end recur
 
       checkNotErased(recur(qual1))
@@ -886,12 +880,11 @@ object Erasure:
     override def typedThis(tree: untpd.This)(using Context): Tree =
       if tree.symbol == ctx.owner.lexicallyEnclosingClass || tree.symbol.isStaticOwner
       then promote(tree)
-      else {
+      else
         report.log(
           i"computing outer path from ${ctx.owner.ownersIterator.toList}%, % to ${tree.symbol}, encl class = ${ctx.owner.enclosingClass}"
         )
         outer.path(toCls = tree.symbol)
-      }
 
     override def typedTypeApply(tree: untpd.TypeApply, pt: Type)(using
         Context

@@ -289,10 +289,9 @@ class SearchbarComponent(
       document.getElementById("search-toggle").asInstanceOf[html.Button]
     icon.onclick = (event: Event) =>
       if document.body.contains(rootDiv) then document.body.removeChild(rootDiv)
-      else {
+      else
         document.body.appendChild(rootDiv)
         inputElem.focus()
-      }
     // open the search if the user hits the `s` key when not focused on a text input
     document.body.addEventListener(
       "keydown",
@@ -308,10 +307,9 @@ class SearchbarComponent(
     mobileSearch.onfocus = (event: Event) =>
       if document.body.contains(rootDiv) then {
         // document.body.removeChild(rootDiv)
-      } else {
+      } else
         document.body.appendChild(rootDiv)
         inputElem.focus()
-      }
     // open the search if the user hits the `s` key when not focused on a text input
     document.body.addEventListener(
       "keydown",
@@ -419,12 +417,11 @@ class SearchbarComponent(
       def recur(elem: raw.Element): raw.Element =
         val prev = elem.previousElementSibling
         if prev == null then null
-        else
-          if !prev.classList.contains("hidden") &&
-            prev.classList.contains("scaladoc-searchbar-row") &&
-            (prev.hasAttribute("result") || prev.hasAttribute("loadmore"))
-          then prev
-          else recur(prev)
+        else if !prev.classList.contains("hidden") &&
+          prev.classList.contains("scaladoc-searchbar-row") &&
+          (prev.hasAttribute("result") || prev.hasAttribute("loadmore"))
+        then prev
+        else recur(prev)
       val sibling = recur(selectedElement)
       if sibling != null then
         sibling.setAttribute("selected", "")
@@ -436,12 +433,11 @@ class SearchbarComponent(
     def recur(elem: raw.Element): raw.Element =
       val next = elem.nextElementSibling
       if next == null then null
-      else
-        if !next.classList.contains("hidden") &&
-          next.classList.contains("scaladoc-searchbar-row") &&
-          (next.hasAttribute("result") || next.hasAttribute("loadmore"))
-        then next
-        else recur(next)
+      else if !next.classList.contains("hidden") &&
+        next.classList.contains("scaladoc-searchbar-row") &&
+        (next.hasAttribute("result") || next.hasAttribute("loadmore"))
+      then next
+      else recur(next)
     if selectedElement != null then
       val sibling = recur(selectedElement)
       if sibling != null then

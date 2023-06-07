@@ -113,7 +113,7 @@ class Namer:
   /** The enclosing class with given name; error if none exists */
   def enclosingClassNamed(name: TypeName, span: Span)(using Context): Symbol =
     if name.isEmpty then NoSymbol
-    else {
+    else
       val cls = ctx.owner.enclosingClassNamed(name)
       if !cls.exists then
         report.error(
@@ -121,7 +121,6 @@ class Namer:
           ctx.source.atSpan(span)
         )
       cls
-    }
 
   /** Record `sym` as the symbol defined by `tree` */
   def recordSym(sym: Symbol, tree: Tree)(using Context): Symbol =
@@ -199,7 +198,7 @@ class Namer:
       */
     def checkFlags(flags: FlagSet) =
       if flags.isEmpty then flags
-      else {
+      else
         val (ok, adapted, kind) = tree match
           case tree: TypeDef => (flags.isTypeFlags, flags.toTypeFlags, "type")
           case _             => (flags.isTermFlags, flags.toTermFlags, "value")
@@ -212,7 +211,6 @@ class Namer:
             tree.srcPos
           )
         if adapted.is(Private) && canBeLocal then adapted | Local else adapted
-      }
 
     /** Add moduleClass/sourceModule to completer if it is for a module val or
       * class
@@ -371,7 +369,7 @@ class Namer:
           d.unlinkFromFile(ctx.source.file)
         case _ =>
       existing
-    else {
+    else
 
       /** If there's already an existing type, then the package is a dup of this
         * type
@@ -384,7 +382,6 @@ class Namer:
           (pid.name ++ "$_error_").toTermName
         ).entered
       else newCompletePackageSymbol(pkgOwner, pid.name.asTermName).entered
-    }
 
   /** Expand tree and store in `expandedTree` */
   def expand(tree: Tree)(using Context): Unit =
@@ -539,7 +536,7 @@ class Namer:
             if other.span.exists && childStart <= other.span.start =>
           if child == other then
             annots // can happen if a class has several inaccessible children
-          else {
+          else
             assert(
               childStart != other.span.start || child.source != other.source,
               i"duplicate child annotation $child / $other"
@@ -547,7 +544,6 @@ class Namer:
             val (prefix, otherAnnot :: rest) =
               annots.span(_.symbol != defn.ChildAnnot): @unchecked
             prefix ::: otherAnnot :: insertInto(rest)
-          }
         case _ =>
           Annotation.Child(child, cls.span.startPos) :: annots
     cls.annotations = insertInto(cls.annotations)
@@ -946,12 +942,11 @@ class Namer:
               em"An annotation class cannot be annotated with iself",
               annotTree.srcPos
             )
-          else {
+          else
             val ann = Annotation.deferred(cls)(
               typedAheadExpr(annotTree)(using annotCtx)
             )
             sym.addAnnotation(ann)
-          }
       case _ =>
 
     private def addInlineInfo(sym: Symbol) = original match
@@ -1173,12 +1168,11 @@ class Namer:
         else info
 
       if isDerived then sym.info = unsafeInfo
-      else {
+      else
         sym.info = NoCompleter
         sym.info = opaqueToBounds(
           checkNonCyclic(sym, unsafeInfo, reportErrors = true)
         )
-      }
       if sym.isOpaqueAlias then
         sym.typeRef
           .recomputeDenot() // make sure we see the new bounds from now on
@@ -1777,7 +1771,7 @@ class Namer:
           completerCtx.superCallContext
         ).dealiasKeepAnnots
         if cls.isRefinementClass then ptype
-        else {
+        else
           val pt = checkClassType(
             ptype,
             parent.srcPos,
@@ -1791,7 +1785,7 @@ class Namer:
               case _ => ""
             report.error(CyclicInheritance(cls, addendum), parent.srcPos)
             defn.ObjectType
-          else {
+          else
             val pclazz = pt.typeSymbol
             if pclazz.is(Final) then
               report.error(ExtendFinalClass(cls, pclazz), cls.srcPos)
@@ -1807,8 +1801,6 @@ class Namer:
                   parent.srcPos
                 )
             pt
-          }
-        }
         end if
       end checkedParentType
 
@@ -2268,13 +2260,12 @@ class Namer:
       fullyDefinedType(cookedRhsType, "right-hand side", mdef.srcPos)
     // if (sym.name.toString == "y") println(i"rhs = $rhsType, cooked = $cookedRhsType")
     if inherited.exists then if sym.isInlineVal then lhsType else inherited
-    else {
+    else
       if sym.is(Implicit) then
         mdef match
           case _: DefDef                     => missingType(sym, "result ")
           case _: ValDef if sym.owner.isType => missingType(sym, "")
           case _                             =>
       lhsType orElse WildcardType
-    }
   end inferredResultType
 end Namer

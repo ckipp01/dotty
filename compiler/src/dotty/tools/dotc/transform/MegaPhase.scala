@@ -512,14 +512,13 @@ class MegaPhase(val miniPhases: Array[MiniPhase]) extends Phase:
   private def defines(phase: MiniPhase, name: String) =
     def hasRedefinedMethod(cls: Class[?]): Boolean =
       if cls.eq(classOf[MiniPhase]) then false
-      else {
+      else
         var clsMethods = clsMethodsCache.get(cls)
         if clsMethods == null then
           clsMethods = cls.getDeclaredMethods
           clsMethodsCache.put(cls, clsMethods)
         clsMethods.nn.exists(_.nn.getName == name) ||
         hasRedefinedMethod(cls.getSuperclass.nn)
-      }
     hasRedefinedMethod(phase.getClass)
 
   private def newNxArray = new Array[MiniPhase | Null](miniPhases.length + 1)

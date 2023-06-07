@@ -34,7 +34,7 @@ object SyntaxHighlighting:
   def highlight(in: String)(using Context): String =
     def freshCtx = ctx.fresh.setReporter(Reporter.NoReporter)
     if in.isEmpty || ctx.settings.color.value == "never" then in
-    else {
+    else
       val source = SourceFile.virtual("<highlighting>", in)
 
       given Context = freshCtx
@@ -135,7 +135,6 @@ object SyntaxHighlighting:
       if colorAt.last != NoColor then highlighted.append(NoColor)
 
       highlighted.toString
-    }
     end if
   end highlight
 end SyntaxHighlighting

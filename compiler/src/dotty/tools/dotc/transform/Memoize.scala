@@ -128,10 +128,9 @@ class Memoize extends MiniPhase with IdentityDenotTransformer:
       if sym eq defn.NothingClass then Throw(nullLiteral)
       else if sym eq defn.NullClass then nullLiteral
       else if sym eq defn.BoxedUnitClass then ref(defn.BoxedUnit_UNIT)
-      else {
+      else
         assert(false, s"$sym has no erased bottom tree")
         EmptyTree
-      }
 
     if sym.is(Accessor, butNot = NoFieldNeeded) then
       def adaptToField(field: Symbol, tree: Tree): Tree =

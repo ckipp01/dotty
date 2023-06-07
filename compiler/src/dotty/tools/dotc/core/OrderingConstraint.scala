@@ -76,23 +76,20 @@ object OrderingConstraint:
       var es = entries(current, poly)
       // TODO: investigate why flow typing is not working on `es`
       if es != null && (es.nn(idx) eq entry) then current
-      else {
+      else
         val result =
           if es == null then
             es = Array.fill(poly.paramNames.length)(initial)
             updateEntries(current, poly, es.nn)
-          else {
+          else
             val prev_es = entries(prev, poly)
             if prev_es == null || (es.nn ne prev_es.nn) then
               current // can re-use existing entries array.
-            else {
+            else
               es = es.nn.clone
               updateEntries(current, poly, es.nn)
-            }
-          }
         es.nn(idx) = entry
         result
-      }
     end update
 
     def update(
@@ -290,13 +287,12 @@ class OrderingConstraint(
   def bounds(param: TypeParamRef)(using Context): TypeBounds =
     val e = entry(param)
     if e.exists then e.bounds
-    else {
+    else
       // TODO: should we change the type of paramInfos to nullable?
       val pinfos: List[param.binder.PInfo] | Null = param.binder.paramInfos
       if pinfos != null then
         pinfos(param.paramNum) // pinfos == null happens in pos/i536.scala
       else TypeBounds.empty
-    }
 
 // ---------- Info related to TypeParamRefs -------------------------------------------
 

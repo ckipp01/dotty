@@ -9,7 +9,7 @@ object baseTypetest extends DottyTest:
   println("Welcome to the Scala worksheet") // > Welcome to the Scala worksheet
   val int =
     defn.IntType // > int  : dotty.tools.dotc.core.Types.Type = TypeRef(ThisType(module class scal
-  // | a#35),Int)
+    // | a#35),Int)
   int.baseClasses // > res0: List[dotty.tools.dotc.core.Symbols.ClassSymbol] = List(class Int#1364,
   // |  class AnyVal#575, class Any#2133)
   defn.StringClass.typeRef.baseClasses // > res1: List[dotty.tools.dotc.core.Symbols.ClassSymbol] = List(class String#21
